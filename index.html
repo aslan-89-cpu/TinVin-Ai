@@ -1,0 +1,580 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#101329">
+<meta name="description" content="TinVin AI - Your all-in-one AI workspace.">
+<title>TinVin AI — Smart Workspace</title>
+
+<style>
+:root {
+  --bg:#0b1020;
+  --panel:#121a30;
+  --panel2:#18223c;
+  --purple:#8b70ff;
+  --blue:#51b8ff;
+  --text:#f5f5ff;
+  --muted:#a1abc5;
+  --border:rgba(166,176,255,.15);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;
+  background:radial-gradient(ellipse at 50% -20%,#28275b 0%,var(--bg) 55%);
+  color:var(--text);
+  font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  min-height:100vh;
+}
+button,input,textarea,select{font:inherit}
+button{cursor:pointer}
+header{
+  height:76px;padding:0 6%;display:flex;align-items:center;
+  justify-content:space-between;gap:15px;
+  background:rgba(11,16,32,.86);border-bottom:1px solid var(--border);
+  position:sticky;top:0;z-index:5;backdrop-filter:blur(16px);
+}
+.brand{display:flex;align-items:center;gap:12px;font-size:23px;font-weight:850;letter-spacing:-.7px}
+.logo{
+  width:43px;height:43px;border-radius:14px;display:grid;place-items:center;
+  color:white;font-size:19px;font-weight:900;
+  background:linear-gradient(135deg,#9679ff,#42c5ff);
+  box-shadow:0 0 25px #8b70ff44;
+}
+.brand span{color:var(--blue)}
+.header-actions{display:flex;align-items:center;gap:10px}
+select,input,textarea{
+  width:100%;color:var(--text);background:#0c1428;
+  border:1px solid var(--border);border-radius:12px;padding:13px;
+}
+select{width:auto;max-width:120px}
+button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{
+  outline:2px solid var(--blue);outline-offset:3px
+}
+.primary{
+  border:0;border-radius:12px;padding:13px 19px;font-weight:800;color:white;
+  background:linear-gradient(110deg,#8866ff,#4f9eff);
+  box-shadow:0 6px 22px #795fff28;
+}
+.primary:hover{filter:brightness(1.12)}
+.secondary{
+  color:var(--text);background:var(--panel2);
+  border:1px solid var(--border);padding:12px 17px;border-radius:12px;
+}
+main{max-width:1200px;margin:auto;padding:35px 22px 65px}
+.hero{
+  position:relative;overflow:hidden;padding:55px 45px;border-radius:28px;
+  border:1px solid var(--border);
+  background:linear-gradient(120deg,#171d3c,#181735 60%,#102c46);
+}
+.hero:after{
+  content:"✦";position:absolute;right:8%;top:8px;
+  font-size:160px;color:#a28aff;opacity:.12;pointer-events:none;
+}
+.eyebrow{
+  display:inline-flex;align-items:center;gap:8px;color:#a8dfff;
+  font-size:12px;font-weight:850;letter-spacing:2px;text-transform:uppercase;
+}
+.eyebrow:before{content:"";width:7px;height:7px;border-radius:50%;background:#57d8b2}
+h1{font-size:clamp(38px,6vw,65px);line-height:1.08;letter-spacing:-2.5px;margin:20px 0}
+.gradient{
+  background:linear-gradient(95deg,#b29bff,#65caff);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.hero p{max-width:590px;color:var(--muted);line-height:1.85;font-size:16px}
+.hero-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:27px}
+.stats{display:flex;gap:32px;flex-wrap:wrap;margin-top:35px}
+.stat strong{display:block;font-size:19px}
+.stat span{color:var(--muted);font-size:12px}
+.section-heading{display:flex;justify-content:space-between;align-items:end;gap:15px;margin:38px 0 20px}
+.section-heading h2{margin:0;font-size:26px;letter-spacing:-.7px}
+.section-heading p{margin:8px 0 0;color:var(--muted);font-size:14px}
+.tools{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:17px}
+.tool{
+  text-align:left;color:var(--text);padding:23px;border-radius:21px;
+  background:linear-gradient(145deg,#151e35,#10182b);
+  border:1px solid var(--border);transition:transform .2s,border-color .2s,box-shadow .2s;
+}
+.tool:hover{transform:translateY(-4px);border-color:#7c70e9;box-shadow:0 12px 32px #0002}
+.tool-icon{
+  width:54px;height:54px;display:grid;place-items:center;
+  border-radius:17px;font-size:25px;margin-bottom:20px;
+  background:#34265d;border:1px solid #ffffff0d;
+}
+.tool:nth-child(2) .tool-icon{background:#183c5a}
+.tool:nth-child(3) .tool-icon{background:#17443f}
+.tool:nth-child(4) .tool-icon{background:#4a3024}
+.tool:nth-child(5) .tool-icon{background:#492944}
+.tool:nth-child(6) .tool-icon{background:#494022}
+.tool h3{margin:0 0 10px;font-size:18px}
+.tool p{font-size:13px;line-height:1.8;color:var(--muted);min-height:47px;margin:0 0 18px}
+.open-link{font-size:13px;font-weight:800;color:#a99aff}
+.workspace{
+  display:none;margin-top:25px;padding:28px;border-radius:23px;
+  border:1px solid var(--border);background:linear-gradient(145deg,#151e35,#101729);
+}
+.workspace.active{display:block}
+.workspace-head{display:flex;align-items:center;gap:14px;margin-bottom:25px}
+.workspace-head .tool-icon{margin:0;flex-shrink:0}
+.workspace-head h2{margin:0 0 6px;font-size:22px}
+.workspace-head p{margin:0;color:var(--muted);font-size:13px}
+.back{margin-left:auto;flex-shrink:0}
+label{display:block;font-size:13px;font-weight:750;margin:17px 0 9px}
+textarea{resize:vertical;min-height:130px;line-height:1.7}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+.generate{width:100%;margin-top:19px;padding:15px}
+.result{
+  display:none;margin-top:23px;padding:20px;border-radius:16px;
+  border:1px solid var(--border);background:#0b1428;
+}
+.result.show{display:block}
+.result-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:13px}
+.result-text{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.85;font-size:14px}
+.copy{background:#202747;border:1px solid var(--border);color:#c7bcff;padding:9px 12px;border-radius:9px}
+.note{font-size:12px;line-height:1.8;color:var(--muted);margin-top:17px}
+footer{text-align:center;border-top:1px solid var(--border);padding:28px 15px;color:var(--muted);font-size:13px}
+footer strong{color:#c5b8ff}
+.toast{
+  position:fixed;bottom:22px;left:50%;transform:translate(-50%,20px);
+  background:#252e49;color:white;padding:13px 20px;border-radius:12px;
+  opacity:0;pointer-events:none;transition:.2s;z-index:20;font-size:13px;
+}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+@media(max-width:800px){
+  .tools{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .hero{padding:38px 28px}
+  header{padding:0 18px}
+}
+@media(max-width:520px){
+  header{height:68px}
+  .brand{font-size:19px;gap:8px}
+  .logo{width:37px;height:37px;border-radius:12px}
+  .header-actions{gap:6px}
+  .header-actions .primary{padding:10px;font-size:12px}
+  select{max-width:94px;padding:9px 5px;font-size:12px}
+  main{padding:23px 14px 45px}
+  .hero{padding:29px 21px;border-radius:22px}
+  h1{letter-spacing:-1.5px}
+  .hero p{font-size:14px}
+  .stats{gap:20px}
+  .tools{grid-template-columns:1fr;gap:12px}
+  .tool{padding:19px}
+  .tool p{min-height:0}
+  .workspace{padding:18px}
+  .workspace-head{flex-wrap:wrap}
+  .back{margin-left:auto}
+  .field-row{grid-template-columns:1fr;gap:0}
+}
+</style>
+</head>
+
+<body>
+<header>
+  <div class="brand"><div class="logo">TV</div><div>TinVin <span>AI</span></div></div>
+  <div class="header-actions">
+    <select id="language" aria-label="Language">
+      <option value="en">English</option>
+      <option value="ku">کوردی</option>
+      <option value="ar">العربية</option>
+      <option value="es">Español</option>
+      <option value="fr">Français</option>
+    </select>
+    <button class="primary" onclick="showAbout()" data-t="about">About</button>
+  </div>
+</header>
+
+<main>
+  <section class="hero" id="hero">
+    <div class="eyebrow" data-t="eyebrow">YOUR AI-POWERED WORKSPACE</div>
+    <h1><span data-t="hero1">Think bigger.</span><br><span class="gradient" data-t="hero2">Create smarter.</span></h1>
+    <p data-t="heroText">Your ideas deserve powerful tools. Write, learn, translate, plan and discover — all from one beautiful workspace.</p>
+    <div class="hero-actions">
+      <button class="primary" onclick="scrollToTools()" data-t="explore">Explore AI Tools ↓</button>
+      <button class="secondary" onclick="showAbout()" data-t="learn">Discover TinVin</button>
+    </div>
+    <div class="stats">
+      <div class="stat"><strong>06</strong><span data-t="stat1">Smart tools</span></div>
+      <div class="stat"><strong>01</strong><span data-t="stat2">Simple workspace</span></div>
+      <div class="stat"><strong>∞</strong><span data-t="stat3">Ideas to explore</span></div>
+    </div>
+  </section>
+
+  <section id="toolSection">
+    <div class="section-heading">
+      <div><h2 data-t="toolsTitle">Explore your toolkit</h2><p data-t="toolsText">The next big idea starts here.</p></div>
+    </div>
+    <div class="tools">
+      <button class="tool" onclick="openTool('writer')">
+        <div class="tool-icon">✍️</div><h3 data-t="writer">AI Writer</h3>
+        <p data-t="writerDesc">Create social captions, emails, articles and engaging content.</p>
+        <span class="open-link" data-t="open">Open tool ↗</span>
+      </button>
+      <button class="tool" onclick="openTool('chat')">
+        <div class="tool-icon">💬</div><h3 data-t="chat">AI Chat</h3>
+        <p data-t="chatDesc">Ask questions, explore topics and develop your thoughts.</p>
+        <span class="open-link" data-t="open">Open tool ↗</span>
+      </button>
+      <button class="tool" onclick="openTool('translate')">
+        <div class="tool-icon">🌍</div><h3 data-t="translate">AI Translator</h3>
+        <p data-t="translateDesc">Translate text naturally between different languages.</p>
+        <span class="open-link" data-t="open">Open tool ↗</span>
+      </button>
+      <button class="tool" onclick="openTool('business')">
+        <div class="tool-icon">📈</div><h3 data-t="business">Business Studio</h3>
+        <p data-t="businessDesc">Build marketing plans, business strategies and brand ideas.</p>
+        <span class="open-link" data-t="open">Open tool ↗</span>
+      </button>
+      <button class="tool" onclick="openTool('study')">
+        <div class="tool-icon">🎓</div><h3 data-t="study">Study Assistant</h3>
+        <p data-t="studyDesc">Understand difficult topics and organize your learning.</p>
+        <span class="open-link" data-t="open">Open tool ↗</span>
+      </button>
+      <button class="tool" onclick="openTool('ideas')">
+        <div class="tool-icon">💡</div><h3 data-t="ideas">Idea Generator</h3>
+        <p data-t="ideasDesc">Discover creative ideas for projects and new ventures.</p>
+        <span class="open-link" data-t="open">Open tool ↗</span>
+      </button>
+    </div>
+  </section>
+
+  <section class="workspace" id="workspace">
+    <div class="workspace-head">
+      <div class="tool-icon" id="activeIcon">✨</div>
+      <div><h2 id="activeTitle">AI Writer</h2><p id="activeDesc">Make your next idea happen.</p></div>
+      <button class="secondary back" onclick="closeTool()" data-t="back">← Back</button>
+    </div>
+    <div id="fields"></div>
+    <button class="primary generate" onclick="generate()" data-t="generate">Generate ✨</button>
+    <div class="result" id="result">
+      <div class="result-head"><strong data-t="resultTitle">Your result</strong><button class="copy" onclick="copyResult()" data-t="copy">Copy result</button></div>
+      <div class="result-text" id="resultText"></div>
+    </div>
+    <p class="note" data-t="demo">Demo version: real AI answers require a connected AI service and secure backend.</p>
+  </section>
+
+  <section class="workspace" id="aboutPanel">
+    <div class="workspace-head">
+      <div class="tool-icon">✨</div>
+      <div><h2 data-t="aboutTitle">Welcome to TinVin AI</h2><p data-t="aboutSubtitle">One space. More possibilities.</p></div>
+      <button class="secondary back" onclick="closeAbout()" data-t="back">← Back</button>
+    </div>
+    <p style="color:var(--muted);line-height:1.9" data-t="aboutBody">TinVin AI is designed to bring creative and productive tools together in one accessible workspace. Explore ideas, write content, learn new things and plan your next move.</p>
+    <p class="note" data-t="aboutNote">This is an early frontend version. AI integrations, account features and payments are not enabled yet.</p>
+  </section>
+</main>
+
+<footer><strong>TinVin AI</strong> — <span data-t="tagline">Think bigger. Create smarter.</span><br>© <span id="year"></span> TinVin AI</footer>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+const T = {
+en:{
+about:"About",eyebrow:"YOUR AI-POWERED WORKSPACE",hero1:"Think bigger.",hero2:"Create smarter.",
+heroText:"Your ideas deserve powerful tools. Write, learn, translate, plan and discover — all from one beautiful workspace.",
+explore:"Explore AI Tools ↓",learn:"Discover TinVin",stat1:"Smart tools",stat2:"Simple workspace",stat3:"Ideas to explore",
+toolsTitle:"Explore your toolkit",toolsText:"The next big idea starts here.",writer:"AI Writer",
+writerDesc:"Create social captions, emails, articles and engaging content.",chat:"AI Chat",
+chatDesc:"Ask questions, explore topics and develop your thoughts.",translate:"AI Translator",
+translateDesc:"Translate text naturally between different languages.",business:"Business Studio",
+businessDesc:"Build marketing plans, business strategies and brand ideas.",study:"Study Assistant",
+studyDesc:"Understand difficult topics and organize your learning.",ideas:"Idea Generator",
+ideasDesc:"Discover creative ideas for projects and new ventures.",open:"Open tool ↗",back:"← Back",
+generate:"Generate ✨",resultTitle:"Your result",copy:"Copy result",
+demo:"Demo version: real AI answers require a connected AI service and secure backend.",
+aboutTitle:"Welcome to TinVin AI",aboutSubtitle:"One space. More possibilities.",
+aboutBody:"TinVin AI is designed to bring creative and productive tools together in one accessible workspace. Explore ideas, write content, learn new things and plan your next move.",
+aboutNote:"This is an early frontend version. AI integrations, account features and payments are not enabled yet.",
+tagline:"Think bigger. Create smarter.",topic:"What do you need help with?",
+topicPH:"Describe what you want...",style:"Writing style",friendly:"Friendly",professional:"Professional",creative:"Creative",
+from:"Translate from",to:"Translate to",source:"Text to translate",sourcePH:"Enter text...",
+businessType:"Business or project",businessPH:"e.g. online clothing store",
+level:"Learning level",beginner:"Beginner",intermediate:"Intermediate",advanced:"Advanced",
+ideaType:"What kind of ideas?",ideaPH:"e.g. technology YouTube channel",
+question:"Your question",questionPH:"Ask anything...",fill:"Please fill in the required field.",
+copied:"Copied!",copyError:"Copy failed. Please select and copy the text.",
+sample:"Demo output",disclaimer:"This is a sample, not a real AI response. Connect a trusted AI API through a secure backend for live answers."
+},
+ku:{
+about:"دەربارە",eyebrow:"شوێنی زیرەکی دەستکرد",hero1:"گەورەتر بیر بکەرەوە.",hero2:"زیرەکانە دروست بکە.",
+heroText:"بە یەک شوێنی جوان بنووسە، فێر ببە، وەرگێڕان بکە و بیرۆکەکانت پەرە پێ بدە.",
+explore:"بینینی ئامرازەکان ↓",learn:"دەربارەی TinVin",stat1:"ئامرازی زیرەک",stat2:"یەک شوێنی ئاسان",stat3:"بیرۆکەی بێ سنوور",
+toolsTitle:"ئامرازەکانت",toolsText:"بیرۆکەیەکی گەورە لێرەوە دەست پێ دەکات.",
+writer:"نووسەری AI",writerDesc:"کەپشن، ئیمەیڵ و ناوەڕۆکی جوان دروست بکە.",
+chat:"گفتوگۆی AI",chatDesc:"پرسیار بکە و بابەتەکان باشتر تێبگە.",
+translate:"وەرگێڕی AI",translateDesc:"دەق بە شێوەیەکی سروشتی وەرگێڕە.",
+business:"ئامرازەکانی بزنس",businessDesc:"پلانی بازاڕکردن و بیرۆکەی بزنس دروست بکە.",
+study:"یاریدەدەری خوێندن",studyDesc:"بابەتە قورسەکان ئاسانتر تێبگە.",
+ideas:"بەرهەمهێنەری بیرۆکە",ideasDesc:"بیرۆکەی نوێ بۆ پڕۆژە و بزنس بدۆزەرەوە.",
+open:"کردنەوەی ئامراز ↗",back:"گەڕانەوە ←",generate:"دروستکردن ✨",
+resultTitle:"ئەنجامەکەت",copy:"کۆپی",demo:"ئەمە وەشانی تاقیکردنەوەیە؛ بۆ وەڵامی ڕاستەقینە پێویستت بە خزمەتگوزاری AI و سێرڤەری پارێزراوە.",
+aboutTitle:"بەخێربێیت بۆ TinVin AI",aboutSubtitle:"یەک شوێن، هەلی زیاتر.",
+aboutBody:"TinVin AI ئامرازەکانی داهێنان و بەرهەمهێنان لە یەک شوێندا کۆدەکاتەوە. بیرۆکە بدۆزەرەوە، بنووسە و پلانی داهاتووت دابنێ.",
+aboutNote:"ئەمە وەشانی سەرەتاییە. خزمەتگوزاری AI و پارەدان هێشتا چالاک نەکراون.",
+tagline:"گەورەتر بیر بکەرەوە، زیرەکانە دروست بکە.",topic:"لە چی یارمەتیت بدەین؟",
+topicPH:"داواکارییەکەت بنووسە...",style:"شێوازی نووسین",friendly:"دۆستانە",professional:"پیشەیی",creative:"داهێنەرانە",
+from:"وەرگێڕان لە",to:"وەرگێڕان بۆ",source:"دەقی وەرگێڕان",sourcePH:"دەقەکەت بنووسە...",
+businessType:"جۆری بزنس یان پڕۆژە",businessPH:"بۆ نموونە: فرۆشگای جل لە ئینتەرنێت",
+level:"ئاستی خوێندن",beginner:"سەرەتایی",intermediate:"مامناوەند",advanced:"پێشکەوتوو",
+ideaType:"چەند جۆر بیرۆکە؟",ideaPH:"بۆ نموونە: کەناڵی تەکنەلۆژیا",
+question:"پرسیارەکەت",questionPH:"پرسیارەکەت بنووسە...",fill:"تکایە خانەی داواکراو پڕ بکەرەوە.",
+copied:"کۆپی کرا!",copyError:"کۆپی سەرکەوتوو نەبوو؛ دەقەکە دەستبژێرە و کۆپی بکە.",
+sample:"ئەنجامی نموونە",disclaimer:"ئەمە نموونەیە، نەک وەڵامی ڕاستەقینەی AI. بۆ وەڵامی ڕاستەقینە API ـی پارێزراو پێویستە."
+},
+ar:{
+about:"حول التطبيق",eyebrow:"مساحة عملك الذكية",hero1:"فكّر بشكل أكبر.",hero2:"ابتكر بذكاء.",
+heroText:"اكتب وتعلّم وترجم وطوّر أفكارك في مساحة عمل واحدة.",
+explore:"استكشف الأدوات ↓",learn:"اكتشف TinVin",stat1:"أدوات ذكية",stat2:"مساحة واحدة",stat3:"أفكار بلا حدود",
+toolsTitle:"أدواتك الذكية",toolsText:"فكرتك الكبيرة تبدأ هنا.",writer:"الكاتب الذكي",
+writerDesc:"أنشئ منشورات ورسائل ومقالات مميزة.",chat:"محادثة AI",chatDesc:"اطرح الأسئلة واستكشف المواضيع.",
+translate:"الترجمة الذكية",translateDesc:"ترجم النصوص بين اللغات.",business:"استوديو الأعمال",
+businessDesc:"أنشئ خطط التسويق وأفكار المشاريع.",study:"مساعد الدراسة",studyDesc:"افهم المواضيع الصعبة بسهولة.",
+ideas:"مولّد الأفكار",ideasDesc:"اكتشف أفكاراً جديدة للمشاريع.",open:"افتح الأداة ↗",back:"رجوع ←",
+generate:"إنشاء ✨",resultTitle:"النتيجة",copy:"نسخ النتيجة",
+demo:"نسخة تجريبية: تتطلب الإجابات الحقيقية ربط خدمة AI وخادماً آمناً.",
+aboutTitle:"مرحباً بك في TinVin AI",aboutSubtitle:"مكان واحد وإمكانات أكبر.",
+aboutBody:"يجمع TinVin AI أدوات الإبداع والإنتاجية في مساحة واحدة سهلة الاستخدام.",
+aboutNote:"هذه نسخة أولية. خدمات AI والمدفوعات غير مفعلة حالياً.",
+tagline:"فكّر بشكل أكبر وابتكر بذكاء.",topic:"بماذا تحتاج إلى المساعدة؟",topicPH:"اكتب طلبك...",
+style:"أسلوب الكتابة",friendly:"ودّي",professional:"احترافي",creative:"إبداعي",
+from:"الترجمة من",to:"الترجمة إلى",source:"النص المراد ترجمته",sourcePH:"أدخل النص...",
+businessType:"نوع المشروع",businessPH:"مثال: متجر ملابس إلكتروني",
+level:"مستوى الدراسة",beginner:"مبتدئ",intermediate:"متوسط",advanced:"متقدم",
+ideaType:"نوع الأفكار",ideaPH:"مثال: قناة تقنية",question:"سؤالك",questionPH:"اكتب سؤالك...",
+fill:"يرجى ملء الحقل المطلوب.",copied:"تم النسخ!",copyError:"تعذر النسخ. حدد النص وانسخه.",
+sample:"نتيجة تجريبية",disclaimer:"هذه نتيجة نموذجية وليست إجابة AI حقيقية. يلزم ربط API آمن للحصول على إجابات مباشرة."
+},
+es:{
+about:"Acerca de",eyebrow:"TU ESPACIO INTELIGENTE",hero1:"Piensa en grande.",hero2:"Crea de forma inteligente.",
+heroText:"Escribe, aprende, traduce y desarrolla tus ideas en un solo espacio.",
+explore:"Explorar herramientas ↓",learn:"Descubre TinVin",stat1:"Herramientas",stat2:"Un espacio",stat3:"Ideas infinitas",
+toolsTitle:"Tus herramientas",toolsText:"Tu próxima gran idea comienza aquí.",writer:"Escritor IA",
+writerDesc:"Crea publicaciones, correos y artículos.",chat:"Chat IA",chatDesc:"Haz preguntas y explora temas.",
+translate:"Traductor IA",translateDesc:"Traduce textos entre idiomas.",business:"Estudio empresarial",
+businessDesc:"Desarrolla planes de marketing e ideas de negocio.",study:"Asistente de estudio",
+studyDesc:"Comprende temas difíciles fácilmente.",ideas:"Generador de ideas",
+ideasDesc:"Encuentra ideas para proyectos.",open:"Abrir herramienta ↗",back:"← Volver",
+generate:"Generar ✨",resultTitle:"Tu resultado",copy:"Copiar resultado",
+demo:"Versión de demostración: las respuestas reales requieren un servicio de IA y un backend seguro.",
+aboutTitle:"Bienvenido a TinVin AI",aboutSubtitle:"Un espacio, más posibilidades.",
+aboutBody:"TinVin AI reúne herramientas creativas y productivas en un espacio sencillo.",
+aboutNote:"Esta es una versión inicial. Las integraciones de IA y los pagos aún no están habilitados.",
+tagline:"Piensa en grande. Crea mejor.",topic:"¿En qué necesitas ayuda?",topicPH:"Describe lo que necesitas...",
+style:"Estilo de escritura",friendly:"Amistoso",professional:"Profesional",creative:"Creativo",
+from:"Traducir de",to:"Traducir a",source:"Texto para traducir",sourcePH:"Introduce el texto...",
+businessType:"Tipo de negocio",businessPH:"Ej. tienda de ropa online",level:"Nivel de aprendizaje",
+beginner:"Principiante",intermediate:"Intermedio",advanced:"Avanzado",ideaType:"Tipo de ideas",
+ideaPH:"Ej. canal de tecnología",question:"Tu pregunta",questionPH:"Haz una pregunta...",
+fill:"Completa el campo obligatorio.",copied:"¡Copiado!",copyError:"No se pudo copiar. Selecciona y copia el texto.",
+sample:"Resultado de muestra",disclaimer:"Esto es una muestra, no una respuesta real de IA. Se necesita una API segura para respuestas reales."
+},
+fr:{
+about:"À propos",eyebrow:"VOTRE ESPACE INTELLIGENT",hero1:"Voyez plus grand.",hero2:"Créez plus intelligemment.",
+heroText:"Écrivez, apprenez, traduisez et développez vos idées dans un seul espace.",
+explore:"Explorer les outils ↓",learn:"Découvrir TinVin",stat1:"Outils intelligents",stat2:"Un espace",stat3:"Idées infinies",
+toolsTitle:"Votre boîte à outils",toolsText:"Votre prochaine grande idée commence ici.",writer:"Rédacteur IA",
+writerDesc:"Créez des publications, des e-mails et des articles.",chat:"Chat IA",
+chatDesc:"Posez des questions et explorez des sujets.",translate:"Traducteur IA",
+translateDesc:"Traduisez des textes entre plusieurs langues.",business:"Studio professionnel",
+businessDesc:"Créez des stratégies marketing et des projets.",study:"Assistant d'étude",
+studyDesc:"Comprenez facilement les sujets complexes.",ideas:"Générateur d'idées",
+ideasDesc:"Découvrez des idées pour vos projets.",open:"Ouvrir l'outil ↗",back:"← Retour",
+generate:"Générer ✨",resultTitle:"Votre résultat",copy:"Copier le résultat",
+demo:"Version démo : les vraies réponses nécessitent un service IA et un backend sécurisé.",
+aboutTitle:"Bienvenue sur TinVin AI",aboutSubtitle:"Un espace, plus de possibilités.",
+aboutBody:"TinVin AI rassemble des outils créatifs et productifs dans un espace simple.",
+aboutNote:"Cette version initiale ne propose pas encore d'intégration IA ni de paiements.",
+tagline:"Voyez plus grand. Créez mieux.",topic:"De quoi avez-vous besoin ?",topicPH:"Décrivez votre besoin...",
+style:"Style d'écriture",friendly:"Amical",professional:"Professionnel",creative:"Créatif",
+from:"Traduire depuis",to:"Traduire vers",source:"Texte à traduire",sourcePH:"Saisissez votre texte...",
+businessType:"Type d'entreprise",businessPH:"Ex. boutique de vêtements en ligne",
+level:"Niveau d'apprentissage",beginner:"Débutant",intermediate:"Intermédiaire",advanced:"Avancé",
+ideaType:"Type d'idées",ideaPH:"Ex. chaîne sur la technologie",question:"Votre question",questionPH:"Posez une question...",
+fill:"Veuillez remplir le champ obligatoire.",copied:"Copié !",copyError:"Copie impossible. Sélectionnez et copiez le texte.",
+sample:"Résultat de démonstration",disclaimer:"Ceci est un exemple, pas une réponse IA réelle. Une API sécurisée est nécessaire pour les réponses en direct."
+}
+};
+
+const tools = {
+writer:{icon:"✍️",title:"writer",desc:"writerDesc",fields:[
+{id:"topic",label:"topic",placeholder:"topicPH",type:"textarea",required:true},
+{id:"style",label:"style",type:"select",options:[["friendly","friendly"],["professional","professional"],["creative","creative"]]}
+]},
+chat:{icon:"💬",title:"chat",desc:"chatDesc",fields:[
+{id:"question",label:"question",placeholder:"questionPH",type:"textarea",required:true}
+]},
+translate:{icon:"🌍",title:"translate",desc:"translateDesc",fields:[
+{id:"from",label:"from",type:"select",options:[["English","English"],["Kurdish","Kurdish"],["Arabic","Arabic"],["Spanish","Spanish"],["French","French"],["Turkish","Turkish"]]},
+{id:"to",label:"to",type:"select",options:[["Kurdish","Kurdish"],["English","English"],["Arabic","Arabic"],["Spanish","Spanish"],["French","French"],["Turkish","Turkish"]]},
+{id:"source",label:"source",placeholder:"sourcePH",type:"textarea",required:true}
+]},
+business:{icon:"📈",title:"business",desc:"businessDesc",fields:[
+{id:"businessType",label:"businessType",placeholder:"businessPH",type:"input",required:true},
+{id:"topic",label:"topic",placeholder:"topicPH",type:"textarea"}
+]},
+study:{icon:"🎓",title:"study",desc:"studyDesc",fields:[
+{id:"question",label:"question",placeholder:"questionPH",type:"textarea",required:true},
+{id:"level",label:"level",type:"select",options:[["beginner","beginner"],["intermediate","intermediate"],["advanced","advanced"]]}
+]},
+ideas:{icon:"💡",title:"ideas",desc:"ideasDesc",fields:[
+{id:"ideaType",label:"ideaType",placeholder:"ideaPH",type:"textarea",required:true}
+]}
+};
+
+let currentTool = null;
+let currentLang = "en";
+let lastResult = "";
+
+function tr(key){return (T[currentLang]&&T[currentLang][key])||T.en[key]||key}
+
+function applyLanguage(){
+  document.querySelectorAll("[data-t]").forEach(el=>{
+    const key=el.dataset.t;
+    if(tr(key)) el.textContent=tr(key);
+  });
+  document.documentElement.lang=currentLang;
+  document.documentElement.dir=currentLang==="ar"||currentLang==="ku"?"rtl":"ltr";
+  document.getElementById("language").value=currentLang;
+  if(currentTool) renderFields();
+}
+
+document.getElementById("language").addEventListener("change",e=>{
+  currentLang=e.target.value;
+  applyLanguage();
+});
+
+function scrollToTools(){
+  document.getElementById("toolSection").scrollIntoView({behavior:"smooth"});
+}
+
+function hidePanels(){
+  document.getElementById("workspace").classList.remove("active");
+  document.getElementById("aboutPanel").classList.remove("active");
+}
+
+function openTool(id){
+  currentTool=id;
+  hidePanels();
+  const t=tools[id];
+  document.getElementById("activeIcon").textContent=t.icon;
+  document.getElementById("activeTitle").textContent=tr(t.title);
+  document.getElementById("activeDesc").textContent=tr(t.desc);
+  document.getElementById("result").classList.remove("show");
+  renderFields();
+  document.getElementById("workspace").classList.add("active");
+  document.getElementById("workspace").scrollIntoView({behavior:"smooth",block:"start"});
+}
+
+function renderFields(){
+  const t=tools[currentTool];
+  if(!t)return;
+  document.getElementById("activeTitle").textContent=tr(t.title);
+  document.getElementById("activeDesc").textContent=tr(t.desc);
+  document.getElementById("fields").innerHTML=t.fields.map((f,i)=>{
+    const label=`<label for="field-${f.id}">${escapeHtml(tr(f.label))}</label>`;
+    if(f.type==="select"){
+      return `<div class="field-row" style="display:block"><label for="field-${f.id}">${escapeHtml(tr(f.label))}</label><select id="field-${f.id}">${f.options.map(o=>`<option value="${escapeHtml(o[0])}">${escapeHtml(tr(o[1]))}</option>`).join("")}</select></div>`;
+    }
+    if(f.type==="textarea"){
+      return label+`<textarea id="field-${f.id}" ${f.required?"required":""} placeholder="${escapeHtml(tr(f.placeholder))}"></textarea>`;
+    }
+    return label+`<input id="field-${f.id}" ${f.required?"required":""} placeholder="${escapeHtml(tr(f.placeholder))}">`;
+  }).join("");
+}
+
+function escapeHtml(value){
+  return String(value).replace(/[&<>"']/g,c=>({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+  })[c]);
+}
+
+function generate(){
+  const t=tools[currentTool];
+  if(!t)return;
+  const values={};
+  for(const f of t.fields){
+    const el=document.getElementById("field-"+f.id);
+    values[f.id]=el?el.value.trim():"";
+    if(f.required&&!values[f.id]){
+      el.focus();
+      toast(tr("fill"));
+      return;
+    }
+  }
+
+  let output="";
+  switch(currentTool){
+    case "writer":
+      output=`${tr("sample")}\n\n${values.topic}\n\nStyle: ${tr(values.style)}\n\nTip: Develop this topic into a clear introduction, three useful points, and a strong closing statement.`;
+      break;
+    case "chat":
+      output=`${tr("sample")}\n\nYour question: ${values.question}\n\nTo explore this question, first identify the main issue, review the key facts, and compare possible explanations. Verify important details using reliable sources.`;
+      break;
+    case "translate":
+      output=`${tr("sample")}\n\n${values.from} → ${values.to}\n\n${values.source}\n\nA live translation service is required to produce an actual translation.`;
+      break;
+    case "business":
+      output=`${tr("sample")}\n\nProject: ${values.businessType}\n\n1. Define your target customers.\n2. Identify what makes your offer different.\n3. Create a simple marketing plan.\n4. Test your idea with a small audience.\n5. Measure results before investing more.\n\nAdditional details: ${values.topic||"Not provided"}`;
+      break;
+    case "study":
+      output=`${tr("sample")}\n\nTopic: ${values.question}\nLevel: ${tr(values.level)}\n\n1. Write down what you already know.\n2. Break the topic into smaller parts.\n3. Review one concept at a time.\n4. Practice with questions.\n5. Summarize the key points in your own words.`;
+      break;
+    case "ideas":
+      output=`${tr("sample")}\n\nTopic: ${values.ideaType}\n\n1. Create a beginner-friendly guide.\n2. Build a checklist or template.\n3. Share a common problem and its solution.\n4. Interview people interested in this topic.\n5. Develop a small project that tests the idea.\n\nThese are demo suggestions, not generated live AI answers.`;
+      break;
+  }
+  lastResult=output;
+  document.getElementById("resultText").textContent=output+"\n\n"+tr("disclaimer");
+  document.getElementById("result").classList.add("show");
+  document.getElementById("result").scrollIntoView({behavior:"smooth",block:"nearest"});
+}
+
+async function copyResult(){
+  if(!lastResult)return;
+  try{
+    await navigator.clipboard.writeText(lastResult+"\n\n"+tr("disclaimer"));
+    toast(tr("copied"));
+  }catch(e){
+    const ta=document.createElement("textarea");
+    ta.value=lastResult+"\n\n"+tr("disclaimer");
+    document.body.appendChild(ta);
+    ta.select();
+    try{
+      document.execCommand("copy");
+      toast(tr("copied"));
+    }catch(err){toast(tr("copyError"))}
+    ta.remove();
+  }
+}
+
+function closeTool(){
+  document.getElementById("workspace").classList.remove("active");
+  currentTool=null;
+  document.getElementById("hero").scrollIntoView({behavior:"smooth"});
+}
+
+function showAbout(){
+  hidePanels();
+  document.getElementById("aboutPanel").classList.add("active");
+  document.getElementById("aboutPanel").scrollIntoView({behavior:"smooth",block:"start"});
+}
+function closeAbout(){
+  document.getElementById("aboutPanel").classList.remove("active");
+  document.getElementById("hero").scrollIntoView({behavior:"smooth"});
+}
+
+let toastTimer;
+function toast(message){
+  const el=document.getElementById("toast");
+  el.textContent=message;
+  el.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>el.classList.remove("show"),2400);
+}
+
+document.getElementById("year").textContent=new Date().getFullYear();
+applyLanguage();
+</script>
+</body>
+</html>
