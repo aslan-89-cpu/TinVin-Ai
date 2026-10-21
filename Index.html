@@ -1,1 +1,788 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#f8f6ff">
+<meta name="description" content="TinVin AI — Your creative AI workspace. Write, chat, translate, learn and grow.">
+<title>TinVin AI — Your AI Workspace</title>
+
+<style>
+:root {
+  --purple: #7955e8;
+  --purple-dark: #5e3bc5;
+  --lavender: #eee8ff;
+  --pink: #f8eaff;
+  --ink: #25213b;
+  --muted: #858098;
+  --white: #ffffff;
+  --line: #eeeaf7;
+  --shadow: 0 12px 35px rgba(91, 66, 163, .09);
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  color: var(--ink);
+  background:
+    radial-gradient(ellipse at 10% 0%, #f0e9ff 0, transparent 36%),
+    radial-gradient(ellipse at 100% 30%, #fceeff 0, transparent 30%),
+    #faf9ff;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  min-height: 100vh;
+}
+button, input, textarea, select { font: inherit; }
+button { cursor: pointer; }
+button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible {
+  outline: 3px solid #c7b4ff;
+  outline-offset: 3px;
+}
+.app {
+  width: 100%;
+  max-width: 1120px;
+  margin: auto;
+  padding: 22px 24px 110px;
+}
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 34px;
+}
+.brand { display: flex; align-items: center; gap: 11px; }
+.logo {
+  width: 45px;
+  height: 45px;
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  color: white;
+  font-weight: 900;
+  font-size: 22px;
+  background: linear-gradient(145deg, #a991ff, #7650df);
+  box-shadow: 0 7px 20px #9d84ee55;
+}
+.brand-name { font-size: 21px; font-weight: 850; letter-spacing: -.8px; }
+.brand-name span { color: var(--purple); }
+.brand-sub { color: var(--muted); font-size: 11px; margin-top: 3px; }
+.top-actions { display: flex; gap: 8px; align-items: center; }
+.icon-btn {
+  background: #fff;
+  border: 1px solid var(--line);
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  color: var(--ink);
+  box-shadow: 0 4px 12px #45317a08;
+}
+.language {
+  height: 42px;
+  max-width: 100px;
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  padding: 0 8px;
+  background: white;
+  color: var(--ink);
+}
+.hero {
+  position: relative;
+  overflow: hidden;
+  border-radius: 30px;
+  padding: 32px 28px;
+  background: linear-gradient(125deg, #eee7ff 0%, #faf5ff 50%, #fff0fa 100%);
+  border: 1px solid #fff;
+  box-shadow: var(--shadow);
+  margin-bottom: 29px;
+}
+.hero::before {
+  content: "";
+  position: absolute;
+  width: 220px;
+  height: 220px;
+  border-radius: 50%;
+  right: -40px;
+  top: -100px;
+  background: #bca7ff77;
+  filter: blur(8px);
+}
+.hero::after {
+  content: "";
+  position: absolute;
+  width: 130px;
+  height: 130px;
+  border-radius: 50%;
+  right: 90px;
+  bottom: -100px;
+  background: #f5b6ec88;
+  filter: blur(5px);
+}
+.hero-content { position: relative; z-index: 1; max-width: 650px; }
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid #ffffffb8;
+  border-radius: 30px;
+  padding: 8px 12px;
+  background: #ffffff99;
+  color: #7652cf;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+.hero h1 {
+  font-size: clamp(34px, 6vw, 53px);
+  line-height: 1.08;
+  letter-spacing: -2px;
+  margin: 19px 0 13px;
+  max-width: 550px;
+}
+.gradient-text {
+  color: var(--purple);
+  background: linear-gradient(90deg, #7551de, #c05bca);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.hero p {
+  color: #716b88;
+  font-size: 15px;
+  line-height: 1.8;
+  max-width: 450px;
+  margin: 0 0 22px;
+}
+.primary-btn {
+  border: 0;
+  border-radius: 15px;
+  padding: 14px 20px;
+  color: white;
+  font-weight: 750;
+  background: linear-gradient(110deg, #8967ed, #7450d7);
+  box-shadow: 0 8px 19px #8868df45;
+}
+.primary-btn:hover { filter: brightness(1.04); transform: translateY(-1px); }
+.secondary-btn {
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  padding: 12px 16px;
+  background: white;
+  color: var(--ink);
+  font-weight: 700;
+}
+.section-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: 12px;
+  margin: 30px 0 16px;
+}
+.section-heading h2 { margin: 0; font-size: 21px; letter-spacing: -.5px; }
+.section-heading p { margin: 6px 0 0; font-size: 12px; color: var(--muted); }
+.small-link { border: 0; background: transparent; color: var(--purple); font-size: 12px; font-weight: 800; }
+.tools-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 15px;
+}
+.tool-card {
+  position: relative;
+  overflow: hidden;
+  min-height: 177px;
+  text-align: left;
+  border: 1px solid #ffffff;
+  border-radius: 23px;
+  background: #ffffffd9;
+  padding: 19px;
+  box-shadow: 0 8px 26px #48347b08;
+  transition: transform .2s, box-shadow .2s;
+  color: var(--ink);
+}
+.tool-card:hover { transform: translateY(-4px); box-shadow: var(--shadow); }
+.tool-icon {
+  width: 47px;
+  height: 47px;
+  display: grid;
+  place-items: center;
+  border-radius: 16px;
+  font-size: 23px;
+  margin-bottom: 15px;
+}
+.icon-purple { background: #eee8ff; }
+.icon-pink { background: #fce8f7; }
+.icon-blue { background: #e6efff; }
+.icon-peach { background: #fff0e6; }
+.icon-green { background: #e4f8ef; }
+.icon-yellow { background: #fff5d9; }
+.tool-card h3 { margin: 0 0 7px; font-size: 15px; }
+.tool-card p { color: var(--muted); margin: 0; font-size: 12px; line-height: 1.6; }
+.card-arrow { position: absolute; right: 17px; top: 20px; color: #b5a9d8; font-size: 18px; }
+.quick-box {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  border: 1px solid white;
+  border-radius: 20px;
+  padding: 17px;
+  background: #ffffffc9;
+  box-shadow: 0 8px 26px #48347b07;
+  margin-top: 22px;
+}
+.quick-symbol {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  background: #f0eaff;
+  border-radius: 15px;
+  font-size: 21px;
+}
+.quick-text { flex: 1; min-width: 0; }
+.quick-text strong { display: block; font-size: 13px; margin-bottom: 5px; }
+.quick-text span { display: block; font-size: 11px; color: var(--muted); line-height: 1.5; }
+.quick-arrow { border: 0; background: transparent; color: var(--purple); font-size: 21px; }
+.feature-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-top: 24px;
+}
+.feature {
+  padding: 16px 10px;
+  text-align: center;
+  border-radius: 17px;
+  background: #ffffffa8;
+  border: 1px solid white;
+}
+.feature span { display: block; font-size: 20px; margin-bottom: 8px; }
+.feature strong { display: block; font-size: 11px; }
+.feature small { display: block; margin-top: 5px; font-size: 10px; color: var(--muted); }
+.footer { text-align: center; color: #9a94ad; font-size: 11px; padding: 30px 0 5px; }
+.page { display: none; }
+.page.active { display: block; animation: appear .25s ease; }
+@keyframes appear { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+.page-title { font-size: 28px; margin: 14px 0 8px; letter-spacing: -1px; }
+.page-description { color: var(--muted); font-size: 13px; line-height: 1.7; margin-bottom: 23px; }
+.back-btn { border: 0; background: transparent; color: var(--purple); font-weight: 750; padding: 7px 0; }
+.workspace {
+  background: #ffffffd9;
+  border: 1px solid white;
+  border-radius: 25px;
+  padding: 22px;
+  box-shadow: var(--shadow);
+}
+.workspace label { display: block; font-size: 12px; font-weight: 750; margin: 18px 0 9px; }
+.workspace label:first-child { margin-top: 0; }
+.workspace input, .workspace textarea, .workspace select {
+  width: 100%;
+  padding: 14px;
+  border-radius: 14px;
+  border: 1px solid #e9e4f5;
+  background: #fcfbff;
+  color: var(--ink);
+}
+.workspace textarea { min-height: 130px; resize: vertical; line-height: 1.7; }
+.workspace select { margin-bottom: 17px; }
+.workspace .primary-btn { margin-top: 16px; }
+.result-box {
+  margin-top: 18px;
+  border: 1px solid #e9e1ff;
+  border-radius: 17px;
+  padding: 17px;
+  background: linear-gradient(135deg, #faf7ff, #fff9fe);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  line-height: 1.8;
+  font-size: 13px;
+}
+.result-box:empty { display: none; }
+.result-label { color: var(--purple); font-weight: 800; font-size: 11px; margin-bottom: 8px; }
+.chat-messages { display: flex; flex-direction: column; gap: 12px; margin: 18px 0; }
+.chat-message { max-width: 88%; border-radius: 17px; padding: 13px 15px; font-size: 13px; line-height: 1.7; white-space: pre-wrap; overflow-wrap: anywhere; }
+.chat-message.ai { background: #f1ecff; align-self: flex-start; }
+.chat-message.user { background: #8664e6; color: white; align-self: flex-end; }
+.chat-form { display: flex; gap: 8px; }
+.chat-form input { min-width: 0; flex: 1; }
+.chat-form .primary-btn { margin: 0; padding: 12px 15px; }
+.bottom-nav {
+  position: fixed;
+  z-index: 10;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(500px, calc(100% - 24px));
+  display: flex;
+  justify-content: space-around;
+  gap: 4px;
+  padding: 9px;
+  background: #ffffffed;
+  backdrop-filter: blur(20px);
+  border: 1px solid #eee8fb;
+  border-radius: 23px;
+  box-shadow: 0 10px 38px #4e3b7d1b;
+}
+.nav-btn {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  border-radius: 15px;
+  background: transparent;
+  padding: 9px 4px;
+  color: #9690a8;
+  font-size: 10px;
+  font-weight: 750;
+}
+.nav-btn span { display: block; font-size: 19px; margin-bottom: 4px; }
+.nav-btn.active { background: #f0eaff; color: var(--purple); }
+.notice {
+  margin-top: 15px;
+  padding: 12px 14px;
+  background: #fff7e9;
+  border-radius: 13px;
+  color: #92713d;
+  font-size: 11px;
+  line-height: 1.7;
+}
+@media (min-width: 800px) {
+  .hero { padding: 45px; }
+  .hero h1 { font-size: 55px; }
+  .tools-grid { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 600px) {
+  .app { padding: 17px 15px 105px; }
+  .topbar { margin-bottom: 25px; }
+  .brand-name { font-size: 19px; }
+  .hero { padding: 27px 21px; border-radius: 25px; }
+  .hero h1 { font-size: 39px; letter-spacing: -1.7px; }
+  .hero p { font-size: 13px; }
+  .tools-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 11px; }
+  .tool-card { min-height: 166px; padding: 15px; border-radius: 20px; }
+  .tool-icon { width: 43px; height: 43px; font-size: 21px; margin-bottom: 12px; }
+  .tool-card h3 { font-size: 13px; }
+  .tool-card p { font-size: 11px; }
+  .section-heading h2 { font-size: 19px; }
+  .workspace { padding: 17px; }
+  .page-title { font-size: 25px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; animation: none !important; transition: none !important; }
+}
+</style>
+</head>
+
+<body>
+<div class="app">
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">T</div>
+      <div>
+        <div class="brand-name">TinVin <span>AI</span></div>
+        <div class="brand-sub" data-i18n="brandSub">Your creative AI workspace</div>
+      </div>
+    </div>
+    <div class="top-actions">
+      <select class="language" id="languageSelect" aria-label="Choose language">
+        <option value="en">EN 🌐</option>
+        <option value="ku">KU 🌐</option>
+        <option value="ar">AR 🌐</option>
+        <option value="es">ES 🌐</option>
+        <option value="fr">FR 🌐</option>
+      </select>
+      <button class="icon-btn" id="aboutButton" aria-label="About TinVin AI">✦</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="page active" id="homePage">
+      <div class="hero">
+        <div class="hero-content">
+          <div class="eyebrow">✦ YOUR IDEAS, ELEVATED</div>
+          <h1 data-i18n="heroTitle">Make room for <span class="gradient-text">brilliant ideas.</span></h1>
+          <p data-i18n="heroDesc">One beautiful space to write, explore, learn and turn your thoughts into something extraordinary.</p>
+          <button class="primary-btn" id="exploreButton" data-i18n="explore">Explore your tools &nbsp; ↗</button>
+        </div>
+      </div>
+
+      <div class="section-heading" id="toolsHeading">
+        <div>
+          <h2 data-i18n="toolsTitle">Your AI toolkit</h2>
+          <p data-i18n="toolsDesc">Six ways to bring your ideas to life.</p>
+        </div>
+        <button class="small-link" id="allToolsButton" data-i18n="viewAll">VIEW ALL ↗</button>
+      </div>
+
+      <div class="tools-grid">
+        <button class="tool-card" data-tool="writer">
+          <span class="card-arrow">↗</span>
+          <div class="tool-icon icon-purple">✍️</div>
+          <h3>AI Writer</h3>
+          <p data-i18n="writerDesc">Captions, posts and creative writing.</p>
+        </button>
+        <button class="tool-card" data-tool="chat">
+          <span class="card-arrow">↗</span>
+          <div class="tool-icon icon-pink">💬</div>
+          <h3>AI Chat</h3>
+          <p data-i18n="chatDesc">Explore questions and new ideas.</p>
+        </button>
+        <button class="tool-card" data-tool="translate">
+          <span class="card-arrow">↗</span>
+          <div class="tool-icon icon-blue">🌐</div>
+          <h3>AI Translate</h3>
+          <p data-i18n="translateDesc">Bridge languages with ease.</p>
+        </button>
+        <button class="tool-card" data-tool="business">
+          <span class="card-arrow">↗</span>
+          <div class="tool-icon icon-peach">📈</div>
+          <h3>AI Business</h3>
+          <p data-i18n="businessDesc">Plans, branding and growth ideas.</p>
+        </button>
+        <button class="tool-card" data-tool="study">
+          <span class="card-arrow">↗</span>
+          <div class="tool-icon icon-green">📚</div>
+          <h3>AI Study</h3>
+          <p data-i18n="studyDesc">Learn topics step by step.</p>
+        </button>
+        <button class="tool-card" data-tool="ideas">
+          <span class="card-arrow">↗</span>
+          <div class="tool-icon icon-yellow">💡</div>
+          <h3>AI Ideas</h3>
+          <p data-i18n="ideasDesc">Find inspiration and possibilities.</p>
+        </button>
+      </div>
+
+      <div class="section-heading">
+        <div>
+          <h2 data-i18n="startTitle">A little inspiration</h2>
+          <p data-i18n="startDesc">Not sure where to begin? Start here.</p>
+        </div>
+      </div>
+      <div class="quick-box">
+        <div class="quick-symbol">✨</div>
+        <div class="quick-text">
+          <strong data-i18n="quickTitle">Create your next great post</strong>
+          <span data-i18n="quickDesc">Turn a simple thought into an engaging social caption.</span>
+        </div>
+        <button class="quick-arrow" data-tool="writer" aria-label="Open AI Writer">→</button>
+      </div>
+
+      <div class="feature-row">
+        <div class="feature"><span>🎨</span><strong data-i18n="feature1">Create</strong><small data-i18n="feature1sub">Express your ideas</small></div>
+        <div class="feature"><span>🧠</span><strong data-i18n="feature2">Discover</strong><small data-i18n="feature2sub">Learn something new</small></div>
+        <div class="feature"><span>🚀</span><strong data-i18n="feature3">Grow</strong><small data-i18n="feature3sub">Make progress daily</small></div>
+      </div>
+    </section>
+
+    <section class="page" id="toolPage">
+      <button class="back-btn" id="backButton">← <span data-i18n="back">Back home</span></button>
+      <h1 class="page-title" id="toolTitle">AI Writer</h1>
+      <p class="page-description" id="toolDescription">Bring your words to life.</p>
+      <div class="workspace" id="toolWorkspace"></div>
+      <div class="notice" id="prototypeNotice">Prototype mode: these are sample responses. Connect an AI service to enable real AI-generated answers.</div>
+    </section>
+
+    <section class="page" id="aboutPage">
+      <button class="back-btn" id="aboutBackButton">← <span data-i18n="back">Back home</span></button>
+      <div class="hero" style="margin-top:15px">
+        <div class="hero-content">
+          <div class="eyebrow">✦ MEET YOUR NEW WORKSPACE</div>
+          <h1>TinVin <span class="gradient-text">AI</span></h1>
+          <p data-i18n="aboutDesc">A creative home for your writing, learning, business ideas and everyday questions.</p>
+        </div>
+      </div>
+      <div class="workspace">
+        <h2 data-i18n="aboutMission">Your ideas deserve a place to grow.</h2>
+        <p class="page-description" data-i18n="aboutDetails">TinVin AI brings six useful tools together in one simple experience. This is an early prototype, built to explore the design and workflow.</p>
+        <p style="font-size:12px;color:#858098;line-height:1.8" data-i18n="aboutNote">Real AI, user accounts, saved history and premium payments have not been connected yet.</p>
+        <button class="primary-btn" id="aboutExploreButton" data-i18n="explore">Explore your tools ↗</button>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">TinVin AI · Connect your ideas to possibility ✦</footer>
+</div>
+
+<nav class="bottom-nav" aria-label="Main navigation">
+  <button class="nav-btn active" data-page="home"><span>⌂</span><b data-i18n="navHome">Home</b></button>
+  <button class="nav-btn" data-page="tools"><span>✧</span><b data-i18n="navTools">AI Tools</b></button>
+  <button class="nav-btn" data-page="chat"><span>☏</span><b data-i18n="navChat">Chat</b></button>
+  <button class="nav-btn" data-page="about"><span>◈</span><b data-i18n="navAbout">About</b></button>
+</nav>
+
+<script>
+const translations = {
+  en: {
+    brandSub:"Your creative AI workspace",
+    heroTitle:'Make room for <span class="gradient-text">brilliant ideas.</span>',
+    heroDesc:"One beautiful space to write, explore, learn and turn your thoughts into something extraordinary.",
+    explore:"Explore your tools ↗", toolsTitle:"Your AI toolkit",
+    toolsDesc:"Six ways to bring your ideas to life.", viewAll:"VIEW ALL ↗",
+    writerDesc:"Captions, posts and creative writing.", chatDesc:"Explore questions and new ideas.",
+    translateDesc:"Bridge languages with ease.", businessDesc:"Plans, branding and growth ideas.",
+    studyDesc:"Learn topics step by step.", ideasDesc:"Find inspiration and possibilities.",
+    startTitle:"A little inspiration",startDesc:"Not sure where to begin? Start here.",
+    quickTitle:"Create your next great post",quickDesc:"Turn a simple thought into an engaging social caption.",
+    feature1:"Create",feature1sub:"Express your ideas",feature2:"Discover",feature2sub:"Learn something new",
+    feature3:"Grow",feature3sub:"Make progress daily",back:"Back home",aboutDesc:"A creative home for your writing, learning, business ideas and everyday questions.",
+    aboutMission:"Your ideas deserve a place to grow.",
+    aboutDetails:"TinVin AI brings six useful tools together in one simple experience. This is an early prototype, built to explore the design and workflow.",
+    aboutNote:"Real AI, user accounts, saved history and premium payments have not been connected yet.",
+    navHome:"Home",navTools:"AI Tools",navChat:"Chat",navAbout:"About"
+  },
+  ku: {
+    brandSub:"شوێنی داهێنانی زیرەکی دەستکرد",
+    heroTitle:'شوێنێک بۆ <span class="gradient-text">بیرۆکە نایابەکانت.</span>',
+    heroDesc:"لە یەک شوێنی جواندا بنووسە، فێربە، بگەڕێ و بیرۆکەکانت بگۆڕە بۆ شتێکی تایبەت.",
+    explore:"بینینی ئامرازەکان ↗",toolsTitle:"ئامرازەکانی AI ـت",
+    toolsDesc:"شەش ڕێگا بۆ گەشەپێدانی بیرۆکەکانت.",viewAll:"هەمووی ببینە ↗",
+    writerDesc:"کەپشن، پۆست و نووسینی داهێنەرانە.",chatDesc:"پرسیار بکە و بیرۆکەی نوێ بدۆزەرەوە.",
+    translateDesc:"بە ئاسانی لەنێوان زمانەکان وەربگێڕە.",businessDesc:"پلان، براند و بیرۆکەی گەشە.",
+    studyDesc:"بابەتەکان هەنگاو بە هەنگاو فێربە.",ideasDesc:"سەرچاوەی ئیلهام و بیرۆکەی نوێ.",
+    startTitle:"کەمێک ئیلهام",startDesc:"نازانیت لە کوێ دەست پێ بکەیت؟ لێرە دەست پێ بکە.",
+    quickTitle:"پۆستێکی جوان دروست بکە",quickDesc:"بیرۆکەیەکی سادە بگۆڕە بۆ کەپشنێکی سەرنجڕاکێش.",
+    feature1:"داهێنان",feature1sub:"بیرۆکەکانت دەرببڕە",feature2:"دۆزینەوە",feature2sub:"شتێکی نوێ فێربە",
+    feature3:"گەشە",feature3sub:"هەموو ڕۆژێک پێش بکەوە",back:"گەڕانەوە بۆ سەرەتا",
+    aboutDesc:"شوێنێکی داهێنەرانە بۆ نووسین، فێربوون، بزنس و پرسیارە ڕۆژانەکانت.",
+    aboutMission:"بیرۆکەکانت شایەنی شوێنێکن بۆ گەشەکردن.",
+    aboutDetails:"TinVin AI شەش ئامرازی بەسوود لە یەک شوێندا کۆدەکاتەوە. ئەمە وەشانی سەرەتایی دیزاین و کارکردنە.",
+    aboutNote:"AI ڕاستەقینە، هەژمار، مێژووی پاشەکەوتکراو و پارەدانی Premium هێشتا پەیوەست نەکراون.",
+    navHome:"سەرەتا",navTools:"ئامرازەکان",navChat:"گفتوگۆ",navAbout:"دەربارە"
+  },
+  ar: {
+    brandSub:"مساحتك الإبداعية للذكاء الاصطناعي",
+    heroTitle:'افسح المجال <span class="gradient-text">للأفكار الرائعة.</span>',
+    heroDesc:"مساحة واحدة للكتابة والاستكشاف والتعلم وتحويل أفكارك إلى شيء استثنائي.",
+    explore:"استكشف الأدوات ↗",toolsTitle:"أدوات الذكاء الاصطناعي",
+    toolsDesc:"ست طرق لتحويل أفكارك إلى واقع.",viewAll:"عرض الكل ↗",
+    writerDesc:"منشورات وتعليقات وكتابة إبداعية.",chatDesc:"استكشف الأسئلة والأفكار الجديدة.",
+    translateDesc:"ترجمة سهلة بين اللغات.",businessDesc:"خطط وعلامات تجارية وأفكار للنمو.",
+    studyDesc:"تعلم الموضوعات خطوة بخطوة.",ideasDesc:"اكتشف الإلهام والاحتمالات.",
+    startTitle:"بعض الإلهام",startDesc:"لا تعرف من أين تبدأ؟ ابدأ هنا.",
+    quickTitle:"أنشئ منشورك القادم",quickDesc:"حوّل فكرة بسيطة إلى تعليق جذاب.",
+    feature1:"ابتكر",feature1sub:"عبّر عن أفكارك",feature2:"اكتشف",feature2sub:"تعلم شيئاً جديداً",
+    feature3:"تطور",feature3sub:"تقدم كل يوم",back:"العودة للرئيسية",
+    aboutDesc:"مساحة إبداعية للكتابة والتعلم والأعمال والأسئلة اليومية.",
+    aboutMission:"أفكارك تستحق مساحة للنمو.",
+    aboutDetails:"يجمع TinVin AI ست أدوات مفيدة في تجربة واحدة. هذه نسخة أولية لاستكشاف التصميم وسير العمل.",
+    aboutNote:"لم يتم ربط الذكاء الاصطناعي الحقيقي والحسابات وسجل المحادثات والمدفوعات بعد.",
+    navHome:"الرئيسية",navTools:"الأدوات",navChat:"الدردشة",navAbout:"حول"
+  },
+  es: {
+    brandSub:"Tu espacio creativo de IA",
+    heroTitle:'Haz espacio para <span class="gradient-text">grandes ideas.</span>',
+    heroDesc:"Un espacio para escribir, explorar, aprender y convertir tus pensamientos en algo extraordinario.",
+    explore:"Explorar herramientas ↗",toolsTitle:"Tus herramientas de IA",
+    toolsDesc:"Seis formas de dar vida a tus ideas.",viewAll:"VER TODAS ↗",
+    writerDesc:"Textos, publicaciones y escritura creativa.",chatDesc:"Explora preguntas e ideas nuevas.",
+    translateDesc:"Conecta idiomas fácilmente.",businessDesc:"Planes, marcas e ideas de crecimiento.",
+    studyDesc:"Aprende paso a paso.",ideasDesc:"Encuentra inspiración y posibilidades.",
+    startTitle:"Un poco de inspiración",startDesc:"¿No sabes por dónde empezar? Empieza aquí.",
+    quickTitle:"Crea tu próxima publicación",quickDesc:"Convierte un pensamiento en un texto atractivo.",
+    feature1:"Crear",feature1sub:"Expresa tus ideas",feature2:"Descubrir",feature2sub:"Aprende algo nuevo",
+    feature3:"Crecer",feature3sub:"Avanza cada día",back:"Volver al inicio",
+    aboutDesc:"Un espacio creativo para escribir, aprender, emprender y resolver dudas.",
+    aboutMission:"Tus ideas merecen un lugar para crecer.",
+    aboutDetails:"TinVin AI reúne seis herramientas útiles. Esta es una versión inicial del diseño y flujo.",
+    aboutNote:"La IA real, las cuentas y los pagos todavía no están conectados.",
+    navHome:"Inicio",navTools:"Herramientas",navChat:"Chat",navAbout:"Acerca de"
+  },
+  fr: {
+    brandSub:"Votre espace créatif IA",
+    heroTitle:'Faites place aux <span class="gradient-text">idées brillantes.</span>',
+    heroDesc:"Un espace pour écrire, explorer, apprendre et transformer vos pensées en quelque chose d'extraordinaire.",
+    explore:"Explorer les outils ↗",toolsTitle:"Vos outils IA",
+    toolsDesc:"Six façons de donner vie à vos idées.",viewAll:"TOUT VOIR ↗",
+    writerDesc:"Légendes, publications et écriture créative.",chatDesc:"Explorez des questions et de nouvelles idées.",
+    translateDesc:"Passez facilement d'une langue à l'autre.",businessDesc:"Plans, marques et idées de croissance.",
+    studyDesc:"Apprenez étape par étape.",ideasDesc:"Trouvez inspiration et possibilités.",
+    startTitle:"Un peu d'inspiration",startDesc:"Vous ne savez pas par où commencer ?",
+    quickTitle:"Créez votre prochaine publication",quickDesc:"Transformez une idée simple en texte captivant.",
+    feature1:"Créer",feature1sub:"Exprimez vos idées",feature2:"Découvrir",feature2sub:"Apprenez du nouveau",
+    feature3:"Grandir",feature3sub:"Progressez chaque jour",back:"Retour à l'accueil",
+    aboutDesc:"Un espace créatif pour écrire, apprendre, entreprendre et poser vos questions.",
+    aboutMission:"Vos idées méritent un espace pour grandir.",
+    aboutDetails:"TinVin AI réunit six outils utiles. Ceci est un prototype initial du design et du parcours.",
+    aboutNote:"L'IA réelle, les comptes et les paiements ne sont pas encore connectés.",
+    navHome:"Accueil",navTools:"Outils IA",navChat:"Chat",navAbout:"À propos"
+  }
+};
+
+const toolInfo = {
+  writer: {title:"AI Writer",desc:"Create captions, posts, bios and fresh content.",icon:"✍️"},
+  chat: {title:"AI Chat",desc:"Explore questions, brainstorm and think out loud.",icon:"💬"},
+  translate: {title:"AI Translate",desc:"Prepare text for another language.",icon:"🌐"},
+  business: {title:"AI Business",desc:"Shape a business idea into a clear plan.",icon:"📈"},
+  study: {title:"AI Study",desc:"Break down a topic into manageable steps.",icon:"📚"},
+  ideas: {title:"AI Ideas",desc:"Find inspiration for your next project.",icon:"💡"}
+};
+
+const samples = {
+  writer: "Here is a sample caption inspired by your topic:\n\n✨ Big ideas often start with one small step. Keep creating, keep learning, and let your journey inspire someone today.\n\n#Inspiration #Creativity #TinVinAI",
+  chat: "Thanks for sharing your question! This prototype is ready for an AI connection. Once an AI service is connected, it can help you explore the topic, explain ideas and brainstorm next steps.",
+  translate: "Translation preview:\n\nYour text will appear here after a translation service is connected. Choose your target language and connect an AI or translation API to enable real translations.",
+  business: "Your business starter plan:\n\n1. Define the problem you want to solve.\n2. Identify your ideal customer.\n3. Describe your product in one clear sentence.\n4. Test demand with a simple landing page.\n5. Improve based on real feedback.\n\nPrototype example — validate each step with real customers.",
+  study: "Your study plan:\n\n1. Start with the key definition.\n2. Break the subject into three smaller topics.\n3. Write down what you already know.\n4. Practise with a simple example.\n5. Review and explain it in your own words.\n\nEnter a subject to personalise this sample.",
+  ideas: "Try these idea starters:\n\n✨ A simple tool that saves people time.\n🌱 A community around a shared interest.\n📚 A learning resource for beginners.\n🎨 A creative service for small businesses.\n\nChoose one and test whether people really need it."
+};
+
+let currentTool = "writer";
+let currentPage = "home";
+
+const $ = id => document.getElementById(id);
+
+function showPage(page) {
+  currentPage = page;
+  $("homePage").classList.toggle("active", page === "home");
+  $("toolPage").classList.toggle("active", page === "tool");
+  $("aboutPage").classList.toggle("active", page === "about");
+
+  document.querySelectorAll(".nav-btn").forEach(btn => {
+    const target = btn.dataset.page;
+    const active = (page === "home" && target === "home") ||
+      (page === "tool" && target === "tools") ||
+      (page === "about" && target === "about") ||
+      (page === "tool" && currentTool === "chat" && target === "chat");
+    btn.classList.toggle("active", active);
+  });
+  window.scrollTo({top:0, behavior:"smooth"});
+}
+
+function openTool(name) {
+  currentTool = name;
+  const info = toolInfo[name];
+  $("toolTitle").textContent = info.icon + "  " + info.title;
+  $("toolDescription").textContent = info.desc;
+  const workspace = $("toolWorkspace");
+
+  if (name === "chat") {
+    workspace.innerHTML = `
+      <div class="chat-messages" id="chatMessages">
+        <div class="chat-message ai">Hello! 👋 Welcome to TinVin AI Chat. Ask a question or share an idea to explore this prototype.</div>
+      </div>
+      <form class="chat-form" id="chatForm">
+        <input id="chatInput" placeholder="Type your message..." autocomplete="off" required aria-label="Your message">
+        <button class="primary-btn" type="submit" aria-label="Send message">↑</button>
+      </form>
+      <div class="result-box" style="display:block">Sample mode: real AI chat requires a connected AI service.</div>`;
+    $("chatForm").addEventListener("submit", event => {
+      event.preventDefault();
+      const input = $("chatInput");
+      const value = input.value.trim();
+      if (!value) return;
+      const messages = $("chatMessages");
+      const user = document.createElement("div");
+      user.className = "chat-message user";
+      user.textContent = value;
+      messages.appendChild(user);
+      const answer = document.createElement("div");
+      answer.className = "chat-message ai";
+      answer.textContent = "Thanks for your message! This is a preview, not a live AI response. Connect an AI API to let TinVin answer your question: " + value;
+      messages.appendChild(answer);
+      input.value = "";
+      messages.scrollIntoView({behavior:"smooth", block:"end"});
+    });
+  } else {
+    let extra = "";
+    if (name === "translate") {
+      extra = `<label for="targetLanguage">Translate to</label>
+        <select id="targetLanguage">
+          <option>English</option><option>Kurdish (Sorani)</option>
+          <option>Arabic</option><option>Spanish</option><option>French</option>
+          <option>Turkish</option><option>German</option>
+        </select>`;
+    }
+    const placeholders = {
+      writer:"Example: Write an Instagram caption for my new clothing brand.",
+      translate:"Enter the text you want to translate...",
+      business:"Example: I want to start a small online business with no budget.",
+      study:"Example: Explain photosynthesis in simple terms.",
+      ideas:"Example: Give me ideas for a useful mobile app."
+    };
+    const labels = {
+      writer:"What would you like to create?",
+      translate:"Text to translate",
+      business:"Tell us about your business idea",
+      study:"What would you like to learn?",
+      ideas:"What kind of ideas do you need?"
+    };
+    workspace.innerHTML = `
+      <label for="toolInput">${labels[name]}</label>
+      <textarea id="toolInput" placeholder="${placeholders[name]}" required></textarea>
+      ${extra}
+      <button class="primary-btn" id="generateButton" type="button">✨ Generate preview</button>
+      <div class="result-box" id="toolResult" aria-live="polite"></div>
+      <button class="secondary-btn" id="copyButton" type="button" style="display:none;margin-top:12px">Copy result</button>`;
+    $("generateButton").addEventListener("click", () => {
+      const input = $("toolInput").value.trim();
+      if (!input) {
+        $("toolInput").focus();
+        $("toolInput").placeholder = "Please enter a topic first...";
+        return;
+      }
+      let output = samples[name];
+      if (name === "translate") {
+        output = "Translation preview (" + $("targetLanguage").value + "):\n\n" +
+          "Your translation will be generated here when a translation service is connected.\n\nOriginal text:\n" + input;
+      } else {
+        output += "\n\nYour topic: " + input;
+      }
+      $("toolResult").textContent = output;
+      $("copyButton").style.display = "inline-block";
+    });
+    $("copyButton").addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText($("toolResult").textContent);
+        $("copyButton").textContent = "Copied ✓";
+      } catch (e) {
+        $("toolResult").textContent += "\n\nSelect and copy this text manually.";
+      }
+    });
+  }
+  showPage("tool");
+}
+
+document.querySelectorAll("[data-tool]").forEach(button => {
+  button.addEventListener("click", () => openTool(button.dataset.tool));
+});
+
+document.querySelectorAll(".nav-btn").forEach(button => {
+  button.addEventListener("click", () => {
+    const page = button.dataset.page;
+    if (page === "home") showPage("home");
+    if (page === "about") showPage("about");
+    if (page === "tools") {
+      $("toolsHeading").scrollIntoView({behavior:"smooth",block:"start"});
+      showPage("home");
+      setTimeout(() => $("toolsHeading").scrollIntoView({behavior:"smooth",block:"start"}), 50);
+    }
+    if (page === "chat") openTool("chat");
+  });
+});
+
+$("backButton").addEventListener("click", () => showPage("home"));
+$("aboutBackButton").addEventListener("click", () => showPage("home"));
+$("aboutButton").addEventListener("click", () => showPage("about"));
+$("aboutExploreButton").addEventListener("click", () => showPage("home"));
+$("exploreButton").addEventListener("click", () => {
+  $("toolsHeading").scrollIntoView({behavior:"smooth",block:"start"});
+});
+$("allToolsButton").addEventListener("click", () => {
+  $("toolsHeading").scrollIntoView({behavior:"smooth",block:"start"});
+});
+
+$("languageSelect").addEventListener("change", event => {
+  const lang = event.target.value;
+  const dict = translations[lang] || translations.en;
+  document.documentElement.lang = lang;
+  document.documentElement.dir = lang === "ar" || lang === "ku" ? "rtl" : "ltr";
+  document.querySelectorAll("[data-i18n]").forEach(el => {
+    const key = el.dataset.i18n;
+    if (dict[key]) el.innerHTML = dict[key];
+  });
+});
+
+showPage("home");
+</script>
+</body>
+</html>
