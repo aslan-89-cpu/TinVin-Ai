@@ -147,7 +147,10 @@ button,input,textarea,select{font:inherit}button{cursor:pointer}
 
 const API_BASE="https://tinvin-ai-server.aslan89aslan1.workers.dev";
 const $=id=>document.getElementById(id);
-const CACHE_PREFIX="tinvin_ui_translations_v1_";
+
+/* v2 prevents reusing old, incomplete UI translations */
+const CACHE_PREFIX="tinvin_ui_translations_v2_";
+const BATCH_SIZE=8;
 
 const languages=[
 "English","Kurdish (Sorani)","Kurdish (Kurmanji)","Arabic","Spanish","French",
@@ -236,6 +239,7 @@ const cardMap={
 function flattenStrings(){
   const strings={...base};
   for(const [tool,d] of Object.entries(toolDefs)){
+    strings[tool+".title"]=d.title;
     strings[tool+".subtitle"]=d.subtitle;
     strings[tool+".label"]=d.label;
     strings[tool+".placeholder"]=d.placeholder;
@@ -260,6 +264,7 @@ function fillSelect(select,items,includeAuto=false){
     select.appendChild(option);
   });
 }
+
 fillSelect($("languageSelect"),uiLanguages.map(x=>x.value));
 Array.from($("languageSelect").options).forEach((o,i)=>o.textContent=uiLanguages[i].label);
 fillSelect($("sourceLanguage"),languages,true);
@@ -274,77 +279,115 @@ let active="writer";
 let imageData="";
 let currentStrings={...sourceStrings};
 let languageRequest=0;
+let toastTimer=null;
 
 function selectedLanguage(){
   return uiLanguages.find(x=>x.value===$("languageSelect").value)||uiLanguages[0];
 }
+
 function currentText(key){
   return currentStrings[key]||sourceStrings[key]||key;
 }
+
 function toast(message){
   $("toast").textContent=message;
   $("toast").classList.add("show");
-  setTimeout(()=>$("toast").classList.remove("show"),3000);
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>$("toast").classList.remove("show"),3000);
 }
+
 function applyStrings(){
   const s=currentStrings;
+
   for(const [id,key] of Object.entries(fieldMap)){
-    if($(id))$(id).textContent=s[key]||sourceStrings[key]||base[key]||key;
+    const el=$(id);
+    if(el){
+      const value=s[key]||sourceStrings[key]||base[key]||key;
+      if(el.tagName==="INPUT"||el.tagName==="TEXTAREA"){
+        el.placeholder=value;
+      }else{
+        el.textContent=value;
+      }
+    }
   }
+
   $("heroTitle").replaceChildren();
   $("heroTitle").append(document.createTextNode((s.hero||base.hero)+" "));
   const span=document.createElement("span");
   span.className="gradient";
   span.textContent=s.end||base.end;
   $("heroTitle").appendChild(span);
-  $("aboutNotice").querySelector("strong").textContent=s.about||base.about;
+
+  $("aboutHeading").textContent=s.about||base.about;
   $("aboutText").textContent=s.aboutText||base.aboutText;
+
   document.querySelectorAll("[data-t]").forEach(el=>{
     const key=cardMap[el.dataset.t];
     if(key)el.textContent=s[key]||base[key]||el.textContent;
   });
+
   $("promptLabel").textContent=s[active+".label"]||toolDefs[active].label;
   $("prompt").placeholder=s[active+".placeholder"]||toolDefs[active].placeholder;
   $("workspaceSubtitle").textContent=s[active+".subtitle"]||toolDefs[active].subtitle;
   $("promptHint").textContent=s[active+".hint"]||toolDefs[active].hint;
   $("workspaceTitle").textContent=s[active+".title"]||toolDefs[active].title;
+
   $("generateText").textContent=s.generate||base.generate;
   $("closeText").textContent=s.close||base.close;
-  $("documentDirection");
+
   const apiName=selectedLanguage().api;
-  document.documentElement.lang=apiName==="Kurdish (Sorani)"?"ckb":apiName;
-  document.documentElement.dir=["Kurdish (Sorani)","Arabic","Persian","Urdu","Pashto","Dari"].includes(apiName)?"rtl":"ltr";
+  const rtlLanguages=["Kurdish (Sorani)","Arabic","Persian","Urdu","Pashto","Dari"];
+  document.documentElement.lang=apiName==="Kurdish (Sorani)"?"ckb":apiName==="English"?"en":apiName;
+  document.documentElement.dir=rtlLanguages.includes(apiName)?"rtl":"ltr";
 }
+
 function openTool(key){
   active=key;
-  document.querySelectorAll(".tool-card").forEach(c=>c.classList.toggle("active",c.dataset.tool===key));
+
+  document.querySelectorAll(".tool-card").forEach(c=>{
+    c.classList.toggle("active",c.dataset.tool===key);
+  });
+
   $("workspace").classList.add("visible");
   $("workspaceIcon").textContent=toolDefs[key].icon;
   $("translateFields").classList.toggle("hidden",key!=="translate");
   $("outputLanguageFields").classList.toggle("hidden",key==="translate");
   $("resultContent").replaceChildren();
+
   const placeholder=document.createElement("div");
   placeholder.className="placeholder";
   const inside=document.createElement("div");
   const icon=document.createElement("span");
   icon.textContent=toolDefs[key].icon;
+
   const strong=document.createElement("strong");
   strong.textContent=currentText("placeholderTitle");
+
   const text=document.createElement("div");
   text.textContent=currentText("placeholderText");
+
   inside.append(icon,strong,text);
   placeholder.appendChild(inside);
   $("resultContent").appendChild(placeholder);
+
   $("downloadBtn").classList.add("hidden");
   $("copyBtn").classList.remove("hidden");
   imageData="";
+
   applyStrings();
   $("workspace").scrollIntoView({behavior:"smooth",block:"start"});
 }
+
+/*
+  Translate small batches separately.
+  A failed batch does not cancel the remaining batches.
+  Each successful batch is applied immediately.
+*/
 async function loadTranslations(){
   const requestId=++languageRequest;
   const selected=selectedLanguage();
   const apiName=selected.api;
+
   if(apiName==="English"){
     currentStrings={...sourceStrings};
     applyStrings();
@@ -352,6 +395,7 @@ async function loadTranslations(){
   }
 
   const cacheKey=CACHE_PREFIX+encodeURIComponent(apiName);
+
   try{
     const cached=localStorage.getItem(cacheKey);
     if(cached){
@@ -359,148 +403,280 @@ async function loadTranslations(){
       if(parsed&&typeof parsed==="object"){
         currentStrings={...sourceStrings,...parsed};
         applyStrings();
+        if($("workspace").classList.contains("visible"))refreshWorkspace();
         return;
       }
     }
-  }catch{}
+  }catch(error){
+    console.warn("Could not read translation cache:",error);
+  }
 
   currentStrings={...sourceStrings};
   applyStrings();
   toast("Translating interface…");
 
-  try{
-    const response=await fetch(API_BASE+"/api/ui-translate",{
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({language:apiName,strings:sourceStrings})
-    });
-    const data=await response.json();
-    if(!response.ok||!data.ok||!data.translations){
-      throw new Error(data.error||"Interface translation failed.");
+  const entries=Object.entries(sourceStrings);
+  const batches=[];
+
+  for(let i=0;i<entries.length;i+=BATCH_SIZE){
+    batches.push(Object.fromEntries(entries.slice(i,i+BATCH_SIZE)));
+  }
+
+  const translations={};
+  let completed=0;
+  let failed=0;
+
+  for(const batch of batches){
+    if(requestId!==languageRequest)return;
+
+    try{
+      const response=await fetch(API_BASE+"/api/ui-translate",{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({language:apiName,strings:batch})
+      });
+
+      let data;
+      try{
+        data=await response.json();
+      }catch{
+        throw new Error("The translation server returned an invalid response.");
+      }
+
+      if(!response.ok||!data.ok||!data.translations){
+        throw new Error(data.error||"Translation request failed.");
+      }
+
+      if(requestId!==languageRequest)return;
+
+      for(const key of Object.keys(batch)){
+        const translated=data.translations[key];
+        if(typeof translated==="string"&&translated.trim()){
+          translations[key]=translated.trim();
+        }
+      }
+
+      completed++;
+      currentStrings={...sourceStrings,...translations};
+      applyStrings();
+      if($("workspace").classList.contains("visible"))refreshWorkspace();
+
+    }catch(error){
+      failed++;
+      console.warn("UI translation batch failed:",error);
     }
-    if(requestId!==languageRequest)return;
-    currentStrings={...sourceStrings,...data.translations};
-    try{localStorage.setItem(cacheKey,JSON.stringify(data.translations));}catch{}
-    applyStrings();
-    if($("workspace").classList.contains("visible"))openTool(active);
-    toast("Interface language updated.");
+  }
+
+  if(requestId!==languageRequest)return;
+
+  currentStrings={...sourceStrings,...translations};
+  applyStrings();
+  if($("workspace").classList.contains("visible"))refreshWorkspace();
+
+  try{
+    localStorage.setItem(cacheKey,JSON.stringify(translations));
   }catch(error){
-    if(requestId!==languageRequest)return;
-    currentStrings={...sourceStrings};
-    applyStrings();
-    toast("Could not translate the interface. Check Worker deployment and try again.");
-    console.error("UI translation failed:",error);
+    console.warn("Could not save translation cache:",error);
+  }
+
+  if(completed===0){
+    toast("Could not translate the interface. Check the Worker and try again.");
+  }else if(failed>0){
+    toast("Some text could not be translated. Change language and retry.");
+  }else{
+    toast("Interface language updated.");
   }
 }
+
+function refreshWorkspace(){
+  $("workspaceTitle").textContent=currentText(active+".title");
+  $("workspaceSubtitle").textContent=currentText(active+".subtitle");
+  $("promptLabel").textContent=currentText(active+".label");
+  $("prompt").placeholder=currentText(active+".placeholder");
+  $("promptHint").textContent=currentText(active+".hint");
+  $("generateText").textContent=currentText("generate");
+  $("closeText").textContent=currentText("close");
+}
+
 async function generate(){
   const prompt=$("prompt").value.trim();
-  if(!prompt){toast(currentText("empty"));$("prompt").focus();return;}
+
+  if(!prompt){
+    toast(currentText("empty"));
+    $("prompt").focus();
+    return;
+  }
 
   const btn=$("generateBtn");
   const out=$("resultContent");
+
   btn.disabled=true;
   btn.innerHTML='<span class="spinner"></span> '+escapeHtml(currentText("working"));
   out.innerHTML='<div class="placeholder"><div class="busy"><span class="spinner"></span><span>'+escapeHtml(currentText("connecting"))+'</span></div></div>';
+
   $("copyBtn").classList.add("hidden");
   $("downloadBtn").classList.add("hidden");
   imageData="";
 
   try{
     let endpoint,body;
+
     if(active==="image"){
       endpoint="/api/image";
       body={prompt,outputLanguage:$("outputLanguage").value};
     }else if(active==="translate"){
       endpoint="/api/ai";
-      body={tool:"translate",text:prompt,sourceLanguage:$("sourceLanguage").value,targetLanguage:$("targetLanguage").value};
+      body={
+        tool:"translate",
+        text:prompt,
+        sourceLanguage:$("sourceLanguage").value,
+        targetLanguage:$("targetLanguage").value
+      };
     }else{
       endpoint="/api/ai";
-      body={tool:active,prompt,outputLanguage:$("outputLanguage").value};
+      body={
+        tool:active,
+        prompt,
+        outputLanguage:$("outputLanguage").value
+      };
     }
+
     const res=await fetch(API_BASE+endpoint,{
       method:"POST",
       headers:{"Content-Type":"application/json"},
       body:JSON.stringify(body)
     });
-    const data=await res.json();
+
+    let data;
+    try{
+      data=await res.json();
+    }catch{
+      throw new Error("The server returned an invalid response.");
+    }
+
     if(!res.ok||!data.ok)throw new Error(data.error||"AI request failed.");
 
     if(active==="image"){
       if(!data.image)throw new Error("The image provider returned no image.");
+
       imageData="data:"+(data.mimeType||"image/jpeg")+";base64,"+data.image;
+
       const img=document.createElement("img");
-      img.src=imageData;img.alt=prompt;img.id="generatedImage";
+      img.src=imageData;
+      img.alt=prompt;
+      img.id="generatedImage";
       out.replaceChildren(img);
+
       $("downloadBtn").classList.remove("hidden");
     }else{
       if(!data.result)throw new Error("The AI provider returned no text.");
+
       out.textContent=data.result;
       $("copyBtn").classList.remove("hidden");
     }
-  }catch(e){
+  }catch(error){
     out.replaceChildren();
     const p=document.createElement("div");
     p.className="error";
-    p.textContent=e.message||"Something went wrong.";
+    p.textContent=error.message||"Something went wrong.";
     out.appendChild(p);
   }finally{
     btn.disabled=false;
     btn.innerHTML='✦ <span id="generateText">'+escapeHtml(currentText("generate"))+'</span>';
   }
 }
+
 function escapeHtml(value){
-  return String(value).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  return String(value).replace(/[&<>"']/g,c=>({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+  }[c]));
 }
+
 async function copyResult(){
   const value=$("resultContent").innerText.trim();
   if(!value)return;
+
   try{
     await navigator.clipboard.writeText(value);
     toast(currentText("copied"));
-  }catch{toast(currentText("copyUnavailable"));}
+  }catch{
+    toast(currentText("copyUnavailable"));
+  }
 }
+
 async function downloadImage(){
-  if(!imageData){toast(currentText("imageFirst"));return;}
+  if(!imageData){
+    toast(currentText("imageFirst"));
+    return;
+  }
+
   const button=$("downloadBtn");
   button.disabled=true;
+
   try{
     const response=await fetch(imageData);
     if(!response.ok)throw new Error("Could not prepare the image.");
+
     const blob=await response.blob();
-    const file=new File([blob],"tinvin-ai-image.png",{type:blob.type||"image/png"});
+    const file=new File([blob],"tinvin-ai-image.png",{
+      type:blob.type||"image/png"
+    });
+
     if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
       await navigator.share({files:[file],title:"TinVin AI image"});
       return;
     }
+
     const objectUrl=URL.createObjectURL(blob);
     const link=document.createElement("a");
-    link.href=objectUrl;link.download="tinvin-ai-image.png";
-    document.body.appendChild(link);link.click();link.remove();
+    link.href=objectUrl;
+    link.download="tinvin-ai-image.png";
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+
     setTimeout(()=>URL.revokeObjectURL(objectUrl),60000);
   }catch(error){
     if(error&&error.name==="AbortError")return;
+
     try{
       const opened=window.open(imageData,"_blank");
       toast(opened?"Open Share and choose Save Image.":currentText("saveImage"));
-    }catch{toast(currentText("saveImage"));}
-  }finally{button.disabled=false;}
+    }catch{
+      toast(currentText("saveImage"));
+    }
+  }finally{
+    button.disabled=false;
+  }
 }
 
-document.querySelectorAll(".tool-card").forEach(card=>card.addEventListener("click",()=>openTool(card.dataset.tool)));
+document.querySelectorAll(".tool-card").forEach(card=>{
+  card.addEventListener("click",()=>openTool(card.dataset.tool));
+});
+
 $("generateBtn").addEventListener("click",generate);
+
 $("closeWorkspace").addEventListener("click",()=>{
   $("workspace").classList.remove("visible");
   document.querySelectorAll(".tool-card").forEach(c=>c.classList.remove("active"));
   window.scrollTo({top:0,behavior:"smooth"});
 });
+
 $("copyBtn").addEventListener("click",copyResult);
 $("downloadBtn").addEventListener("click",downloadImage);
 $("languageSelect").addEventListener("change",loadTranslations);
-$("aboutBtn").addEventListener("click",()=>$("aboutNotice").scrollIntoView({behavior:"smooth",block:"center"}));
-$("prompt").addEventListener("keydown",e=>{if((e.ctrlKey||e.metaKey)&&e.key==="Enter")generate();});
+
+$("aboutBtn").addEventListener("click",()=>{
+  $("aboutNotice").scrollIntoView({behavior:"smooth",block:"center"});
+});
+
+$("prompt").addEventListener("keydown",e=>{
+  if((e.ctrlKey||e.metaKey)&&e.key==="Enter")generate();
+});
 
 applyStrings();
 loadTranslations();
+
 })();
 </script>
 </body>
