@@ -31,7 +31,7 @@ button,input,textarea,select{font:inherit}button{cursor:pointer}
 .section-head h2{font-size:21px;margin:0 0 3px}
 .section-head p{margin:0;color:var(--muted);font-size:13px}
 .tools{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
-.tool-card{display:flex;flex-direction:column;gap:10px;text-align:left;min-height:178px;padding:20px;background:linear-gradient(145deg,#211f43,#18172f);color:var(--text);border:1px solid #39365f;border-radius:18px;transition:.18s}
+.tool-card{display:flex;flex-direction:column;gap:10px;text-align:start;min-height:178px;padding:20px;background:linear-gradient(145deg,#211f43,#18172f);color:var(--text);border:1px solid #39365f;border-radius:18px;transition:.18s}
 .tool-card:hover,.tool-card.active{transform:translateY(-3px);border-color:#8c7cff;box-shadow:0 12px 34px #08081755}
 .tool-icon{display:grid;place-items:center;width:46px;height:46px;border-radius:14px;background:#8274ff20;border:1px solid #9d8aff32;font-size:23px}
 .tool-card h3{font-size:16px;margin:2px 0 0}
@@ -79,7 +79,7 @@ button,input,textarea,select{font:inherit}button{cursor:pointer}
 <body>
 <div class="shell">
 <header class="topbar">
-  <div class="brand"><div class="logo">✦</div><div>TinVin AI<small>SMART WORKSPACE</small></div></div>
+  <div class="brand"><div class="logo">✦</div><div>TinVin AI<small id="brandSub">SMART WORKSPACE</small></div></div>
   <div class="top-actions">
     <select class="select" id="languageSelect" aria-label="Interface language"></select>
     <button class="ghost" id="aboutBtn">About</button>
@@ -90,44 +90,42 @@ button,input,textarea,select{font:inherit}button{cursor:pointer}
   <span class="eyebrow"><span class="dot"></span><span id="eyebrowText">YOUR CREATIVE AI WORKSPACE</span></span>
   <h1 id="heroTitle">Ideas become <span class="gradient">something more.</span></h1>
   <p id="heroText">Write, explore, translate, learn, build your business, and create images — all in one intelligent workspace.</p>
-  <div class="stats"><div class="stat"><strong>07</strong><span id="statTools">AI tools</span></div><div class="stat"><strong>50</strong><span id="statLanguages">languages supported by translator</span></div><div class="stat"><strong>24/7</strong><span id="statReady">ready when you are</span></div></div>
+  <div class="stats">
+    <div class="stat"><strong>07</strong><span id="statTools">AI tools</span></div>
+    <div class="stat"><strong>50</strong><span id="statLanguages">languages supported by translator</span></div>
+    <div class="stat"><strong>24/7</strong><span id="statReady">ready when you are</span></div>
+  </div>
 </section>
 
 <div class="section-head"><h2 id="toolsTitle">Explore your tools</h2><p id="toolsSubtitle">Choose a workspace to get started.</p></div>
+
 <section class="tools" id="toolCards">
-  <button class="tool-card" data-tool="writer"><span class="tool-icon">✍️</span><h3>AI Writer</h3><p>Create polished content, posts, emails and more.</p><span class="tool-tag">WRITE & CREATE ↗</span></button>
-  <button class="tool-card" data-tool="chat"><span class="tool-icon">💬</span><h3>AI Chat</h3><p>Ask questions and explore ideas with AI.</p><span class="tool-tag">ASK ANYTHING ↗</span></button>
-  <button class="tool-card" data-tool="translate"><span class="tool-icon">🌐</span><h3>AI Translator</h3><p>Translate text across 50 languages.</p><span class="tool-tag">50 LANGUAGES ↗</span></button>
-  <button class="tool-card" data-tool="business"><span class="tool-icon">🚀</span><h3>Business Studio</h3><p>Build plans, marketing ideas and brand content.</p><span class="tool-tag">BUILD YOUR VISION ↗</span></button>
-  <button class="tool-card" data-tool="study"><span class="tool-icon">📚</span><h3>Study Assistant</h3><p>Learn new topics with clear step-by-step help.</p><span class="tool-tag">LEARN SMARTER ↗</span></button>
-  <button class="tool-card" data-tool="ideas"><span class="tool-icon">💡</span><h3>Idea Generator</h3><p>Discover fresh ideas and creative directions.</p><span class="tool-tag">GET INSPIRED ↗</span></button>
-  <button class="tool-card" data-tool="image"><span class="tool-icon">🖼️</span><h3>Image Generator</h3><p>Turn a description into an original AI image.</p><span class="tool-tag">CREATE AN IMAGE ↗</span></button>
+  <button class="tool-card" data-tool="writer"><span class="tool-icon">✍️</span><h3 data-t="writer.title">AI Writer</h3><p data-t="writer.card">Create polished content, posts, emails and more.</p><span class="tool-tag" data-t="writer.tag">WRITE & CREATE ↗</span></button>
+  <button class="tool-card" data-tool="chat"><span class="tool-icon">💬</span><h3 data-t="chat.title">AI Chat</h3><p data-t="chat.card">Ask questions and explore ideas with AI.</p><span class="tool-tag" data-t="chat.tag">ASK ANYTHING ↗</span></button>
+  <button class="tool-card" data-tool="translate"><span class="tool-icon">🌐</span><h3 data-t="translate.title">AI Translator</h3><p data-t="translate.card">Translate text across 50 languages.</p><span class="tool-tag" data-t="translate.tag">50 LANGUAGES ↗</span></button>
+  <button class="tool-card" data-tool="business"><span class="tool-icon">🚀</span><h3 data-t="business.title">Business Studio</h3><p data-t="business.card">Build plans, marketing ideas and brand content.</p><span class="tool-tag" data-t="business.tag">BUILD YOUR VISION ↗</span></button>
+  <button class="tool-card" data-tool="study"><span class="tool-icon">📚</span><h3 data-t="study.title">Study Assistant</h3><p data-t="study.card">Learn new topics with clear step-by-step help.</p><span class="tool-tag" data-t="study.tag">LEARN SMARTER ↗</span></button>
+  <button class="tool-card" data-tool="ideas"><span class="tool-icon">💡</span><h3 data-t="ideas.title">Idea Generator</h3><p data-t="ideas.card">Discover fresh ideas and creative directions.</p><span class="tool-tag" data-t="ideas.tag">GET INSPIRED ↗</span></button>
+  <button class="tool-card" data-tool="image"><span class="tool-icon">🖼️</span><h3 data-t="image.title">Image Generator</h3><p data-t="image.card">Turn a description into an original AI image.</p><span class="tool-tag" data-t="image.tag">CREATE AN IMAGE ↗</span></button>
 </section>
 
 <section class="workspace" id="workspace">
   <div class="workspace-head">
-    <div class="workspace-title"><span class="tool-icon" id="workspaceIcon">✍️</span><div><h2 id="workspaceTitle">AI Writer</h2><p id="workspaceSubtitle">Describe what you want to create.</p></div></div>
+    <div class="workspace-title"><span class="tool-icon" id="workspaceIcon">✍️</span><div><h2 id="workspaceTitle">AI Writer</h2><p id="workspaceSubtitle"></p></div></div>
     <button class="close-btn" id="closeWorkspace">✕ <span id="closeText">Close</span></button>
   </div>
   <div class="workspace-body">
     <div>
-      <div class="field"><label for="prompt" id="promptLabel">What would you like to create?</label><textarea id="prompt" placeholder="Tell TinVin AI what you need..."></textarea><div class="hint" id="promptHint">Be specific for a more useful result.</div></div>
-
+      <div class="field"><label for="prompt" id="promptLabel">What would you like to write?</label><textarea id="prompt" placeholder="Tell TinVin AI what you need..."></textarea><div class="hint" id="promptHint"></div></div>
       <div id="outputLanguageFields">
-        <div class="field">
-          <label for="outputLanguage" id="outputLanguageLabel">AI response language</label>
-          <select id="outputLanguage"></select>
-          <div class="hint">Choose the language you want the AI to use for its answer.</div>
-        </div>
+        <div class="field"><label for="outputLanguage" id="outputLanguageLabel">AI response language</label><select id="outputLanguage"></select><div class="hint" id="outputHint">Choose the language you want the AI to use for its answer.</div></div>
       </div>
-
       <div id="translateFields" class="hidden">
         <div class="two">
           <div class="field"><label for="sourceLanguage" id="sourceLabel">Source language</label><select id="sourceLanguage"></select></div>
           <div class="field"><label for="targetLanguage" id="targetLabel">Translate to</label><select id="targetLanguage"></select></div>
         </div>
       </div>
-
       <button class="primary" id="generateBtn">✦ <span id="generateText">Generate with AI</span></button>
       <p class="hint" id="privacyHint">Your API key stays on the server, not in this page.</p>
     </div>
@@ -138,8 +136,8 @@ button,input,textarea,select{font:inherit}button{cursor:pointer}
   </div>
 </section>
 
-<div class="notice" id="aboutNotice"><strong>About TinVin AI</strong><br>One workspace for writing, conversation, translation, business planning, studying, ideas and image creation. AI availability depends on the configured provider, model access and usage limits.</div>
-<footer class="footer"><span>© 2026 TinVin AI · Smart Workspace</span><span id="footerText">Create thoughtfully. Keep exploring.</span></footer>
+<div class="notice" id="aboutNotice"><strong id="aboutHeading">About TinVin AI</strong><br><span id="aboutText">One workspace for writing, conversation, translation, business planning, studying, ideas and image creation.</span></div>
+<footer class="footer"><span>© 2026 TinVin AI · <span id="footerBrand">Smart Workspace</span></span><span id="footerText">Create thoughtfully. Keep exploring.</span></footer>
 </div>
 <div class="toast" id="toast" role="status"></div>
 
@@ -149,99 +147,60 @@ button,input,textarea,select{font:inherit}button{cursor:pointer}
 
 const API_BASE="https://tinvin-ai-server.aslan89aslan1.workers.dev";
 const $=id=>document.getElementById(id);
+const CACHE_PREFIX="tinvin_ui_translations_v1_";
 
-/* Exactly 50 languages. Hebrew is intentionally excluded. */
 const languages=[
-"English",
-"Kurdish (Sorani)",
-"Kurdish (Kurmanji)",
-"Arabic",
-"Spanish",
-"French",
-"Turkish",
-"Persian",
-"German",
-"Italian",
-"Japanese",
-"Chinese (Simplified)",
-"Korean",
-"Russian",
-"Portuguese",
-"Hindi",
-"Urdu",
-"Pashto",
-"Bengali",
-"Indonesian",
-"Malay",
-"Thai",
-"Vietnamese",
-"Dutch",
-"Polish",
-"Ukrainian",
-"Greek",
-"Swedish",
-"Norwegian",
-"Romanian",
-"Danish",
-"Finnish",
-"Czech",
-"Hungarian",
-"Bulgarian",
-"Serbian",
-"Croatian",
-"Slovak",
-"Dari",
-"Uzbek",
-"Kazakh",
-"Tamil",
-"Telugu",
-"Marathi",
-"Gujarati",
-"Swahili",
-"Amharic",
-"Afrikaans",
-"Albanian",
-"Armenian"
+"English","Kurdish (Sorani)","Kurdish (Kurmanji)","Arabic","Spanish","French",
+"Turkish","Persian","German","Italian","Japanese","Chinese (Simplified)",
+"Korean","Russian","Portuguese","Hindi","Urdu","Pashto","Bengali","Indonesian",
+"Malay","Thai","Vietnamese","Dutch","Polish","Ukrainian","Greek","Swedish",
+"Norwegian","Romanian","Danish","Finnish","Czech","Hungarian","Bulgarian",
+"Serbian","Croatian","Slovak","Dari","Uzbek","Kazakh","Tamil","Telugu",
+"Marathi","Gujarati","Swahili","Amharic","Afrikaans","Albanian","Armenian"
 ];
 
 const uiLanguages=[
-{value:"en",label:"English"},
-{value:"ku",label:"کوردی"},
-{value:"ar",label:"العربية"},
-{value:"es",label:"Español"},
-{value:"fr",label:"Français"},
-...languages.filter(x=>!["English","Kurdish (Sorani)","Arabic","Spanish","French"].includes(x)).map(x=>({value:x,label:x}))
+{value:"en",label:"English",api:"English"},
+{value:"ku",label:"کوردی",api:"Kurdish (Sorani)"},
+{value:"ar",label:"العربية",api:"Arabic"},
+{value:"es",label:"Español",api:"Spanish"},
+{value:"fr",label:"Français",api:"French"},
+...languages.filter(x=>!["English","Kurdish (Sorani)","Arabic","Spanish","French"].includes(x)).map(x=>({value:x,label:x,api:x}))
 ];
 
-function fillSelect(select,items,includeAuto=false){
-  select.innerHTML="";
-  if(includeAuto){
-    const auto=document.createElement("option");
-    auto.value="Auto-detect";
-    auto.textContent="Auto-detect";
-    select.appendChild(auto);
-  }
-  items.forEach(item=>{
-    const option=document.createElement("option");
-    option.value=item;
-    option.textContent=item;
-    select.appendChild(option);
-  });
-}
+const base={
+about:"About",eyebrow:"YOUR CREATIVE AI WORKSPACE",
+hero:"Ideas become",end:"something more.",
+heroText:"Write, explore, translate, learn, build your business, and create images — all in one intelligent workspace.",
+tools:"Explore your tools",sub:"Choose a workspace to get started.",
+generate:"Generate with AI",source:"Source language",target:"Translate to",
+result:"RESULT",copy:"Copy",download:"Download image",close:"Close",
+privacy:"Your API key stays on the server, not in this page.",
+placeholderTitle:"Your result will appear here",
+placeholderText:"Enter your request and select Generate.",
+statTools:"AI tools",statLanguages:"languages supported by translator",
+statReady:"ready when you are",footer:"Create thoughtfully. Keep exploring.",
+empty:"Please enter a request first.",copied:"Copied.",
+aboutText:"One workspace for writing, conversation, translation, business planning, studying, ideas and image creation. AI availability depends on the configured provider, model access and usage limits.",
+promptLabel:"What would you like to create?",
+promptHint:"Be specific for a more useful result.",
+outputLanguage:"AI response language",
+outputHint:"Choose the language you want the AI to use for its answer.",
+working:"Working…",connecting:"Connecting to TinVin AI…",
+auto:"Auto-detect",copyUnavailable:"Copy is not available in this browser.",
+imageFirst:"Generate an image first.",
+saveImage:"Touch and hold the image, then choose Save to Photos.",
+brandSub:"SMART WORKSPACE",footerBrand:"Smart Workspace",
+writerTitle:"AI Writer",writerCard:"Create polished content, posts, emails and more.",writerTag:"WRITE & CREATE ↗",
+chatTitle:"AI Chat",chatCard:"Ask questions and explore ideas with AI.",chatTag:"ASK ANYTHING ↗",
+translateTitle:"AI Translator",translateCard:"Translate text across 50 languages.",translateTag:"50 LANGUAGES ↗",
+businessTitle:"Business Studio",businessCard:"Build plans, marketing ideas and brand content.",businessTag:"BUILD YOUR VISION ↗",
+studyTitle:"Study Assistant",studyCard:"Learn new topics with clear step-by-step help.",studyTag:"LEARN SMARTER ↗",
+ideasTitle:"Idea Generator",ideasCard:"Discover fresh ideas and creative directions.",ideasTag:"GET INSPIRED ↗",
+imageTitle:"Image Generator",imageCard:"Turn a description into an original AI image.",imageTag:"CREATE AN IMAGE ↗"
+};
 
-fillSelect($("languageSelect"),uiLanguages.map(x=>x.value));
-Array.from($("languageSelect").options).forEach((o,i)=>{
-  o.textContent=uiLanguages[i].label;
-});
-fillSelect($("sourceLanguage"),languages,true);
-fillSelect($("targetLanguage"),languages);
-fillSelect($("outputLanguage"),languages);
-
-$("sourceLanguage").value="Auto-detect";
-$("targetLanguage").value="Kurdish (Sorani)";
-$("outputLanguage").value="English";
-
-const defs={
+const toolDefs={
 writer:{icon:"✍️",title:"AI Writer",subtitle:"Create polished content for any purpose.",label:"What would you like to write?",placeholder:"Write a launch post, email, story or article...",hint:"Mention your audience, tone, format and desired length."},
 chat:{icon:"💬",title:"AI Chat",subtitle:"Ask a question or talk through an idea.",label:"What would you like to ask?",placeholder:"Ask TinVin AI anything...",hint:"Add context for a more precise answer."},
 translate:{icon:"🌐",title:"AI Translator",subtitle:"Translate while preserving meaning and tone.",label:"Text to translate",placeholder:"Paste the text you want translated...",hint:"Choose the source and target language below."},
@@ -251,280 +210,297 @@ ideas:{icon:"💡",title:"Idea Generator",subtitle:"Explore fresh and useful dir
 image:{icon:"🖼️",title:"Image Generator",subtitle:"Create an image from a written description.",label:"Describe the image you want",placeholder:"A cinematic purple-and-blue futuristic city at night...",hint:"Describe the subject, art style, colors, lighting and composition."}
 };
 
-const tr={
-en:{about:"About",eyebrow:"YOUR CREATIVE AI WORKSPACE",hero:"Ideas become",end:"something more.",heroText:"Write, explore, translate, learn, build your business, and create images — all in one intelligent workspace.",tools:"Explore your tools",sub:"Choose a workspace to get started.",generate:"Generate with AI",source:"Source language",target:"Translate to",result:"RESULT",copy:"Copy",download:"Download image",close:"Close",privacy:"Your API key stays on the server, not in this page.",placeholderTitle:"Your result will appear here",placeholderText:"Enter your request and select Generate.",statTools:"AI tools",statLanguages:"languages supported by translator",statReady:"ready when you are",footer:"Create thoughtfully. Keep exploring.",empty:"Please enter a request first.",copied:"Copied.",aboutText:"One workspace for writing, conversation, translation, business planning, studying, ideas and image creation. Availability depends on your AI provider and usage limits."},
-ku:{about:"دەربارە",eyebrow:"شوێنی کاری داهێنەرانەی AI ـت",hero:"بیرۆکەکان دەبنە",end:"شتێکی زیاتر.",heroText:"بنوسە، وەرگێڕان بکە، فێربە، کارەکەت گەشە پێبدە و وێنە دروست بکە؛ هەمووی لە یەک شوێندا.",tools:"ئامرازەکانت ببینە",sub:"ئامرازێک هەڵبژێرە بۆ دەستپێکردن.",generate:"بە AI دروست بکە",source:"زمانی سەرچاوە",target:"وەرگێڕان بۆ",result:"ئەنجام",copy:"کۆپی",download:"داگرتنی وێنە",close:"داخستن",privacy:"کلیلی API ـەکەت لە سێرڤەر دەمێنێتەوە.",placeholderTitle:"ئەنجامەکەت لێرە دەردەکەوێت",placeholderText:"داواکارییەکەت بنووسە و دروستکردن هەڵبژێرە.",statTools:"ئامرازی AI",statLanguages:"زمانی وەرگێڕان",statReady:"هەمیشە ئامادەیە",footer:"بە داهێنان دروست بکە و بەردەوام بە.",empty:"سەرەتا داواکارییەکەت بنووسە.",copied:"کۆپی کرا.",aboutText:"یەک شوێن بۆ نووسین، گفتوگۆ، وەرگێڕان، بازرگانی، خوێندن و دروستکردنی وێنە. کارکردن بە مۆدێل و سنووری بەکارهێنانەوە پەیوەستە."},
-ar:{about:"حول",eyebrow:"مساحة الذكاء الاصطناعي الإبداعية",hero:"الأفكار تصبح",end:"شيئًا أكبر.",heroText:"اكتب واستكشف وترجم وتعلّم وطوّر عملك وأنشئ الصور في مساحة ذكية واحدة.",tools:"استكشف الأدوات",sub:"اختر مساحة للبدء.",generate:"إنشاء بالذكاء الاصطناعي",source:"اللغة المصدر",target:"الترجمة إلى",result:"النتيجة",copy:"نسخ",download:"تنزيل الصورة",close:"إغلاق",privacy:"يبقى مفتاح API على الخادم.",placeholderTitle:"ستظهر النتيجة هنا",placeholderText:"أدخل طلبك ثم اضغط إنشاء.",statTools:"أدوات ذكاء اصطناعي",statLanguages:"لغة للترجمة",statReady:"متاح عند الحاجة",footer:"أنشئ بإبداع وواصل الاستكشاف.",empty:"أدخل طلبك أولاً.",copied:"تم النسخ.",aboutText:"مساحة للكتابة والمحادثة والترجمة والتخطيط والتعلم وإنشاء الصور. يعتمد التوفر على المزوّد وحدود الاستخدام."},
-es:{about:"Acerca de",eyebrow:"TU ESPACIO CREATIVO DE IA",hero:"Las ideas se convierten",end:"en algo más.",heroText:"Escribe, explora, traduce, aprende, desarrolla tu negocio y crea imágenes en un solo espacio inteligente.",tools:"Explora tus herramientas",sub:"Elige un espacio para comenzar.",generate:"Generar con IA",source:"Idioma de origen",target:"Traducir a",result:"RESULTADO",copy:"Copiar",download:"Descargar imagen",close:"Cerrar",privacy:"Tu clave API permanece en el servidor.",placeholderTitle:"Tu resultado aparecerá aquí",placeholderText:"Escribe tu solicitud y pulsa Generar.",statTools:"herramientas de IA",statLanguages:"idiomas de traducción",statReady:"disponible cuando quieras",footer:"Crea con intención. Sigue explorando.",empty:"Escribe una solicitud primero.",copied:"Copiado.",aboutText:"Un espacio para escribir, conversar, traducir, planificar, estudiar, generar ideas y crear imágenes."},
-fr:{about:"À propos",eyebrow:"VOTRE ESPACE CRÉATIF IA",hero:"Les idées deviennent",end:"bien plus.",heroText:"Écrivez, explorez, traduisez, apprenez, développez votre activité et créez des images dans un seul espace intelligent.",tools:"Découvrez vos outils",sub:"Choisissez un espace pour commencer.",generate:"Générer avec l’IA",source:"Langue source",target:"Traduire vers",result:"RÉSULTAT",copy:"Copier",download:"Télécharger l’image",close:"Fermer",privacy:"Votre clé API reste sur le serveur.",placeholderTitle:"Votre résultat apparaîtra ici",placeholderText:"Saisissez votre demande puis cliquez sur Générer.",statTools:"outils IA",statLanguages:"langues de traduction",statReady:"prêt quand vous l’êtes",footer:"Créez avec intention. Continuez à explorer.",empty:"Saisissez d’abord une demande.",copied:"Copié.",aboutText:"Un espace pour écrire, discuter, traduire, planifier, étudier, générer des idées et créer des images."}
+const fieldMap={
+aboutBtn:"about",eyebrowText:"eyebrow",heroText:"heroText",
+toolsTitle:"tools",toolsSubtitle:"sub",generateText:"generate",
+sourceLabel:"source",targetLabel:"target",resultTitle:"result",
+copyBtn:"copy",downloadBtn:"download",closeText:"close",
+privacyHint:"privacy",resultPlaceholderTitle:"placeholderTitle",
+resultPlaceholderText:"placeholderText",statTools:"statTools",
+statLanguages:"statLanguages",statReady:"statReady",footerText:"footer",
+outputLanguageLabel:"outputLanguage",outputHint:"outputHint",
+promptHint:"promptHint",aboutHeading:"about",aboutText:"aboutText",
+brandSub:"brandSub",footerBrand:"footerBrand"
 };
+
+const cardMap={
+"writer.title":"writerTitle","writer.card":"writerCard","writer.tag":"writerTag",
+"chat.title":"chatTitle","chat.card":"chatCard","chat.tag":"chatTag",
+"translate.title":"translateTitle","translate.card":"translateCard","translate.tag":"translateTag",
+"business.title":"businessTitle","business.card":"businessCard","business.tag":"businessTag",
+"study.title":"studyTitle","study.card":"studyCard","study.tag":"studyTag",
+"ideas.title":"ideasTitle","ideas.card":"ideasCard","ideas.tag":"ideasTag",
+"image.title":"imageTitle","image.card":"imageCard","image.tag":"imageTag"
+};
+
+function flattenStrings(){
+  const strings={...base};
+  for(const [tool,d] of Object.entries(toolDefs)){
+    strings[tool+".subtitle"]=d.subtitle;
+    strings[tool+".label"]=d.label;
+    strings[tool+".placeholder"]=d.placeholder;
+    strings[tool+".hint"]=d.hint;
+  }
+  return strings;
+}
+const sourceStrings=flattenStrings();
+
+function fillSelect(select,items,includeAuto=false){
+  select.replaceChildren();
+  if(includeAuto){
+    const option=document.createElement("option");
+    option.value="Auto-detect";
+    option.textContent=base.auto;
+    select.appendChild(option);
+  }
+  items.forEach(item=>{
+    const option=document.createElement("option");
+    option.value=item;
+    option.textContent=item;
+    select.appendChild(option);
+  });
+}
+fillSelect($("languageSelect"),uiLanguages.map(x=>x.value));
+Array.from($("languageSelect").options).forEach((o,i)=>o.textContent=uiLanguages[i].label);
+fillSelect($("sourceLanguage"),languages,true);
+fillSelect($("targetLanguage"),languages);
+fillSelect($("outputLanguage"),languages);
+
+$("sourceLanguage").value="Auto-detect";
+$("targetLanguage").value="Kurdish (Sorani)";
+$("outputLanguage").value="English";
 
 let active="writer";
 let imageData="";
+let currentStrings={...sourceStrings};
+let languageRequest=0;
 
-const uiLocale=()=>({
-en:"en",ku:"ku",ar:"ar",es:"es",fr:"fr"
-}[$("languageSelect").value]||"en");
-
-const lang=()=>tr[uiLocale()]||tr.en;
-
+function selectedLanguage(){
+  return uiLanguages.find(x=>x.value===$("languageSelect").value)||uiLanguages[0];
+}
+function currentText(key){
+  return currentStrings[key]||sourceStrings[key]||key;
+}
 function toast(message){
   $("toast").textContent=message;
   $("toast").classList.add("show");
   setTimeout(()=>$("toast").classList.remove("show"),3000);
 }
-
-function applyLanguage(){
-  const x=lang();
-  const l=uiLocale();
-  document.documentElement.lang=l==="ku"?"ckb":l;
-  document.documentElement.dir=(l==="ku"||l==="ar")?"rtl":"ltr";
-
-  $("aboutBtn").textContent=x.about;
-  $("eyebrowText").textContent=x.eyebrow;
-  $("heroTitle").innerHTML=x.hero+' <span class="gradient">'+x.end+"</span>";
-  $("heroText").textContent=x.heroText;
-  $("toolsTitle").textContent=x.tools;
-  $("toolsSubtitle").textContent=x.sub;
-  $("generateText").textContent=x.generate;
-  $("sourceLabel").textContent=x.source;
-  $("targetLabel").textContent=x.target;
-  $("resultTitle").textContent=x.result;
-  $("copyBtn").textContent=x.copy;
-  $("downloadBtn").textContent=x.download;
-  $("closeText").textContent=x.close;
-  $("privacyHint").textContent=x.privacy;
-  $("resultPlaceholderTitle").textContent=x.placeholderTitle;
-  $("resultPlaceholderText").textContent=x.placeholderText;
-  $("statTools").textContent=x.statTools;
-  $("statLanguages").textContent=x.statLanguages;
-  $("statReady").textContent=x.statReady;
-  $("footerText").textContent=x.footer;
-  $("aboutNotice").innerHTML="<strong>"+x.about+"</strong><br>"+x.aboutText;
-  $("outputLanguageLabel").textContent=l==="ku"?"زمانی وەڵامی AI":l==="ar"?"لغة رد الذكاء الاصطناعي":"AI response language";
+function applyStrings(){
+  const s=currentStrings;
+  for(const [id,key] of Object.entries(fieldMap)){
+    if($(id))$(id).textContent=s[key]||sourceStrings[key]||base[key]||key;
+  }
+  $("heroTitle").replaceChildren();
+  $("heroTitle").append(document.createTextNode((s.hero||base.hero)+" "));
+  const span=document.createElement("span");
+  span.className="gradient";
+  span.textContent=s.end||base.end;
+  $("heroTitle").appendChild(span);
+  $("aboutNotice").querySelector("strong").textContent=s.about||base.about;
+  $("aboutText").textContent=s.aboutText||base.aboutText;
+  document.querySelectorAll("[data-t]").forEach(el=>{
+    const key=cardMap[el.dataset.t];
+    if(key)el.textContent=s[key]||base[key]||el.textContent;
+  });
+  $("promptLabel").textContent=s[active+".label"]||toolDefs[active].label;
+  $("prompt").placeholder=s[active+".placeholder"]||toolDefs[active].placeholder;
+  $("workspaceSubtitle").textContent=s[active+".subtitle"]||toolDefs[active].subtitle;
+  $("promptHint").textContent=s[active+".hint"]||toolDefs[active].hint;
+  $("workspaceTitle").textContent=s[active+".title"]||toolDefs[active].title;
+  $("generateText").textContent=s.generate||base.generate;
+  $("closeText").textContent=s.close||base.close;
+  $("documentDirection");
+  const apiName=selectedLanguage().api;
+  document.documentElement.lang=apiName==="Kurdish (Sorani)"?"ckb":apiName;
+  document.documentElement.dir=["Kurdish (Sorani)","Arabic","Persian","Urdu","Pashto","Dari"].includes(apiName)?"rtl":"ltr";
 }
-
 function openTool(key){
   active=key;
-  document.querySelectorAll(".tool-card").forEach(c=>
-    c.classList.toggle("active",c.dataset.tool===key)
-  );
-
+  document.querySelectorAll(".tool-card").forEach(c=>c.classList.toggle("active",c.dataset.tool===key));
   $("workspace").classList.add("visible");
-  const d=defs[key];
-
-  $("workspaceIcon").textContent=d.icon;
-  $("workspaceTitle").textContent=d.title;
-  $("workspaceSubtitle").textContent=d.subtitle;
-  $("promptLabel").textContent=d.label;
-  $("prompt").placeholder=d.placeholder;
-  $("promptHint").textContent=d.hint;
+  $("workspaceIcon").textContent=toolDefs[key].icon;
   $("translateFields").classList.toggle("hidden",key!=="translate");
   $("outputLanguageFields").classList.toggle("hidden",key==="translate");
-
-  $("resultContent").innerHTML=
-    '<div class="placeholder"><div><span>'+d.icon+'</span><strong>'+
-    lang().placeholderTitle+'</strong><div>'+lang().placeholderText+
-    '</div></div></div>';
-
+  $("resultContent").replaceChildren();
+  const placeholder=document.createElement("div");
+  placeholder.className="placeholder";
+  const inside=document.createElement("div");
+  const icon=document.createElement("span");
+  icon.textContent=toolDefs[key].icon;
+  const strong=document.createElement("strong");
+  strong.textContent=currentText("placeholderTitle");
+  const text=document.createElement("div");
+  text.textContent=currentText("placeholderText");
+  inside.append(icon,strong,text);
+  placeholder.appendChild(inside);
+  $("resultContent").appendChild(placeholder);
   $("downloadBtn").classList.add("hidden");
   $("copyBtn").classList.remove("hidden");
   imageData="";
+  applyStrings();
   $("workspace").scrollIntoView({behavior:"smooth",block:"start"});
 }
-
-async function generate(){
-  const prompt=$("prompt").value.trim();
-
-  if(!prompt){
-    toast(lang().empty);
-    $("prompt").focus();
+async function loadTranslations(){
+  const requestId=++languageRequest;
+  const selected=selectedLanguage();
+  const apiName=selected.api;
+  if(apiName==="English"){
+    currentStrings={...sourceStrings};
+    applyStrings();
     return;
   }
 
+  const cacheKey=CACHE_PREFIX+encodeURIComponent(apiName);
+  try{
+    const cached=localStorage.getItem(cacheKey);
+    if(cached){
+      const parsed=JSON.parse(cached);
+      if(parsed&&typeof parsed==="object"){
+        currentStrings={...sourceStrings,...parsed};
+        applyStrings();
+        return;
+      }
+    }
+  }catch{}
+
+  currentStrings={...sourceStrings};
+  applyStrings();
+  toast("Translating interface…");
+
+  try{
+    const response=await fetch(API_BASE+"/api/ui-translate",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({language:apiName,strings:sourceStrings})
+    });
+    const data=await response.json();
+    if(!response.ok||!data.ok||!data.translations){
+      throw new Error(data.error||"Interface translation failed.");
+    }
+    if(requestId!==languageRequest)return;
+    currentStrings={...sourceStrings,...data.translations};
+    try{localStorage.setItem(cacheKey,JSON.stringify(data.translations));}catch{}
+    applyStrings();
+    if($("workspace").classList.contains("visible"))openTool(active);
+    toast("Interface language updated.");
+  }catch(error){
+    if(requestId!==languageRequest)return;
+    currentStrings={...sourceStrings};
+    applyStrings();
+    toast("Could not translate the interface. Check Worker deployment and try again.");
+    console.error("UI translation failed:",error);
+  }
+}
+async function generate(){
+  const prompt=$("prompt").value.trim();
+  if(!prompt){toast(currentText("empty"));$("prompt").focus();return;}
+
   const btn=$("generateBtn");
   const out=$("resultContent");
-
   btn.disabled=true;
-  btn.innerHTML='<span class="spinner"></span> Working…';
-  out.innerHTML='<div class="placeholder"><div class="busy"><span class="spinner"></span><span>Connecting to TinVin AI…</span></div></div>';
+  btn.innerHTML='<span class="spinner"></span> '+escapeHtml(currentText("working"));
+  out.innerHTML='<div class="placeholder"><div class="busy"><span class="spinner"></span><span>'+escapeHtml(currentText("connecting"))+'</span></div></div>';
   $("copyBtn").classList.add("hidden");
   $("downloadBtn").classList.add("hidden");
   imageData="";
 
   try{
     let endpoint,body;
-
     if(active==="image"){
       endpoint="/api/image";
-      body={
-        prompt,
-        outputLanguage:$("outputLanguage").value
-      };
+      body={prompt,outputLanguage:$("outputLanguage").value};
     }else if(active==="translate"){
       endpoint="/api/ai";
-      body={
-        tool:"translate",
-        text:prompt,
-        sourceLanguage:$("sourceLanguage").value,
-        targetLanguage:$("targetLanguage").value
-      };
+      body={tool:"translate",text:prompt,sourceLanguage:$("sourceLanguage").value,targetLanguage:$("targetLanguage").value};
     }else{
       endpoint="/api/ai";
-      body={
-        tool:active,
-        prompt,
-        outputLanguage:$("outputLanguage").value
-      };
+      body={tool:active,prompt,outputLanguage:$("outputLanguage").value};
     }
-
     const res=await fetch(API_BASE+endpoint,{
       method:"POST",
       headers:{"Content-Type":"application/json"},
       body:JSON.stringify(body)
     });
-
     const data=await res.json();
-
-    if(!res.ok||!data.ok){
-      throw new Error(data.error||"AI request failed.");
-    }
+    if(!res.ok||!data.ok)throw new Error(data.error||"AI request failed.");
 
     if(active==="image"){
-      if(!data.image){
-        throw new Error("The image provider returned no image.");
-      }
-
-      imageData="data:"+(data.mimeType||"image/png")+";base64,"+data.image;
-
+      if(!data.image)throw new Error("The image provider returned no image.");
+      imageData="data:"+(data.mimeType||"image/jpeg")+";base64,"+data.image;
       const img=document.createElement("img");
-      img.src=imageData;
-      img.alt=prompt;
-      img.id="generatedImage";
-
-      out.innerHTML="";
-      out.appendChild(img);
-
+      img.src=imageData;img.alt=prompt;img.id="generatedImage";
+      out.replaceChildren(img);
       $("downloadBtn").classList.remove("hidden");
-      $("copyBtn").classList.add("hidden");
     }else{
-      if(!data.result){
-        throw new Error("The AI provider returned no text.");
-      }
-
+      if(!data.result)throw new Error("The AI provider returned no text.");
       out.textContent=data.result;
       $("copyBtn").classList.remove("hidden");
     }
   }catch(e){
-    out.innerHTML="";
+    out.replaceChildren();
     const p=document.createElement("div");
     p.className="error";
     p.textContent=e.message||"Something went wrong.";
     out.appendChild(p);
   }finally{
     btn.disabled=false;
-    btn.innerHTML="✦ <span id='generateText'>"+lang().generate+"</span>";
+    btn.innerHTML='✦ <span id="generateText">'+escapeHtml(currentText("generate"))+'</span>';
   }
 }
-
+function escapeHtml(value){
+  return String(value).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
 async function copyResult(){
   const value=$("resultContent").innerText.trim();
   if(!value)return;
-
   try{
     await navigator.clipboard.writeText(value);
-    toast(lang().copied);
-  }catch{
-    toast("Copy is not available in this browser.");
-  }
+    toast(currentText("copied"));
+  }catch{toast(currentText("copyUnavailable"));}
 }
-
 async function downloadImage(){
-  if(!imageData){
-    toast("Generate an image first.");
-    return;
-  }
-
+  if(!imageData){toast(currentText("imageFirst"));return;}
   const button=$("downloadBtn");
-  const originalText=lang().download;
   button.disabled=true;
-
   try{
     const response=await fetch(imageData);
     if(!response.ok)throw new Error("Could not prepare the image.");
-
     const blob=await response.blob();
-    const file=new File(
-      [blob],
-      "tinvin-ai-image.png",
-      {type:blob.type||"image/png"}
-    );
-
+    const file=new File([blob],"tinvin-ai-image.png",{type:blob.type||"image/png"});
     if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
       await navigator.share({files:[file],title:"TinVin AI image"});
       return;
     }
-
     const objectUrl=URL.createObjectURL(blob);
     const link=document.createElement("a");
-    link.href=objectUrl;
-    link.download="tinvin-ai-image.png";
-    link.style.display="none";
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
+    link.href=objectUrl;link.download="tinvin-ai-image.png";
+    document.body.appendChild(link);link.click();link.remove();
     setTimeout(()=>URL.revokeObjectURL(objectUrl),60000);
-    toast("If the image did not download, open it and use Share to save.");
   }catch(error){
     if(error&&error.name==="AbortError")return;
-
     try{
       const opened=window.open(imageData,"_blank");
-      if(!opened){
-        const img=document.getElementById("generatedImage");
-        if(img)img.scrollIntoView({behavior:"smooth",block:"center"});
-        toast("Touch and hold the image, then choose Save to Photos.");
-      }else{
-        toast("Open Share and choose Save Image.");
-      }
-    }catch{
-      toast("Touch and hold the image, then choose Save to Photos.");
-    }
-  }finally{
-    button.disabled=false;
-    button.textContent=originalText;
-  }
+      toast(opened?"Open Share and choose Save Image.":currentText("saveImage"));
+    }catch{toast(currentText("saveImage"));}
+  }finally{button.disabled=false;}
 }
 
-document.querySelectorAll(".tool-card").forEach(c=>
-  c.addEventListener("click",()=>openTool(c.dataset.tool))
-);
-
+document.querySelectorAll(".tool-card").forEach(card=>card.addEventListener("click",()=>openTool(card.dataset.tool)));
 $("generateBtn").addEventListener("click",generate);
-
 $("closeWorkspace").addEventListener("click",()=>{
   $("workspace").classList.remove("visible");
   document.querySelectorAll(".tool-card").forEach(c=>c.classList.remove("active"));
   window.scrollTo({top:0,behavior:"smooth"});
 });
-
 $("copyBtn").addEventListener("click",copyResult);
 $("downloadBtn").addEventListener("click",downloadImage);
+$("languageSelect").addEventListener("change",loadTranslations);
+$("aboutBtn").addEventListener("click",()=>$("aboutNotice").scrollIntoView({behavior:"smooth",block:"center"}));
+$("prompt").addEventListener("keydown",e=>{if((e.ctrlKey||e.metaKey)&&e.key==="Enter")generate();});
 
-$("languageSelect").addEventListener("change",()=>{
-  applyLanguage();
-  if($("workspace").classList.contains("visible"))openTool(active);
-});
-
-$("aboutBtn").addEventListener("click",()=>
-  $("aboutNotice").scrollIntoView({behavior:"smooth",block:"center"})
-);
-
-$("prompt").addEventListener("keydown",e=>{
-  if((e.ctrlKey||e.metaKey)&&e.key==="Enter")generate();
-});
-
-applyLanguage();
+applyStrings();
+loadTranslations();
 })();
 </script>
 </body>
