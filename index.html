@@ -73,7 +73,7 @@ button,input,textarea,select{font:inherit}button{cursor:pointer}
 .toast.show{opacity:1;transform:translate(-50%,0)}
 .hidden{display:none!important}
 @media(max-width:850px){.tools{grid-template-columns:repeat(2,minmax(0,1fr))}.workspace-body{grid-template-columns:1fr}.hero{padding-top:35px}}
-@media(max-width:540px){.shell{width:calc(100% - 22px)}.topbar{padding:15px 0}.brand{font-size:17px}.logo{width:38px;height:38px}.top-actions .select{max-width:115px;padding:9px 7px}.hero h1{letter-spacing:-1px}.tools{gap:10px}.tool-card{min-height:164px;padding:15px}.tool-icon{width:41px;height:41px}.workspace-head{padding:17px}.workspace-body{padding:14px}.two{grid-template-columns:1fr}}
+@media(max-width:540px){.shell{width:calc(100% - 22px)}.topbar{padding:15px 0}.brand{font-size:17px}.logo{width:38px;height:38px}.top-actions .select{max-width:145px;padding:9px 7px}.hero h1{letter-spacing:-1px}.tools{gap:10px}.tool-card{min-height:164px;padding:15px}.tool-icon{width:41px;height:41px}.workspace-head{padding:17px}.workspace-body{padding:14px}.two{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -81,9 +81,7 @@ button,input,textarea,select{font:inherit}button{cursor:pointer}
 <header class="topbar">
   <div class="brand"><div class="logo">✦</div><div>TinVin AI<small>SMART WORKSPACE</small></div></div>
   <div class="top-actions">
-    <select class="select" id="languageSelect" aria-label="Interface language">
-      <option value="en">English</option><option value="ku">کوردی</option><option value="ar">العربية</option><option value="es">Español</option><option value="fr">Français</option>
-    </select>
+    <select class="select" id="languageSelect" aria-label="Interface language"></select>
     <button class="ghost" id="aboutBtn">About</button>
   </div>
 </header>
@@ -92,14 +90,14 @@ button,input,textarea,select{font:inherit}button{cursor:pointer}
   <span class="eyebrow"><span class="dot"></span><span id="eyebrowText">YOUR CREATIVE AI WORKSPACE</span></span>
   <h1 id="heroTitle">Ideas become <span class="gradient">something more.</span></h1>
   <p id="heroText">Write, explore, translate, learn, build your business, and create images — all in one intelligent workspace.</p>
-  <div class="stats"><div class="stat"><strong>07</strong><span id="statTools">AI tools</span></div><div class="stat"><strong>50+</strong><span id="statLanguages">languages supported by translator</span></div><div class="stat"><strong>24/7</strong><span id="statReady">ready when you are</span></div></div>
+  <div class="stats"><div class="stat"><strong>07</strong><span id="statTools">AI tools</span></div><div class="stat"><strong>50</strong><span id="statLanguages">languages supported by translator</span></div><div class="stat"><strong>24/7</strong><span id="statReady">ready when you are</span></div></div>
 </section>
 
 <div class="section-head"><h2 id="toolsTitle">Explore your tools</h2><p id="toolsSubtitle">Choose a workspace to get started.</p></div>
 <section class="tools" id="toolCards">
   <button class="tool-card" data-tool="writer"><span class="tool-icon">✍️</span><h3>AI Writer</h3><p>Create polished content, posts, emails and more.</p><span class="tool-tag">WRITE & CREATE ↗</span></button>
   <button class="tool-card" data-tool="chat"><span class="tool-icon">💬</span><h3>AI Chat</h3><p>Ask questions and explore ideas with AI.</p><span class="tool-tag">ASK ANYTHING ↗</span></button>
-  <button class="tool-card" data-tool="translate"><span class="tool-icon">🌐</span><h3>AI Translator</h3><p>Translate text across a wide range of languages.</p><span class="tool-tag">50+ LANGUAGES ↗</span></button>
+  <button class="tool-card" data-tool="translate"><span class="tool-icon">🌐</span><h3>AI Translator</h3><p>Translate text across 50 languages.</p><span class="tool-tag">50 LANGUAGES ↗</span></button>
   <button class="tool-card" data-tool="business"><span class="tool-icon">🚀</span><h3>Business Studio</h3><p>Build plans, marketing ideas and brand content.</p><span class="tool-tag">BUILD YOUR VISION ↗</span></button>
   <button class="tool-card" data-tool="study"><span class="tool-icon">📚</span><h3>Study Assistant</h3><p>Learn new topics with clear step-by-step help.</p><span class="tool-tag">LEARN SMARTER ↗</span></button>
   <button class="tool-card" data-tool="ideas"><span class="tool-icon">💡</span><h3>Idea Generator</h3><p>Discover fresh ideas and creative directions.</p><span class="tool-tag">GET INSPIRED ↗</span></button>
@@ -114,12 +112,22 @@ button,input,textarea,select{font:inherit}button{cursor:pointer}
   <div class="workspace-body">
     <div>
       <div class="field"><label for="prompt" id="promptLabel">What would you like to create?</label><textarea id="prompt" placeholder="Tell TinVin AI what you need..."></textarea><div class="hint" id="promptHint">Be specific for a more useful result.</div></div>
-      <div id="translateFields" class="hidden">
-        <div class="two">
-          <div class="field"><label for="sourceLanguage" id="sourceLabel">Source language</label><select id="sourceLanguage"><option>Auto-detect</option><option>English</option><option>Kurdish (Sorani)</option><option>Kurdish (Kurmanji)</option><option>Arabic</option><option>Spanish</option><option>French</option><option>German</option><option>Italian</option><option>Turkish</option><option>Persian</option><option>Russian</option><option>Chinese (Simplified)</option><option>Japanese</option><option>Korean</option></select></div>
-          <div class="field"><label for="targetLanguage" id="targetLabel">Translate to</label><select id="targetLanguage"><option>English</option><option>Kurdish (Sorani)</option><option>Kurdish (Kurmanji)</option><option>Arabic</option><option>Spanish</option><option>French</option><option>German</option><option>Italian</option><option>Portuguese</option><option>Dutch</option><option>Russian</option><option>Ukrainian</option><option>Turkish</option><option>Persian</option><option>Urdu</option><option>Hindi</option><option>Bengali</option><option>Punjabi</option><option>Tamil</option><option>Telugu</option><option>Chinese (Simplified)</option><option>Chinese (Traditional)</option><option>Japanese</option><option>Korean</option><option>Thai</option><option>Vietnamese</option><option>Indonesian</option><option>Malay</option><option>Filipino</option><option>Swahili</option><option>Amharic</option><option>Hebrew</option><option>Swedish</option><option>Norwegian</option><option>Danish</option><option>Finnish</option><option>Icelandic</option><option>Irish</option><option>Welsh</option><option>Serbian</option><option>Croatian</option><option>Bulgarian</option><option>Albanian</option><option>Nepali</option></select></div>
+
+      <div id="outputLanguageFields">
+        <div class="field">
+          <label for="outputLanguage" id="outputLanguageLabel">AI response language</label>
+          <select id="outputLanguage"></select>
+          <div class="hint">Choose the language you want the AI to use for its answer.</div>
         </div>
       </div>
+
+      <div id="translateFields" class="hidden">
+        <div class="two">
+          <div class="field"><label for="sourceLanguage" id="sourceLabel">Source language</label><select id="sourceLanguage"></select></div>
+          <div class="field"><label for="targetLanguage" id="targetLabel">Translate to</label><select id="targetLanguage"></select></div>
+        </div>
+      </div>
+
       <button class="primary" id="generateBtn">✦ <span id="generateText">Generate with AI</span></button>
       <p class="hint" id="privacyHint">Your API key stays on the server, not in this page.</p>
     </div>
@@ -142,6 +150,97 @@ button,input,textarea,select{font:inherit}button{cursor:pointer}
 const API_BASE="https://tinvin-ai-server.aslan89aslan1.workers.dev";
 const $=id=>document.getElementById(id);
 
+/* Exactly 50 languages. Hebrew is intentionally excluded. */
+const languages=[
+"English",
+"Kurdish (Sorani)",
+"Kurdish (Kurmanji)",
+"Arabic",
+"Spanish",
+"French",
+"Turkish",
+"Persian",
+"German",
+"Italian",
+"Japanese",
+"Chinese (Simplified)",
+"Korean",
+"Russian",
+"Portuguese",
+"Hindi",
+"Urdu",
+"Pashto",
+"Bengali",
+"Indonesian",
+"Malay",
+"Thai",
+"Vietnamese",
+"Dutch",
+"Polish",
+"Ukrainian",
+"Greek",
+"Swedish",
+"Norwegian",
+"Romanian",
+"Danish",
+"Finnish",
+"Czech",
+"Hungarian",
+"Bulgarian",
+"Serbian",
+"Croatian",
+"Slovak",
+"Dari",
+"Uzbek",
+"Kazakh",
+"Tamil",
+"Telugu",
+"Marathi",
+"Gujarati",
+"Swahili",
+"Amharic",
+"Afrikaans",
+"Albanian",
+"Armenian"
+];
+
+const uiLanguages=[
+{value:"en",label:"English"},
+{value:"ku",label:"کوردی"},
+{value:"ar",label:"العربية"},
+{value:"es",label:"Español"},
+{value:"fr",label:"Français"},
+...languages.filter(x=>!["English","Kurdish (Sorani)","Arabic","Spanish","French"].includes(x)).map(x=>({value:x,label:x}))
+];
+
+function fillSelect(select,items,includeAuto=false){
+  select.innerHTML="";
+  if(includeAuto){
+    const auto=document.createElement("option");
+    auto.value="Auto-detect";
+    auto.textContent="Auto-detect";
+    select.appendChild(auto);
+  }
+  items.forEach(item=>{
+    const option=document.createElement("option");
+    option.value=item;
+    option.textContent=item;
+    select.appendChild(option);
+  });
+}
+
+fillSelect($("languageSelect"),uiLanguages.map(x=>x.value));
+Array.from($("languageSelect").options).forEach((o,i)=>{
+  o.textContent=uiLanguages[i].label;
+});
+fillSelect($("sourceLanguage"),languages,true);
+fillSelect($("targetLanguage"),languages);
+fillSelect($("outputLanguage"),languages);
+
+$("sourceLanguage").value="Auto-detect";
+$("targetLanguage").value="Kurdish (Sorani)";
+$("outputLanguage").value="English";
+
 const defs={
 writer:{icon:"✍️",title:"AI Writer",subtitle:"Create polished content for any purpose.",label:"What would you like to write?",placeholder:"Write a launch post, email, story or article...",hint:"Mention your audience, tone, format and desired length."},
 chat:{icon:"💬",title:"AI Chat",subtitle:"Ask a question or talk through an idea.",label:"What would you like to ask?",placeholder:"Ask TinVin AI anything...",hint:"Add context for a more precise answer."},
@@ -163,7 +262,11 @@ fr:{about:"À propos",eyebrow:"VOTRE ESPACE CRÉATIF IA",hero:"Les idées devien
 let active="writer";
 let imageData="";
 
-const lang=()=>tr[$("languageSelect").value]||tr.en;
+const uiLocale=()=>({
+en:"en",ku:"ku",ar:"ar",es:"es",fr:"fr"
+}[$("languageSelect").value]||"en");
+
+const lang=()=>tr[uiLocale()]||tr.en;
 
 function toast(message){
   $("toast").textContent=message;
@@ -173,7 +276,7 @@ function toast(message){
 
 function applyLanguage(){
   const x=lang();
-  const l=$("languageSelect").value;
+  const l=uiLocale();
   document.documentElement.lang=l==="ku"?"ckb":l;
   document.documentElement.dir=(l==="ku"||l==="ar")?"rtl":"ltr";
 
@@ -198,6 +301,7 @@ function applyLanguage(){
   $("statReady").textContent=x.statReady;
   $("footerText").textContent=x.footer;
   $("aboutNotice").innerHTML="<strong>"+x.about+"</strong><br>"+x.aboutText;
+  $("outputLanguageLabel").textContent=l==="ku"?"زمانی وەڵامی AI":l==="ar"?"لغة رد الذكاء الاصطناعي":"AI response language";
 }
 
 function openTool(key){
@@ -216,6 +320,7 @@ function openTool(key){
   $("prompt").placeholder=d.placeholder;
   $("promptHint").textContent=d.hint;
   $("translateFields").classList.toggle("hidden",key!=="translate");
+  $("outputLanguageFields").classList.toggle("hidden",key==="translate");
 
   $("resultContent").innerHTML=
     '<div class="placeholder"><div><span>'+d.icon+'</span><strong>'+
@@ -225,7 +330,6 @@ function openTool(key){
   $("downloadBtn").classList.add("hidden");
   $("copyBtn").classList.remove("hidden");
   imageData="";
-
   $("workspace").scrollIntoView({behavior:"smooth",block:"start"});
 }
 
@@ -253,17 +357,25 @@ async function generate(){
 
     if(active==="image"){
       endpoint="/api/image";
-      body={prompt};
+      body={
+        prompt,
+        outputLanguage:$("outputLanguage").value
+      };
+    }else if(active==="translate"){
+      endpoint="/api/ai";
+      body={
+        tool:"translate",
+        text:prompt,
+        sourceLanguage:$("sourceLanguage").value,
+        targetLanguage:$("targetLanguage").value
+      };
     }else{
       endpoint="/api/ai";
-      body=active==="translate"
-        ?{
-          tool:"translate",
-          text:prompt,
-          sourceLanguage:$("sourceLanguage").value,
-          targetLanguage:$("targetLanguage").value
-        }
-        :{tool:active,prompt};
+      body={
+        tool:active,
+        prompt,
+        outputLanguage:$("outputLanguage").value
+      };
     }
 
     const res=await fetch(API_BASE+endpoint,{
@@ -327,13 +439,6 @@ async function copyResult(){
   }
 }
 
-/*
- * Image saving improvements:
- * 1. On supported iPhones, open the iOS share sheet with the image file.
- * 2. Otherwise, try a regular image download.
- * 3. If direct download is blocked, open the image so the user can
- *    use Safari's Share menu or long-press the image to save it.
- */
 async function downloadImage(){
   if(!imageData){
     toast("Generate an image first.");
@@ -355,20 +460,11 @@ async function downloadImage(){
       {type:blob.type||"image/png"}
     );
 
-    // iOS Safari can offer Save Image through the native share sheet.
-    if(
-      navigator.share &&
-      navigator.canShare &&
-      navigator.canShare({files:[file]})
-    ){
-      await navigator.share({
-        files:[file],
-        title:"TinVin AI image"
-      });
+    if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
+      await navigator.share({files:[file],title:"TinVin AI image"});
       return;
     }
 
-    // Standard download for browsers that support it.
     const objectUrl=URL.createObjectURL(blob);
     const link=document.createElement("a");
     link.href=objectUrl;
@@ -377,20 +473,16 @@ async function downloadImage(){
     document.body.appendChild(link);
     link.click();
     link.remove();
-
     setTimeout(()=>URL.revokeObjectURL(objectUrl),60000);
     toast("If the image did not download, open it and use Share to save.");
   }catch(error){
-    // Sharing may be cancelled by the user; do not treat that as an error.
-    if(error && error.name==="AbortError")return;
+    if(error&&error.name==="AbortError")return;
 
     try{
       const opened=window.open(imageData,"_blank");
       if(!opened){
         const img=document.getElementById("generatedImage");
-        if(img){
-          img.scrollIntoView({behavior:"smooth",block:"center"});
-        }
+        if(img)img.scrollIntoView({behavior:"smooth",block:"center"});
         toast("Touch and hold the image, then choose Save to Photos.");
       }else{
         toast("Open Share and choose Save Image.");
