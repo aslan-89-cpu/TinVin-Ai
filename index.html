@@ -10,8 +10,7 @@
 :root{--bg:#100f25;--panel:#191832;--line:#343156;--text:#f5f4ff;--muted:#aaa8c9;--blue:#6478ff;--purple:#9a6bff}
 *{box-sizing:border-box}
 body{margin:0;background:radial-gradient(ellipse at 12% 0%,#272052,transparent 36%),radial-gradient(ellipse at 100% 30%,#172b55,transparent 32%),var(--bg);color:var(--text);font:15px/1.55 system-ui,-apple-system,sans-serif}
-button,input,textarea,select{font:inherit}
-button{cursor:pointer}
+button,input,textarea,select{font:inherit}button{cursor:pointer}
 .shell{width:min(1160px,calc(100% - 32px));margin:auto}
 .topbar{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:22px 0;border-bottom:1px solid #ffffff12}
 .brand{display:flex;align-items:center;gap:12px;font-size:20px;font-weight:800}
@@ -63,14 +62,14 @@ button{cursor:pointer}
 .result-content img{display:block;width:100%;height:auto;border-radius:12px}
 .placeholder{display:grid;place-items:center;text-align:center;min-height:205px;color:#77749e;padding:20px}
 .placeholder span{font-size:29px;display:block;margin-bottom:8px}
-.error{color:#ff9aa8}
+.error{color:#ff9aa8;white-space:pre-wrap}
 .busy{display:flex;align-items:center;gap:9px;color:#c9c4ff}
 .spinner{width:16px;height:16px;border:2px solid #7770a9;border-top-color:white;border-radius:50%;animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 .notice{border:1px solid #ffffff13;background:#ffffff05;border-radius:14px;padding:14px 16px;color:var(--muted);font-size:12px;margin:20px 0 38px}
 .notice strong{color:#e6e3ff}
 .footer{padding:20px 0 30px;border-top:1px solid #ffffff12;color:#77759d;font-size:12px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
-.toast{position:fixed;left:50%;bottom:22px;transform:translate(-50%,18px);opacity:0;pointer-events:none;background:#26234a;border:1px solid #5c548b;color:white;padding:12px 17px;border-radius:12px;transition:.2s;z-index:20}
+.toast{position:fixed;left:50%;bottom:22px;transform:translate(-50%,18px);opacity:0;pointer-events:none;background:#26234a;border:1px solid #5c548b;color:white;padding:12px 17px;border-radius:12px;transition:.2s;z-index:20;max-width:90%;text-align:center}
 .toast.show{opacity:1;transform:translate(-50%,0)}
 .hidden{display:none!important}
 @media(max-width:850px){.tools{grid-template-columns:repeat(2,minmax(0,1fr))}.workspace-body{grid-template-columns:1fr}.hero{padding-top:35px}}
@@ -139,8 +138,10 @@ button{cursor:pointer}
 <script>
 (() => {
 "use strict";
+
 const API_BASE="https://tinvin-ai-server.aslan89aslan1.workers.dev";
 const $=id=>document.getElementById(id);
+
 const defs={
 writer:{icon:"✍️",title:"AI Writer",subtitle:"Create polished content for any purpose.",label:"What would you like to write?",placeholder:"Write a launch post, email, story or article...",hint:"Mention your audience, tone, format and desired length."},
 chat:{icon:"💬",title:"AI Chat",subtitle:"Ask a question or talk through an idea.",label:"What would you like to ask?",placeholder:"Ask TinVin AI anything...",hint:"Add context for a more precise answer."},
@@ -150,6 +151,7 @@ study:{icon:"📚",title:"Study Assistant",subtitle:"Understand topics step by s
 ideas:{icon:"💡",title:"Idea Generator",subtitle:"Explore fresh and useful directions.",label:"What do you need ideas for?",placeholder:"Generate names, project ideas or creative concepts...",hint:"Include any themes or constraints you want."},
 image:{icon:"🖼️",title:"Image Generator",subtitle:"Create an image from a written description.",label:"Describe the image you want",placeholder:"A cinematic purple-and-blue futuristic city at night...",hint:"Describe the subject, art style, colors, lighting and composition."}
 };
+
 const tr={
 en:{about:"About",eyebrow:"YOUR CREATIVE AI WORKSPACE",hero:"Ideas become",end:"something more.",heroText:"Write, explore, translate, learn, build your business, and create images — all in one intelligent workspace.",tools:"Explore your tools",sub:"Choose a workspace to get started.",generate:"Generate with AI",source:"Source language",target:"Translate to",result:"RESULT",copy:"Copy",download:"Download image",close:"Close",privacy:"Your API key stays on the server, not in this page.",placeholderTitle:"Your result will appear here",placeholderText:"Enter your request and select Generate.",statTools:"AI tools",statLanguages:"languages supported by translator",statReady:"ready when you are",footer:"Create thoughtfully. Keep exploring.",empty:"Please enter a request first.",copied:"Copied.",aboutText:"One workspace for writing, conversation, translation, business planning, studying, ideas and image creation. Availability depends on your AI provider and usage limits."},
 ku:{about:"دەربارە",eyebrow:"شوێنی کاری داهێنەرانەی AI ـت",hero:"بیرۆکەکان دەبنە",end:"شتێکی زیاتر.",heroText:"بنوسە، وەرگێڕان بکە، فێربە، کارەکەت گەشە پێبدە و وێنە دروست بکە؛ هەمووی لە یەک شوێندا.",tools:"ئامرازەکانت ببینە",sub:"ئامرازێک هەڵبژێرە بۆ دەستپێکردن.",generate:"بە AI دروست بکە",source:"زمانی سەرچاوە",target:"وەرگێڕان بۆ",result:"ئەنجام",copy:"کۆپی",download:"داگرتنی وێنە",close:"داخستن",privacy:"کلیلی API ـەکەت لە سێرڤەر دەمێنێتەوە.",placeholderTitle:"ئەنجامەکەت لێرە دەردەکەوێت",placeholderText:"داواکارییەکەت بنووسە و دروستکردن هەڵبژێرە.",statTools:"ئامرازی AI",statLanguages:"زمانی وەرگێڕان",statReady:"هەمیشە ئامادەیە",footer:"بە داهێنان دروست بکە و بەردەوام بە.",empty:"سەرەتا داواکارییەکەت بنووسە.",copied:"کۆپی کرا.",aboutText:"یەک شوێن بۆ نووسین، گفتوگۆ، وەرگێڕان، بازرگانی، خوێندن و دروستکردنی وێنە. کارکردن بە مۆدێل و سنووری بەکارهێنانەوە پەیوەستە."},
@@ -157,75 +159,279 @@ ar:{about:"حول",eyebrow:"مساحة الذكاء الاصطناعي الإب�
 es:{about:"Acerca de",eyebrow:"TU ESPACIO CREATIVO DE IA",hero:"Las ideas se convierten",end:"en algo más.",heroText:"Escribe, explora, traduce, aprende, desarrolla tu negocio y crea imágenes en un solo espacio inteligente.",tools:"Explora tus herramientas",sub:"Elige un espacio para comenzar.",generate:"Generar con IA",source:"Idioma de origen",target:"Traducir a",result:"RESULTADO",copy:"Copiar",download:"Descargar imagen",close:"Cerrar",privacy:"Tu clave API permanece en el servidor.",placeholderTitle:"Tu resultado aparecerá aquí",placeholderText:"Escribe tu solicitud y pulsa Generar.",statTools:"herramientas de IA",statLanguages:"idiomas de traducción",statReady:"disponible cuando quieras",footer:"Crea con intención. Sigue explorando.",empty:"Escribe una solicitud primero.",copied:"Copiado.",aboutText:"Un espacio para escribir, conversar, traducir, planificar, estudiar, generar ideas y crear imágenes."},
 fr:{about:"À propos",eyebrow:"VOTRE ESPACE CRÉATIF IA",hero:"Les idées deviennent",end:"bien plus.",heroText:"Écrivez, explorez, traduisez, apprenez, développez votre activité et créez des images dans un seul espace intelligent.",tools:"Découvrez vos outils",sub:"Choisissez un espace pour commencer.",generate:"Générer avec l’IA",source:"Langue source",target:"Traduire vers",result:"RÉSULTAT",copy:"Copier",download:"Télécharger l’image",close:"Fermer",privacy:"Votre clé API reste sur le serveur.",placeholderTitle:"Votre résultat apparaîtra ici",placeholderText:"Saisissez votre demande puis cliquez sur Générer.",statTools:"outils IA",statLanguages:"langues de traduction",statReady:"prêt quand vous l’êtes",footer:"Créez avec intention. Continuez à explorer.",empty:"Saisissez d’abord une demande.",copied:"Copié.",aboutText:"Un espace pour écrire, discuter, traduire, planifier, étudier, générer des idées et créer des images."}
 };
-let active="writer",imageData="";
+
+let active="writer";
+let imageData="";
+
 const lang=()=>tr[$("languageSelect").value]||tr.en;
-function toast(s){$("toast").textContent=s;$("toast").classList.add("show");setTimeout(()=>$("toast").classList.remove("show"),2400)}
+
+function toast(message){
+  $("toast").textContent=message;
+  $("toast").classList.add("show");
+  setTimeout(()=>$("toast").classList.remove("show"),3000);
+}
+
 function applyLanguage(){
-const x=lang(),l=$("languageSelect").value;
-document.documentElement.lang=l==="ku"?"ckb":l;
-document.documentElement.dir=(l==="ku"||l==="ar")?"rtl":"ltr";
-$("aboutBtn").textContent=x.about;$("eyebrowText").textContent=x.eyebrow;
-$("heroTitle").innerHTML=x.hero+' <span class="gradient">'+x.end+"</span>";
-$("heroText").textContent=x.heroText;$("toolsTitle").textContent=x.tools;$("toolsSubtitle").textContent=x.sub;
-$("generateText").textContent=x.generate;$("sourceLabel").textContent=x.source;$("targetLabel").textContent=x.target;
-$("resultTitle").textContent=x.result;$("copyBtn").textContent=x.copy;$("downloadBtn").textContent=x.download;
-$("closeText").textContent=x.close;$("privacyHint").textContent=x.privacy;
-$("resultPlaceholderTitle").textContent=x.placeholderTitle;$("resultPlaceholderText").textContent=x.placeholderText;
-$("statTools").textContent=x.statTools;$("statLanguages").textContent=x.statLanguages;$("statReady").textContent=x.statReady;
-$("footerText").textContent=x.footer;$("aboutNotice").innerHTML="<strong>"+x.about+"</strong><br>"+x.aboutText;
+  const x=lang();
+  const l=$("languageSelect").value;
+  document.documentElement.lang=l==="ku"?"ckb":l;
+  document.documentElement.dir=(l==="ku"||l==="ar")?"rtl":"ltr";
+
+  $("aboutBtn").textContent=x.about;
+  $("eyebrowText").textContent=x.eyebrow;
+  $("heroTitle").innerHTML=x.hero+' <span class="gradient">'+x.end+"</span>";
+  $("heroText").textContent=x.heroText;
+  $("toolsTitle").textContent=x.tools;
+  $("toolsSubtitle").textContent=x.sub;
+  $("generateText").textContent=x.generate;
+  $("sourceLabel").textContent=x.source;
+  $("targetLabel").textContent=x.target;
+  $("resultTitle").textContent=x.result;
+  $("copyBtn").textContent=x.copy;
+  $("downloadBtn").textContent=x.download;
+  $("closeText").textContent=x.close;
+  $("privacyHint").textContent=x.privacy;
+  $("resultPlaceholderTitle").textContent=x.placeholderTitle;
+  $("resultPlaceholderText").textContent=x.placeholderText;
+  $("statTools").textContent=x.statTools;
+  $("statLanguages").textContent=x.statLanguages;
+  $("statReady").textContent=x.statReady;
+  $("footerText").textContent=x.footer;
+  $("aboutNotice").innerHTML="<strong>"+x.about+"</strong><br>"+x.aboutText;
 }
+
 function openTool(key){
-active=key;
-document.querySelectorAll(".tool-card").forEach(c=>c.classList.toggle("active",c.dataset.tool===key));
-$("workspace").classList.add("visible");
-const d=defs[key];$("workspaceIcon").textContent=d.icon;$("workspaceTitle").textContent=d.title;$("workspaceSubtitle").textContent=d.subtitle;
-$("promptLabel").textContent=d.label;$("prompt").placeholder=d.placeholder;$("promptHint").textContent=d.hint;
-$("translateFields").classList.toggle("hidden",key!=="translate");
-$("resultContent").innerHTML='<div class="placeholder"><div><span>'+d.icon+'</span><strong>'+lang().placeholderTitle+'</strong><div>'+lang().placeholderText+'</div></div></div>';
-$("downloadBtn").classList.add("hidden");$("copyBtn").classList.remove("hidden");imageData="";
-$("workspace").scrollIntoView({behavior:"smooth",block:"start"});
+  active=key;
+  document.querySelectorAll(".tool-card").forEach(c=>
+    c.classList.toggle("active",c.dataset.tool===key)
+  );
+
+  $("workspace").classList.add("visible");
+  const d=defs[key];
+
+  $("workspaceIcon").textContent=d.icon;
+  $("workspaceTitle").textContent=d.title;
+  $("workspaceSubtitle").textContent=d.subtitle;
+  $("promptLabel").textContent=d.label;
+  $("prompt").placeholder=d.placeholder;
+  $("promptHint").textContent=d.hint;
+  $("translateFields").classList.toggle("hidden",key!=="translate");
+
+  $("resultContent").innerHTML=
+    '<div class="placeholder"><div><span>'+d.icon+'</span><strong>'+
+    lang().placeholderTitle+'</strong><div>'+lang().placeholderText+
+    '</div></div></div>';
+
+  $("downloadBtn").classList.add("hidden");
+  $("copyBtn").classList.remove("hidden");
+  imageData="";
+
+  $("workspace").scrollIntoView({behavior:"smooth",block:"start"});
 }
+
 async function generate(){
-const prompt=$("prompt").value.trim();
-if(!prompt){toast(lang().empty);$("prompt").focus();return}
-const btn=$("generateBtn"),out=$("resultContent");
-btn.disabled=true;btn.innerHTML='<span class="spinner"></span> Working…';
-out.innerHTML='<div class="placeholder"><div class="busy"><span class="spinner"></span><span>Connecting to TinVin AI…</span></div></div>';
-$("copyBtn").classList.add("hidden");$("downloadBtn").classList.add("hidden");
-try{
-let endpoint,body;
-if(active==="image"){endpoint="/api/image";body={prompt}}
-else{
-endpoint="/api/ai";
-body=active==="translate"?{tool:"translate",text:prompt,sourceLanguage:$("sourceLanguage").value,targetLanguage:$("targetLanguage").value}:{tool:active,prompt};
+  const prompt=$("prompt").value.trim();
+
+  if(!prompt){
+    toast(lang().empty);
+    $("prompt").focus();
+    return;
+  }
+
+  const btn=$("generateBtn");
+  const out=$("resultContent");
+
+  btn.disabled=true;
+  btn.innerHTML='<span class="spinner"></span> Working…';
+  out.innerHTML='<div class="placeholder"><div class="busy"><span class="spinner"></span><span>Connecting to TinVin AI…</span></div></div>';
+  $("copyBtn").classList.add("hidden");
+  $("downloadBtn").classList.add("hidden");
+  imageData="";
+
+  try{
+    let endpoint,body;
+
+    if(active==="image"){
+      endpoint="/api/image";
+      body={prompt};
+    }else{
+      endpoint="/api/ai";
+      body=active==="translate"
+        ?{
+          tool:"translate",
+          text:prompt,
+          sourceLanguage:$("sourceLanguage").value,
+          targetLanguage:$("targetLanguage").value
+        }
+        :{tool:active,prompt};
+    }
+
+    const res=await fetch(API_BASE+endpoint,{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify(body)
+    });
+
+    const data=await res.json();
+
+    if(!res.ok||!data.ok){
+      throw new Error(data.error||"AI request failed.");
+    }
+
+    if(active==="image"){
+      if(!data.image){
+        throw new Error("The image provider returned no image.");
+      }
+
+      imageData="data:"+(data.mimeType||"image/png")+";base64,"+data.image;
+
+      const img=document.createElement("img");
+      img.src=imageData;
+      img.alt=prompt;
+      img.id="generatedImage";
+
+      out.innerHTML="";
+      out.appendChild(img);
+
+      $("downloadBtn").classList.remove("hidden");
+      $("copyBtn").classList.add("hidden");
+    }else{
+      if(!data.result){
+        throw new Error("The AI provider returned no text.");
+      }
+
+      out.textContent=data.result;
+      $("copyBtn").classList.remove("hidden");
+    }
+  }catch(e){
+    out.innerHTML="";
+    const p=document.createElement("div");
+    p.className="error";
+    p.textContent=e.message||"Something went wrong.";
+    out.appendChild(p);
+  }finally{
+    btn.disabled=false;
+    btn.innerHTML="✦ <span id='generateText'>"+lang().generate+"</span>";
+  }
 }
-const res=await fetch(API_BASE+endpoint,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
-const data=await res.json();
-if(!res.ok||!data.ok)throw new Error(data.error||"AI request failed.");
-if(active==="image"){
-if(!data.image)throw new Error("The image provider returned no image.");
-imageData="data:"+(data.mimeType||"image/png")+";base64,"+data.image;
-const img=document.createElement("img");img.src=imageData;img.alt=prompt;out.innerHTML="";out.appendChild(img);
-$("downloadBtn").classList.remove("hidden");
-}else{
-if(!data.result)throw new Error("The AI provider returned no text.");
-out.textContent=data.result;$("copyBtn").classList.remove("hidden");
-}
-}catch(e){out.innerHTML="";const p=document.createElement("div");p.className="error";p.textContent=e.message||"Something went wrong.";out.appendChild(p)}
-finally{btn.disabled=false;btn.innerHTML="✦ <span id='generateText'>"+lang().generate+"</span>"}
-}
+
 async function copyResult(){
-const value=imageData||$("resultContent").innerText.trim();if(!value)return;
-try{await navigator.clipboard.writeText(value);toast(lang().copied)}catch{toast("Copy is not available in this browser.")}
+  const value=$("resultContent").innerText.trim();
+  if(!value)return;
+
+  try{
+    await navigator.clipboard.writeText(value);
+    toast(lang().copied);
+  }catch{
+    toast("Copy is not available in this browser.");
+  }
 }
-function downloadImage(){if(!imageData)return;const a=document.createElement("a");a.href=imageData;a.download="tinvin-ai-image.png";a.click()}
-document.querySelectorAll(".tool-card").forEach(c=>c.addEventListener("click",()=>openTool(c.dataset.tool)));
+
+/*
+ * Image saving improvements:
+ * 1. On supported iPhones, open the iOS share sheet with the image file.
+ * 2. Otherwise, try a regular image download.
+ * 3. If direct download is blocked, open the image so the user can
+ *    use Safari's Share menu or long-press the image to save it.
+ */
+async function downloadImage(){
+  if(!imageData){
+    toast("Generate an image first.");
+    return;
+  }
+
+  const button=$("downloadBtn");
+  const originalText=lang().download;
+  button.disabled=true;
+
+  try{
+    const response=await fetch(imageData);
+    if(!response.ok)throw new Error("Could not prepare the image.");
+
+    const blob=await response.blob();
+    const file=new File(
+      [blob],
+      "tinvin-ai-image.png",
+      {type:blob.type||"image/png"}
+    );
+
+    // iOS Safari can offer Save Image through the native share sheet.
+    if(
+      navigator.share &&
+      navigator.canShare &&
+      navigator.canShare({files:[file]})
+    ){
+      await navigator.share({
+        files:[file],
+        title:"TinVin AI image"
+      });
+      return;
+    }
+
+    // Standard download for browsers that support it.
+    const objectUrl=URL.createObjectURL(blob);
+    const link=document.createElement("a");
+    link.href=objectUrl;
+    link.download="tinvin-ai-image.png";
+    link.style.display="none";
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+
+    setTimeout(()=>URL.revokeObjectURL(objectUrl),60000);
+    toast("If the image did not download, open it and use Share to save.");
+  }catch(error){
+    // Sharing may be cancelled by the user; do not treat that as an error.
+    if(error && error.name==="AbortError")return;
+
+    try{
+      const opened=window.open(imageData,"_blank");
+      if(!opened){
+        const img=document.getElementById("generatedImage");
+        if(img){
+          img.scrollIntoView({behavior:"smooth",block:"center"});
+        }
+        toast("Touch and hold the image, then choose Save to Photos.");
+      }else{
+        toast("Open Share and choose Save Image.");
+      }
+    }catch{
+      toast("Touch and hold the image, then choose Save to Photos.");
+    }
+  }finally{
+    button.disabled=false;
+    button.textContent=originalText;
+  }
+}
+
+document.querySelectorAll(".tool-card").forEach(c=>
+  c.addEventListener("click",()=>openTool(c.dataset.tool))
+);
+
 $("generateBtn").addEventListener("click",generate);
-$("closeWorkspace").addEventListener("click",()=>{$("workspace").classList.remove("visible");document.querySelectorAll(".tool-card").forEach(c=>c.classList.remove("active"));window.scrollTo({top:0,behavior:"smooth"})});
-$("copyBtn").addEventListener("click",copyResult);$("downloadBtn").addEventListener("click",downloadImage);
-$("languageSelect").addEventListener("change",()=>{applyLanguage();if($("workspace").classList.contains("visible"))openTool(active)});
-$("aboutBtn").addEventListener("click",()=>$("aboutNotice").scrollIntoView({behavior:"smooth",block:"center"}));
-$("prompt").addEventListener("keydown",e=>{if((e.ctrlKey||e.metaKey)&&e.key==="Enter")generate()});
+
+$("closeWorkspace").addEventListener("click",()=>{
+  $("workspace").classList.remove("visible");
+  document.querySelectorAll(".tool-card").forEach(c=>c.classList.remove("active"));
+  window.scrollTo({top:0,behavior:"smooth"});
+});
+
+$("copyBtn").addEventListener("click",copyResult);
+$("downloadBtn").addEventListener("click",downloadImage);
+
+$("languageSelect").addEventListener("change",()=>{
+  applyLanguage();
+  if($("workspace").classList.contains("visible"))openTool(active);
+});
+
+$("aboutBtn").addEventListener("click",()=>
+  $("aboutNotice").scrollIntoView({behavior:"smooth",block:"center"})
+);
+
+$("prompt").addEventListener("keydown",e=>{
+  if((e.ctrlKey||e.metaKey)&&e.key==="Enter")generate();
+});
+
 applyLanguage();
 })();
 </script>
