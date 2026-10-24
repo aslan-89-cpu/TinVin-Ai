@@ -16,7 +16,7 @@ button{cursor:pointer}
 .top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:28px}
 .brand{display:flex;align-items:center;gap:11px;font-weight:850;font-size:21px}
 .logo{width:42px;height:42px;border-radius:14px;display:grid;place-items:center;background:linear-gradient(135deg,var(--gold),#fff0b7);color:#11182b;font-weight:950}
-.top select{max-width:220px}
+.top select{max-width:240px}
 .hero{padding:25px 0 24px}
 .eyebrow{color:var(--gold);font-weight:750;font-size:12px;letter-spacing:2px;text-transform:uppercase}
 .hero h1{font-size:clamp(32px,6vw,54px);line-height:1.08;margin:12px 0;background:linear-gradient(90deg,#fff,var(--gold),#83d2ff);-webkit-background-clip:text;background-clip:text;color:transparent;max-width:780px}
@@ -27,7 +27,7 @@ button{cursor:pointer}
 .tool.active{background:linear-gradient(145deg,#263453,#18233c)}
 .tool .ico{font-size:23px;margin-bottom:9px}
 .tool strong{display:block;font-size:14px}
-.tool small{display:block;color:var(--muted);margin-top:5px;line-height:1.35}
+.tool small{display:block;color:var(--muted);margin-top:5px;line-height:1.4}
 .panel{border:1px solid var(--line);background:linear-gradient(145deg,#141e36ee,#0f1729f5);border-radius:22px;padding:clamp(16px,3vw,26px);box-shadow:0 18px 60px #0002}
 .panel-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:17px}
 .panel h2{font-size:21px;margin:0}
@@ -47,12 +47,14 @@ textarea:focus,input:focus,select:focus{border-color:var(--blue);box-shadow:0 0 
 .result-top{display:flex;justify-content:space-between;align-items:center;gap:12px}
 .result h3{margin:0;font-size:16px}
 .output{white-space:pre-wrap;overflow-wrap:anywhere;color:#e9edfb;line-height:1.7;margin-top:12px;min-height:60px}
-.output:empty:before{content:"Your result will appear here.";color:#7f8ca8}
+.output:empty:before{content:attr(data-empty);color:#7f8ca8}
 .image-result{display:none;max-width:100%;border-radius:15px;margin-top:14px;border:1px solid var(--line)}
 .foot{text-align:center;color:#74819d;font-size:12px;padding:22px 0 0}
 .toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#26334e;border:1px solid #485b7d;border-radius:12px;padding:11px 15px;max-width:calc(100% - 24px);z-index:9;display:none;box-shadow:0 10px 40px #0006}
 .hidden{display:none!important}
+html[dir=rtl] body{direction:rtl}
 html[dir=rtl] .tool{text-align:right}
+html[dir=rtl] .eyebrow{letter-spacing:0}
 @media(max-width:760px){.tools{grid-template-columns:repeat(2,minmax(0,1fr))}.grid2{grid-template-columns:1fr}.top{align-items:flex-start}.brand{font-size:18px}.wrap{padding-top:15px}.hero{padding-top:15px}}
 @media(min-width:761px) and (max-width:960px){.tools{grid-template-columns:repeat(3,minmax(0,1fr))}}
 </style>
@@ -79,7 +81,7 @@ html[dir=rtl] .tool{text-align:right}
   </div>
 
   <div id="standardFields">
-    <label id="promptLabel" for="prompt">What would you like to create?</label>
+    <label id="promptLabel" for="prompt">What would you like to write?</label>
     <textarea id="prompt" placeholder="Describe what you need..."></textarea>
   </div>
 
@@ -112,7 +114,7 @@ html[dir=rtl] .tool{text-align:right}
         <button class="secondary hidden" id="downloadButton">Download image</button>
       </div>
     </div>
-    <div class="output" id="output" aria-live="polite"></div>
+    <div class="output" id="output" aria-live="polite" data-empty="Your result will appear here."></div>
     <img id="imageResult" class="image-result" alt="Generated image">
   </div>
 </section>
@@ -163,11 +165,9 @@ const en = {
   eyebrow:'YOUR SMART WORKSPACE',
   headline:'Think bigger. Create smarter.',
   intro:'Seven AI tools in one workspace. Write, learn, translate, plan, brainstorm, chat, and create images.',
-  workspaceTitle:'AI Writer',
   toolPill:'7 AI TOOLS',
-  promptLabel:'What would you like to create?',
   promptPlaceholder:'Describe what you need...',
-  textLabel:'Text to translate',
+  textPlaceholder:'Enter the text you want translated...',
   sourceLabel:'From',
   targetLabel:'To',
   outputLanguageLabel:'Answer language',
@@ -180,23 +180,56 @@ const en = {
   working:'Working on it…',
   empty:'Please enter some text first.',
   copied:'Copied to clipboard.',
-  toastTranslation:'Interface translation failed. English is shown.'
+  nothingToCopy:'Nothing to copy yet.',
+  copyUnavailable:'Copy is not available in this browser. Select the result and copy it.',
+  timeout:'This request took too long. Please try again.',
+  imageCreated:'Image created.',
+  imageError:'The server returned an image that could not be displayed.',
+  noImage:'No image was returned.',
+  interfaceError:'Interface translation failed. Please try again.',
+  requestError:'Something went wrong. Please try again.',
+  footer:'TinVin AI · Smart tools for everyone',
+  autoDetect:'Auto-detect',
+  toolNames:[
+    'AI Writer','AI Chat','AI Translator','Business Studio',
+    'Study Assistant','Idea Generator','Image Generator'
+  ],
+  toolDescriptions:[
+    'Posts, emails and more','Ask questions and explore',
+    'Translate between languages','Plans, marketing and growth',
+    'Learn difficult topics','Fresh ideas and inspiration',
+    'Create images from text'
+  ],
+  toolLabels:[
+    'What would you like to write?',
+    'What would you like to ask?',
+    'Text to translate',
+    'What business task do you need?',
+    'What would you like to learn?',
+    'What do you need ideas for?',
+    'Describe the image'
+  ],
+  toolPlaceholders:[
+    'Tell me what you want to write, and include any details or tone...',
+    'Ask a question or explain what you need help with...',
+    'Enter the text you want translated...',
+    'Describe your business, audience, and goal...',
+    'Enter a topic or question. Ask for a simple explanation...',
+    'Describe the topic, goal, audience, or problem...',
+    'Describe the scene, style, colors, and details you want...'
+  ]
 };
 
 const $ = id => document.getElementById(id);
 let activeTool = 'writer';
 let uiLang = 'en';
-let uiText = {...en};
+let uiText = structuredClone(en);
 let imageUrl = '';
 let uiTranslationRequest = 0;
 
-function escapeHtml(s) {
-  return String(s).replace(/[&<>"']/g, c => ({
-    '&':'&amp;',
-    '<':'&lt;',
-    '>':'&gt;',
-    '"':'&quot;',
-    "'":'&#39;'
+function escapeHtml(value) {
+  return String(value).replace(/[&<>"']/g, c => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
   }[c]));
 }
 
@@ -206,7 +239,7 @@ function languageName(code) {
 
 function fillSelect(el, selected) {
   el.innerHTML = languages.map(l =>
-    `<option value="${escapeHtml(l.name)}" data-code="${escapeHtml(l.code)}">${escapeHtml(l.name)}</option>`
+    `<option value="${escapeHtml(l.name)}">${escapeHtml(l.name)}</option>`
   ).join('');
   if (selected) el.value = selected;
 }
@@ -215,19 +248,23 @@ function showToast(message) {
   $('toast').textContent = message;
   $('toast').style.display = 'block';
   clearTimeout(showToast.timer);
-  showToast.timer = setTimeout(() => $('toast').style.display = 'none', 3000);
+  showToast.timer = setTimeout(() => $('toast').style.display = 'none', 3200);
 }
 
 function currentTool() {
   return tools.find(t => t.id === activeTool) || tools[0];
 }
 
+function toolIndex() {
+  return Math.max(0, tools.findIndex(t => t.id === activeTool));
+}
+
 function renderTools() {
-  $('tools').innerHTML = tools.map(t => `
+  $('tools').innerHTML = tools.map((t, i) => `
     <button class="tool ${t.id === activeTool ? 'active' : ''}" data-tool="${t.id}">
       <div class="ico">${t.icon}</div>
-      <strong>${escapeHtml(t.name)}</strong>
-      <small>${escapeHtml(t.desc)}</small>
+      <strong>${escapeHtml(uiText.toolNames?.[i] || t.name)}</strong>
+      <small>${escapeHtml(uiText.toolDescriptions?.[i] || t.desc)}</small>
     </button>`).join('');
 
   document.querySelectorAll('[data-tool]').forEach(button => {
@@ -235,30 +272,62 @@ function renderTools() {
   });
 }
 
-function selectTool(id) {
-  activeTool = id;
+function applyUI() {
+  $('eyebrow').textContent = uiText.eyebrow || en.eyebrow;
+  $('headline').textContent = uiText.headline || en.headline;
+  $('intro').textContent = uiText.intro || en.intro;
+  $('toolPill').textContent = uiText.toolPill || en.toolPill;
+  $('sourceLabel').textContent = uiText.sourceLabel || en.sourceLabel;
+  $('targetLabel').textContent = uiText.targetLabel || en.targetLabel;
+  $('outputLanguageLabel').textContent = uiText.outputLanguageLabel || en.outputLanguageLabel;
+  $('runButton').textContent = uiText.runButton || en.runButton;
+  $('clearButton').textContent = uiText.clearButton || en.clearButton;
+  $('resultTitle').textContent = uiText.resultTitle || en.resultTitle;
+  $('copyButton').textContent = uiText.copyButton || en.copyButton;
+  $('downloadButton').textContent = uiText.downloadButton || en.downloadButton;
+  $('prompt').placeholder = uiText.promptPlaceholder || en.promptPlaceholder;
+  $('translateText').placeholder = uiText.textPlaceholder || en.textPlaceholder;
+  $('output').dataset.empty = uiText.resultEmpty || 'Your result will appear here.';
+  document.querySelector('.foot').textContent = uiText.footer || en.footer;
+
+  document.documentElement.lang = uiLang;
+  document.documentElement.dir =
+    ['ku','ar','fa','ur'].includes(uiLang) ? 'rtl' : 'ltr';
+
   renderTools();
+
+  const i = toolIndex();
+  $('workspaceTitle').textContent = uiText.toolNames?.[i] || currentTool().name;
+  $('promptLabel').textContent = uiText.toolLabels?.[i] || currentTool().label;
+  $('prompt').placeholder = uiText.toolPlaceholders?.[i] || currentTool().placeholder;
+  $('textLabel').textContent = uiText.toolLabels?.[2] || en.toolLabels[2];
+  $('translateText').placeholder = uiText.toolPlaceholders?.[2] || en.toolPlaceholders[2];
+}
+
+function selectTool(id) {
+  activeTool = tools.some(t => t.id === id) ? id : 'writer';
   const t = currentTool();
+  const i = toolIndex();
 
-  $('workspaceTitle').textContent = t.name;
-  $('promptLabel').textContent = t.label;
-  $('prompt').placeholder = t.placeholder;
-
-  $('standardFields').classList.toggle('hidden', id === 'translate');
-  $('translateFields').classList.toggle('hidden', id !== 'translate');
-  $('outputLanguageWrap').classList.toggle('hidden', id === 'translate' || id === 'image');
-  $('downloadButton').classList.toggle('hidden', id !== 'image');
+  $('standardFields').classList.toggle('hidden', activeTool === 'translate');
+  $('translateFields').classList.toggle('hidden', activeTool !== 'translate');
+  $('outputLanguageWrap').classList.toggle('hidden', activeTool === 'translate' || activeTool === 'image');
+  $('downloadButton').classList.toggle('hidden', activeTool !== 'image');
 
   $('status').textContent = '';
   $('output').textContent = '';
+  $('imageResult').style.display = 'none';
 
-  if (id === 'translate') {
-    $('textLabel').textContent = t.label;
-    $('translateText').placeholder = t.placeholder;
-  }
+  $('workspaceTitle').textContent = uiText.toolNames?.[i] || t.name;
+  $('promptLabel').textContent = uiText.toolLabels?.[i] || t.label;
+  $('prompt').placeholder = uiText.toolPlaceholders?.[i] || t.placeholder;
+  $('textLabel').textContent = uiText.toolLabels?.[2] || en.toolLabels[2];
+  $('translateText').placeholder = uiText.toolPlaceholders?.[2] || en.toolPlaceholders[2];
+
+  renderTools();
 }
 
-async function requestJson(path, body, timeoutMs = 45000) {
+async function requestJson(path, body, timeoutMs = 60000) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
 
@@ -282,121 +351,114 @@ async function requestJson(path, body, timeoutMs = 45000) {
   }
 }
 
-function applyUI() {
-  const ids = [
-    'eyebrow','headline','intro','workspaceTitle','toolPill',
-    'promptLabel','textLabel','sourceLabel','targetLabel',
-    'outputLanguageLabel','runButton','clearButton','resultTitle',
-    'copyButton','downloadButton'
-  ];
-
-  ids.forEach(id => {
-    if ($(id) && uiText[id]) $(id).textContent = uiText[id];
-  });
-
-  $('prompt').placeholder = uiText.promptPlaceholder || en.promptPlaceholder;
-
-  document.documentElement.lang = uiLang;
-  document.documentElement.dir =
-    ['ku','ar','fa','ur'].includes(uiLang) ? 'rtl' : 'ltr';
-
-  // Keep the selected tool's own labels after applying interface translations.
-  const t = currentTool();
-  $('workspaceTitle').textContent = t.name;
-  $('promptLabel').textContent = t.label;
-  $('prompt').placeholder = t.placeholder;
-
-  if (activeTool === 'translate') {
-    $('textLabel').textContent = t.label;
-    $('translateText').placeholder = t.placeholder;
-  }
-}
-
-/*
-  The current Worker has /api/ai but does not have /api/ui-translate.
-  Therefore this function uses the existing /api/ai endpoint to translate
-  the interface labels. If translation fails, the app remains usable in English.
-*/
 async function translateUI(languageCode) {
   const requestId = ++uiTranslationRequest;
+  uiLang = languageCode;
 
   if (languageCode === 'en') {
-    uiText = {...en};
+    uiText = structuredClone(en);
     applyUI();
     return;
   }
 
   const language = languageName(languageCode);
-  const cacheKey = 'tinvin_ui_translation_v6_' + languageCode;
+  const cacheKey = 'tinvin_ui_translation_v7_' + languageCode;
 
   try {
     const cached = localStorage.getItem(cacheKey);
     if (cached) {
       const parsed = JSON.parse(cached);
-      if (parsed && typeof parsed === 'object') {
-        uiText = {...en, ...parsed};
-        if (requestId === uiTranslationRequest) applyUI();
+      if (parsed && Array.isArray(parsed.toolNames) &&
+          Array.isArray(parsed.toolDescriptions) &&
+          Array.isArray(parsed.toolLabels) &&
+          Array.isArray(parsed.toolPlaceholders)) {
+        if (requestId !== uiTranslationRequest) return;
+        uiText = {...structuredClone(en), ...parsed};
+        applyUI();
         return;
       }
     }
   } catch (_) {}
 
-  const labels = {
-    eyebrow:en.eyebrow,
-    headline:en.headline,
-    intro:en.intro,
-    workspaceTitle:en.workspaceTitle,
-    toolPill:en.toolPill,
-    promptLabel:en.promptLabel,
-    promptPlaceholder:en.promptPlaceholder,
-    textLabel:en.textLabel,
-    sourceLabel:en.sourceLabel,
-    targetLabel:en.targetLabel,
-    outputLanguageLabel:en.outputLanguageLabel,
-    runButton:en.runButton,
-    clearButton:en.clearButton,
-    resultTitle:en.resultTitle,
-    copyButton:en.copyButton,
-    downloadButton:en.downloadButton,
-    ready:en.ready,
-    working:en.working,
-    empty:en.empty,
-    copied:en.copied
-  };
+  uiText = structuredClone(en);
+  applyUI();
+  $('status').textContent = uiText.translating || 'Translating interface…';
 
   try {
+    const payload = {
+      eyebrow:en.eyebrow,
+      headline:en.headline,
+      intro:en.intro,
+      toolPill:en.toolPill,
+      sourceLabel:en.sourceLabel,
+      targetLabel:en.targetLabel,
+      outputLanguageLabel:en.outputLanguageLabel,
+      runButton:en.runButton,
+      clearButton:en.clearButton,
+      resultTitle:en.resultTitle,
+      copyButton:en.copyButton,
+      downloadButton:en.downloadButton,
+      promptPlaceholder:en.promptPlaceholder,
+      textPlaceholder:en.textPlaceholder,
+      resultEmpty:'Your result will appear here.',
+      ready:en.ready,
+      working:en.working,
+      empty:en.empty,
+      copied:en.copied,
+      nothingToCopy:en.nothingToCopy,
+      copyUnavailable:en.copyUnavailable,
+      timeout:en.timeout,
+      imageCreated:en.imageCreated,
+      imageError:en.imageError,
+      noImage:en.noImage,
+      interfaceError:en.interfaceError,
+      requestError:en.requestError,
+      footer:en.footer,
+      autoDetect:en.autoDetect,
+      toolNames:en.toolNames,
+      toolDescriptions:en.toolDescriptions,
+      toolLabels:en.toolLabels,
+      toolPlaceholders:en.toolPlaceholders
+    };
+
     const data = await requestJson('/api/ai', {
-      tool:'chat',
-      prompt:
-        'Translate every string value in the following JSON object into ' +
-        language + '. Return ONLY a valid JSON object with exactly the same keys. ' +
-        'Do not add markdown fences or explanations. Preserve the meaning. ' +
-        'For Kurdish Sorani, use natural Iraqi Kurdish Sorani in Arabic-based script, not Arabic or Latin transliteration.\n\n' +
-        JSON.stringify(labels)
-    }, 45000);
+      tool:'ui-translate',
+      outputLanguage:language,
+      prompt:JSON.stringify(payload)
+    }, 60000);
 
     if (requestId !== uiTranslationRequest) return;
 
-    let raw = String(data.result || data.answer || data.text || '').trim();
+    let raw = String(data.result || '').trim();
     raw = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '');
 
     const start = raw.indexOf('{');
     const end = raw.lastIndexOf('}');
-    if (start < 0 || end <= start) throw new Error('Invalid interface translation.');
+    if (start < 0 || end <= start) throw new Error('The translation was not valid JSON.');
 
     const translated = JSON.parse(raw.slice(start, end + 1));
-    uiText = {...en, ...translated};
+
+    if (!Array.isArray(translated.toolNames) ||
+        !Array.isArray(translated.toolDescriptions) ||
+        !Array.isArray(translated.toolLabels) ||
+        !Array.isArray(translated.toolPlaceholders)) {
+      throw new Error('The translated tool labels were missing.');
+    }
+
+    uiText = {...structuredClone(en), ...translated};
     applyUI();
+    $('status').textContent = '';
 
     try {
       localStorage.setItem(cacheKey, JSON.stringify(translated));
     } catch (_) {}
   } catch (error) {
     if (requestId !== uiTranslationRequest) return;
-    uiText = {...en};
+    uiText = structuredClone(en);
     applyUI();
-    showToast('Interface translation failed. English is shown.');
-    console.warn('TinVin interface translation failed:', error);
+    $('status').textContent = '';
+    showToast(uiText.interfaceError || en.interfaceError);
+    console.error('Interface translation failed:', error);
   }
 }
 
@@ -411,7 +473,7 @@ async function runTool() {
   }
 
   $('runButton').disabled = true;
-  $('status').textContent = uiText.working || 'Working on it…';
+  $('status').textContent = uiText.working || en.working;
   $('output').textContent = '';
   $('imageResult').style.display = 'none';
   $('downloadButton').classList.toggle('hidden', !isImage);
@@ -426,16 +488,16 @@ async function runTool() {
       } else if (data.url) {
         imageUrl = data.url;
       } else {
-        throw new Error(data.error || 'No image was returned.');
+        throw new Error(data.error || uiText.noImage || en.noImage);
       }
 
       $('imageResult').onerror = () => {
-        $('status').textContent = 'The server returned an image that could not be displayed.';
+        $('status').textContent = uiText.imageError || en.imageError;
       };
       $('imageResult').src = imageUrl;
       $('imageResult').style.display = 'block';
       $('downloadButton').classList.remove('hidden');
-      $('status').textContent = 'Image created.';
+      $('status').textContent = uiText.imageCreated || en.imageCreated;
     } else if (isTranslate) {
       const target = $('targetLanguage').value;
       const source = $('sourceLanguage').value;
@@ -443,32 +505,32 @@ async function runTool() {
       const data = await requestJson('/api/ai', {
         tool:'translate',
         text:prompt,
-        sourceLanguage:source === 'Auto-detect' ? 'Auto-detect' : source,
+        sourceLanguage:source,
         targetLanguage:target
       }, 60000);
 
-      $('output').textContent = data.result || data.answer || data.text || data.translation || '';
+      $('output').textContent = data.result || '';
     } else {
       const outputLanguage = $('outputLanguage').value || languageName(uiLang);
+
       const data = await requestJson('/api/ai', {
         tool:activeTool,
-        prompt:
-          'Please answer in ' + outputLanguage + '.\n\n' + prompt,
-        text:prompt
+        outputLanguage,
+        prompt
       }, 60000);
 
-      $('output').textContent = data.result || data.answer || data.text || '';
+      $('output').textContent = data.result || '';
     }
 
     if (!isImage && !$('output').textContent.trim()) {
       throw new Error('The AI returned an empty answer.');
     }
 
-    if (!isImage) $('status').textContent = uiText.ready || 'Ready';
+    if (!isImage) $('status').textContent = uiText.ready || en.ready;
   } catch (error) {
     const message = error.name === 'AbortError'
-      ? 'This request took too long. Please try again.'
-      : (error.message || 'Something went wrong. Please try again.');
+      ? (uiText.timeout || en.timeout)
+      : (error.message || uiText.requestError || en.requestError);
 
     $('status').textContent = message;
     showToast(message);
@@ -492,13 +554,13 @@ $('clearButton').addEventListener('click', () => {
 
 $('copyButton').addEventListener('click', async () => {
   const text = $('output').textContent;
-  if (!text) return showToast('Nothing to copy yet.');
+  if (!text) return showToast(uiText.nothingToCopy || en.nothingToCopy);
 
   try {
     await navigator.clipboard.writeText(text);
-    showToast(uiText.copied || 'Copied to clipboard.');
+    showToast(uiText.copied || en.copied);
   } catch (_) {
-    showToast('Copy is not available in this browser. Select the result and copy it.');
+    showToast(uiText.copyUnavailable || en.copyUnavailable);
   }
 });
 
@@ -526,20 +588,22 @@ fillSelect($('sourceLanguage'), 'English');
 fillSelect($('targetLanguage'), 'Kurdish (Sorani)');
 fillSelect($('outputLanguage'), 'English');
 
-$('sourceLanguage').insertAdjacentHTML(
-  'afterbegin',
-  '<option value="Auto-detect">Auto-detect</option>'
-);
+const autoOption = document.createElement('option');
+autoOption.value = 'Auto-detect';
+autoOption.textContent = 'Auto-detect';
+$('sourceLanguage').insertBefore(autoOption, $('sourceLanguage').firstChild);
 $('sourceLanguage').value = 'Auto-detect';
 
 $('uiLanguage').addEventListener('change', async event => {
-  uiLang = languages.find(l => l.name === event.target.value)?.code || 'en';
-  await translateUI(uiLang);
+  const selected = languages.find(l => l.name === event.target.value);
+  const code = selected ? selected.code : 'en';
+  $('outputLanguage').value = languageName(code);
+  await translateUI(code);
 });
 
 renderTools();
 selectTool('writer');
-translateUI('en');
+applyUI();
 })();
 </script>
 </body>
