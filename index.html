@@ -102,7 +102,6 @@ h1{font-size:clamp(28px,5vw,43px);letter-spacing:-1.6px;line-height:1.12;margin:
     <span class="hero-chip">🌍 Multilingual</span>
     <span class="hero-chip">🎨 Personal themes</span>
   </section>
-
   <div class="section-title"><h2>Your AI tools</h2><span>Choose a tool to get started</span></div>
   <section class="tools-grid" id="toolsGrid">
     <button class="tool-card" data-tool="writer"><div class="tool-icon">✍️</div><h3>AI Writer</h3><p>Write posts, emails, stories and professional content.</p></button>
@@ -173,8 +172,10 @@ h1{font-size:clamp(28px,5vw,43px);letter-spacing:-1.6px;line-height:1.12;margin:
     <div class="panel">
       <label class="field-label" for="interfaceLang">Interface language</label>
       <select id="interfaceLang" class="select">
-        <option value="English">English</option><option value="Sorani Kurdish">کوردیی سۆرانی</option>
-        <option value="Kurmanji Kurdish">Kurdî Kurmancî</option><option value="Arabic">العربية</option>
+        <option value="English">English</option>
+        <option value="Sorani Kurdish">کوردیی سۆرانی</option>
+        <option value="Kurmanji Kurdish">Kurdî Kurmancî</option>
+        <option value="Arabic">العربية</option>
         <option value="Spanish">Español</option><option value="French">Français</option>
         <option value="Portuguese">Português</option><option value="German">Deutsch</option>
         <option value="Turkish">Türkçe</option><option value="Persian">فارسی</option>
@@ -184,7 +185,8 @@ h1{font-size:clamp(28px,5vw,43px);letter-spacing:-1.6px;line-height:1.12;margin:
         <option value="Italian">Italiano</option><option value="Dutch">Nederlands</option>
         <option value="Ukrainian">Українська</option><option value="Polish">Polski</option>
       </select>
-      <p class="status">Tool output can be requested in any language. This selector currently saves your preference; full interface translation requires Worker support.</p>
+      <p class="status">Choose a language to translate the visible interface. Tool responses can use other languages too.</p>
+      <div id="languageStatus" class="status" role="status"></div>
     </div>
   </div>
 </section>
@@ -194,10 +196,6 @@ h1{font-size:clamp(28px,5vw,43px);letter-spacing:-1.6px;line-height:1.12;margin:
 (() => {
 "use strict";
 
-/*
-  Set this to your deployed TinVin AI Worker URL.
-  Never put your private AI API key in this file.
-*/
 const API_BASE = "https://tinvin-ai-server.aslan89aslan1.workers.dev";
 
 const definitions = {
@@ -211,9 +209,16 @@ const definitions = {
 };
 
 const languages = [
-"English","Sorani Kurdish","Kurmanji Kurdish","Arabic","Spanish","Portuguese",
-"German","French","Italian","Turkish","Persian","Russian","Chinese Simplified",
-"Japanese","Korean","Dutch","Hindi","Urdu","Ukrainian","Polish"
+"English","Sorani Kurdish","Kurmanji Kurdish","Arabic","Persian","Turkish",
+"Spanish","French","German","Italian","Portuguese","Brazilian Portuguese",
+"Russian","Ukrainian","Polish","Dutch","Swedish","Norwegian","Danish","Finnish",
+"Greek","Romanian","Hungarian","Czech","Slovak","Bulgarian","Serbian","Croatian",
+"Bosnian","Albanian","Macedonian","Armenian","Georgian","Azerbaijani","Kazakh",
+"Uzbek","Turkmen","Pashto","Urdu","Hindi","Bengali","Punjabi","Gujarati","Marathi",
+"Tamil","Telugu","Malayalam","Kannada","Thai","Vietnamese","Indonesian","Malay",
+"Filipino","Chinese Simplified","Chinese Traditional","Japanese","Korean","Swahili",
+"Amharic","Somali","Hausa","Yoruba","Zulu","Afrikaans","Nepali","Sinhala","Khmer",
+"Lao","Mongolian","Burmese"
 ];
 
 const $ = id => document.getElementById(id);
@@ -222,228 +227,472 @@ let activeTool = "writer";
 let lastOutput = "";
 let chatMessages = [];
 let busy = false;
+let translationRun = 0;
+let translatedNodes = [];
+let originalText = new WeakMap();
+let originalPlaceholders = new WeakMap();
 
 function showPage(id) {
   pages.forEach(p => $(p).classList.toggle("active",p === id));
   window.scrollTo({top:0,behavior:"smooth"});
 }
+
 function applyTheme(theme) {
-  document.documentElement.dataset.theme = theme === "purple" ? "" : theme;
   if(theme === "purple") document.documentElement.removeAttribute("data-theme");
+  else document.documentElement.dataset.theme = theme;
   localStorage.setItem("tinvin_theme",theme);
   $("themeSelect").value = theme;
 }
-function setStatus(id,text){$(id).textContent=text||"";}
 
-function fillLanguageMenus(){
-  for(const id of ["sourceLang","targetLang"]){
-    const sel=$(id);
-    sel.innerHTML="";
-    languages.forEach(name=>{
-      const opt=document.createElement("option");
-      opt.value=name;opt.textContent=name;sel.appendChild(opt);
+function setStatus(id,text) {
+  $(id).textContent = text || "";
+}
+
+function fillLanguageMenus() {
+  for(const id of ["sourceLang","targetLang"]) {
+    const sel = $(id);
+    sel.replaceChildren();
+    languages.forEach(name => {
+      const opt = document.createElement("option");
+      opt.value = name;
+      opt.textContent = name;
+      sel.appendChild(opt);
     });
   }
-  $("sourceLang").value="English";
-  $("targetLang").value="Sorani Kurdish";
+  $("sourceLang").value = "English";
+  $("targetLang").value = "Sorani Kurdish";
 }
 
-function openTool(key){
-  if(!definitions[key]) return;
-  activeTool=key;
-  if(key==="chat"){showPage("chatPage");$("chatInput").focus();return;}
-  const d=definitions[key];
-  $("activeTitle").textContent=d.title;
-  $("activeIcon").textContent=d.icon;
-  $("activeDescription").textContent=d.description;
-  $("inputLabel").textContent=d.label;
-  $("toolInput").placeholder=d.placeholder;
-  $("toolInput").value="";
-  $("toolOutput").textContent="";
-  $("toolImage").replaceChildren();
-  $("translatorOptions").classList.toggle("hidden",key!=="translator");
-  $("imageHint").classList.toggle("hidden",key!=="image");
-  $("resultTitle").textContent=key==="image"?"Generated image":"Result";
-  $("copyBtn").classList.toggle("hidden",key==="image");
-  $("runBtn").textContent=key==="image"?"Generate image":key==="translator"?"Translate":"Generate";
-  setStatus("toolStatus","");
-  lastOutput="";
-  showPage("toolPage");
-  $("toolInput").focus();
-}
-
-async function postJSON(path,data){
-  const response=await fetch(API_BASE+path,{
+async function postJSON(path,data) {
+  const response = await fetch(API_BASE + path,{
     method:"POST",
     headers:{"Content-Type":"application/json"},
     body:JSON.stringify(data)
   });
+
   let result;
-  try{result=await response.json();}
-  catch{throw new Error("The server returned an unreadable response.");}
-  if(!response.ok || result.ok===false){
-    throw new Error(result.error||result.message||("Request failed ("+response.status+")"));
+  try { result = await response.json(); }
+  catch { throw new Error("The server returned an unreadable response."); }
+
+  if(!response.ok || result.ok === false) {
+    throw new Error(result.error || result.message || ("Request failed (" + response.status + ")"));
   }
   return result;
 }
 
-function extractText(data){
-  if(typeof data.text==="string")return data.text;
-  if(typeof data.output==="string")return data.output;
-  if(typeof data.response==="string")return data.response;
-  if(data.result && typeof data.result==="string")return data.result;
-  if(data.choices?.[0]?.message?.content){
-    const c=data.choices[0].message.content;
-    if(typeof c==="string")return c;
-    if(Array.isArray(c))return c.map(x=>x.text||"").join("\n");
-  }
+function extractText(data) {
+  if(typeof data.text === "string") return data.text;
+  if(typeof data.output === "string") return data.output;
+  if(typeof data.response === "string") return data.response;
+  if(typeof data.result === "string") return data.result;
+
+  const c = data.choices?.[0]?.message?.content;
+  if(typeof c === "string") return c;
+  if(Array.isArray(c)) return c.map(x => x.text || "").join("\n");
   return "";
 }
 
-function makeImage(data,container){
-  const raw=data.image||data.base64||data.data;
+function makeImage(data,container) {
+  const raw = data.image || data.base64 || data.data;
   if(!raw) return false;
-  const img=document.createElement("img");
-  img.className="image-result";
-  img.alt="AI-generated image";
-  img.src=raw.startsWith("data:")?raw:
-    `data:${data.mimeType||"image/png"};base64,${raw}`;
+
+  const img = document.createElement("img");
+  img.className = "image-result";
+  img.alt = "AI-generated image";
+  img.src = raw.startsWith("data:") ? raw :
+    `data:${data.mimeType || "image/png"};base64,${raw}`;
   container.appendChild(img);
   return true;
 }
 
-function imageIntent(text){
+function imageIntent(text) {
   return /\b(generate|create|draw|make|design|render)\b.{0,45}\b(image|picture|illustration|artwork|logo)\b|\b(image|picture|illustration|artwork|logo)\b.{0,35}\b(of|showing|with)\b/i.test(text);
 }
 
-async function runTool(){
-  if(busy)return;
-  const input=$("toolInput").value.trim();
-  if(!input){setStatus("toolStatus","Please enter a request first.");return;}
-  busy=true;$("runBtn").disabled=true;$("toolOutput").textContent="";
-  $("toolImage").replaceChildren();setStatus("toolStatus","Working...");
-  try{
+function openTool(key) {
+  if(!definitions[key]) return;
+  activeTool = key;
+
+  if(key === "chat") {
+    showPage("chatPage");
+    $("chatInput").focus();
+    return;
+  }
+
+  const d = definitions[key];
+  $("activeTitle").textContent = d.title;
+  $("activeIcon").textContent = d.icon;
+  $("activeDescription").textContent = d.description;
+  $("inputLabel").textContent = d.label;
+  $("toolInput").placeholder = d.placeholder;
+  $("toolInput").value = "";
+  $("toolOutput").textContent = "";
+  $("toolImage").replaceChildren();
+  $("translatorOptions").classList.toggle("hidden",key !== "translator");
+  $("imageHint").classList.toggle("hidden",key !== "image");
+  $("resultTitle").textContent = key === "image" ? "Generated image" : "Result";
+  $("copyBtn").classList.toggle("hidden",key === "image");
+  $("runBtn").textContent = key === "image" ? "Generate image" : key === "translator" ? "Translate" : "Generate";
+  setStatus("toolStatus","");
+  lastOutput = "";
+  showPage("toolPage");
+  $("toolInput").focus();
+}
+
+async function runTool() {
+  if(busy) return;
+
+  const input = $("toolInput").value.trim();
+  if(!input) {
+    setStatus("toolStatus","Please enter a request first.");
+    return;
+  }
+
+  busy = true;
+  $("runBtn").disabled = true;
+  $("toolOutput").textContent = "";
+  $("toolImage").replaceChildren();
+  setStatus("toolStatus","Working...");
+
+  try {
     let data;
-    if(activeTool==="image" || imageIntent(input)){
-      data=await postJSON("/api/image",{prompt:input});
-      if(!makeImage(data,$("toolImage")))throw new Error("The server did not return an image. Check the Worker image endpoint.");
-      lastOutput="";
-    }else{
-      const payload={tool:activeTool,message:input,prompt:input};
-      if(activeTool==="translator"){
-        payload.sourceLanguage=$("sourceLang").value;
-        payload.targetLanguage=$("targetLang").value;
-        payload.source=payload.sourceLanguage;
-        payload.target=payload.targetLanguage;
+
+    if(activeTool === "image" || imageIntent(input)) {
+      data = await postJSON("/api/image",{prompt:input});
+      if(!makeImage(data,$("toolImage"))) {
+        throw new Error("The server did not return an image. Check the Worker image endpoint.");
       }
-      data=await postJSON("/api/ai",payload);
-      const answer=extractText(data);
-      if(!answer)throw new Error("The server returned no text. Check the Worker response format.");
-      lastOutput=answer;$("toolOutput").textContent=answer;
+      lastOutput = "";
+    } else {
+      const payload = {tool:activeTool,message:input,prompt:input};
+
+      if(activeTool === "translator") {
+        payload.sourceLanguage = $("sourceLang").value;
+        payload.targetLanguage = $("targetLang").value;
+      }
+
+      data = await postJSON("/api/ai",payload);
+      const answer = extractText(data);
+      if(!answer) throw new Error("The server returned no text.");
+
+      lastOutput = answer;
+      $("toolOutput").textContent = answer;
     }
+
     setStatus("toolStatus","Finished.");
-  }catch(err){
-    setStatus("toolStatus","Error: "+(err.message||"Request failed"));
-  }finally{
-    busy=false;$("runBtn").disabled=false;
+  } catch(err) {
+    setStatus("toolStatus","Error: " + (err.message || "Request failed"));
+  } finally {
+    busy = false;
+    $("runBtn").disabled = false;
   }
 }
 
-function addBubble(role,text,imageData){
-  const bubble=document.createElement("div");
-  bubble.className="bubble "+role;
-  const label=document.createElement("div");
-  label.className="bubble-label";
-  label.textContent=role==="user"?"YOU":"TINVIN AI";
+function addBubble(role,text,imageData) {
+  const bubble = document.createElement("div");
+  bubble.className = "bubble " + role;
+
+  const label = document.createElement("div");
+  label.className = "bubble-label";
+  label.textContent = role === "user" ? "YOU" : "TINVIN AI";
   bubble.appendChild(label);
-  if(text){
-    const body=document.createElement("div");
-    body.textContent=text;
+
+  if(text) {
+    const body = document.createElement("div");
+    body.textContent = text;
     bubble.appendChild(body);
   }
-  if(imageData){
-    const holder=document.createElement("div");
-    if(!makeImage(imageData,holder)){
-      const note=document.createElement("div");note.textContent="Image could not be displayed.";
+
+  if(imageData) {
+    const holder = document.createElement("div");
+    if(!makeImage(imageData,holder)) {
+      const note = document.createElement("div");
+      note.textContent = "Image could not be displayed.";
       holder.appendChild(note);
     }
     bubble.appendChild(holder);
   }
+
   $("chatHistory").appendChild(bubble);
-  $("chatHistory").scrollTop=$("chatHistory").scrollHeight;
+  $("chatHistory").scrollTop = $("chatHistory").scrollHeight;
 }
 
-async function sendChat(){
-  if(busy)return;
-  const text=$("chatInput").value.trim();
-  if(!text)return;
-  /*
-    Only the current message is sent. Previous turns remain visible,
-    but are not resent to the server in this basic version.
-  */
-  $("chatInput").value="";
+async function sendChat() {
+  if(busy) return;
+
+  const input = $("chatInput");
+  const text = input.value.trim();
+  if(!text) return;
+
+  // Clear only the composer. Keep all conversation bubbles.
+  input.value = "";
+
+  // Snapshot prior turns before adding this new user turn.
+  // The Worker receives prior history separately and current text once.
+  const previousHistory = chatMessages.map(item => ({...item}));
+
   chatMessages.push({role:"user",content:text});
   addBubble("user",text);
-  busy=true;$("sendBtn").disabled=true;
+
+  busy = true;
+  $("sendBtn").disabled = true;
   setStatus("chatStatus","TinVin AI is thinking...");
-  try{
-    let data;
-    if(imageIntent(text)){
-      data=await postJSON("/api/image",{prompt:text});
-      if(!data.image&&!data.base64&&!data.data)throw new Error("No image was returned by the server.");
+
+  try {
+    if(imageIntent(text)) {
+      const data = await postJSON("/api/image",{prompt:text});
+      if(!data.image && !data.base64 && !data.data) {
+        throw new Error("No image was returned by the server.");
+      }
+
       chatMessages.push({role:"assistant",content:"[Generated image]"});
       addBubble("assistant","Here is your generated image:",data);
-    }else{
-      data=await postJSON("/api/ai",{tool:"chat",message:text,prompt:text});
-      const answer=extractText(data);
-      if(!answer)throw new Error("The server returned no text.");
+    } else {
+      const data = await postJSON("/api/ai",{
+        tool:"chat",
+        message:text,
+        history:previousHistory
+      });
+
+      const answer = extractText(data);
+      if(!answer) throw new Error("The server returned no text.");
+
       chatMessages.push({role:"assistant",content:answer});
       addBubble("assistant",answer);
     }
+
     setStatus("chatStatus","");
-  }catch(err){
-    setStatus("chatStatus","Error: "+(err.message||"Request failed"));
-  }finally{
-    busy=false;$("sendBtn").disabled=false;$("chatInput").focus();
+  } catch(err) {
+    setStatus("chatStatus","Error: " + (err.message || "Request failed"));
+    // Keep the user message visible; it has not been silently removed.
+  } finally {
+    busy = false;
+    $("sendBtn").disabled = false;
+    input.focus();
   }
 }
 
-$("toolsGrid").addEventListener("click",e=>{
-  const card=e.target.closest("[data-tool]");
-  if(card)openTool(card.dataset.tool);
+function rememberOriginalTextNodes() {
+  const walker = document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);
+  let node;
+
+  while((node = walker.nextNode())) {
+    const parent = node.parentElement;
+    if(!parent) continue;
+    if(parent.closest("script,style,option[data-no-translate]")) continue;
+    if(parent.closest(".brand")) continue;
+    if(!node.nodeValue.trim()) continue;
+
+    if(!originalText.has(node)) originalText.set(node,node.nodeValue);
+  }
+
+  document.querySelectorAll("[placeholder]").forEach(el => {
+    if(!originalPlaceholders.has(el)) {
+      originalPlaceholders.set(el,el.getAttribute("placeholder"));
+    }
+  });
+}
+
+function restoreEnglishText() {
+  for(const [node,original] of translatedNodes) {
+    if(node.isConnected) node.nodeValue = original;
+  }
+  translatedNodes = [];
+
+  // Restore original placeholders after any previous UI translation.
+  document.querySelectorAll("[placeholder]").forEach(el => {
+    const original = originalPlaceholders.get(el);
+    if(original !== undefined) el.setAttribute("placeholder",original);
+  });
+}
+
+function getTranslatableNodes() {
+  rememberOriginalTextNodes();
+  const items = [];
+
+  const walker = document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);
+  let node;
+
+  while((node = walker.nextNode())) {
+    const parent = node.parentElement;
+    if(!parent || !node.nodeValue.trim()) continue;
+    if(parent.closest("script,style,.brand")) continue;
+
+    // Language names and theme names should remain recognizable.
+    if(parent.closest("#sourceLang,#targetLang,#interfaceLang,#themeSelect")) continue;
+
+    const original = originalText.get(node) ?? node.nodeValue;
+    items.push({node,original});
+  }
+  return items;
+}
+
+async function translateInterface(language) {
+  const runId = ++translationRun;
+  restoreEnglishText();
+
+  if(!language || language === "English") {
+    document.documentElement.lang = "en";
+    setStatus("languageStatus","Interface language: English");
+    return;
+  }
+
+  setStatus("languageStatus","Translating interface...");
+  const items = getTranslatableNodes();
+
+  // Small batches keep each translation request manageable.
+  const batchSize = 28;
+
+  try {
+    for(let start = 0; start < items.length; start += batchSize) {
+      if(runId !== translationRun) return;
+
+      const batch = items.slice(start,start + batchSize);
+      const payload = {};
+
+      batch.forEach((item,index) => {
+        payload["s" + index] = item.original.trim();
+      });
+
+      const result = await postJSON("/api/ai",{
+        tool:"ui-translate",
+        message:JSON.stringify(payload),
+        targetLanguage:language
+      });
+
+      let translated;
+      try {
+        translated = JSON.parse(extractText(result));
+      } catch {
+        throw new Error("The translation service returned invalid JSON.");
+      }
+
+      if(!translated || typeof translated !== "object") {
+        throw new Error("The translation service returned an invalid result.");
+      }
+
+      if(runId !== translationRun) return;
+
+      batch.forEach((item,index) => {
+        const value = translated["s" + index];
+        if(typeof value === "string" && value.trim()) {
+          translatedNodes.push([item.node,item.original]);
+          item.node.nodeValue = item.original.replace(
+            item.original.trim(),
+            value.trim()
+          );
+        }
+      });
+    }
+
+    // Translate placeholders in a separate request.
+    const fields = [...document.querySelectorAll("input[placeholder],textarea[placeholder]")];
+    const fieldData = fields.map(el => ({
+      el,
+      original: originalPlaceholders.get(el) ?? el.getAttribute("placeholder")
+    })).filter(x => x.original);
+
+    if(fieldData.length && runId === translationRun) {
+      const obj = {};
+      fieldData.forEach((x,i) => obj["p" + i] = x.original);
+
+      const result = await postJSON("/api/ai",{
+        tool:"ui-translate",
+        message:JSON.stringify(obj),
+        targetLanguage:language
+      });
+
+      let translated;
+      try { translated = JSON.parse(extractText(result)); }
+      catch { translated = {}; }
+
+      if(runId === translationRun) {
+        fieldData.forEach((x,i) => {
+          if(typeof translated["p" + i] === "string") {
+            x.el.setAttribute("placeholder",translated["p" + i]);
+          }
+        });
+      }
+    }
+
+    document.documentElement.lang = language === "Sorani Kurdish" ? "ckb" :
+      language === "Arabic" ? "ar" :
+      language === "Kurmanji Kurdish" ? "ku-Latn" : "en";
+
+    setStatus("languageStatus","Interface translated to " + language + ".");
+  } catch(err) {
+    setStatus("languageStatus","Could not translate the full interface: " + (err.message || "Please try again."));
+  }
+}
+
+$("toolsGrid").addEventListener("click",e => {
+  const card = e.target.closest("[data-tool]");
+  if(card) openTool(card.dataset.tool);
 });
-$("backBtn").addEventListener("click",()=>showPage("homePage"));
-$("chatBackBtn").addEventListener("click",()=>showPage("homePage"));
-$("settingsBackBtn").addEventListener("click",()=>showPage("homePage"));
-$("settingsBtn").addEventListener("click",()=>showPage("settingsPage"));
+
+$("backBtn").addEventListener("click",() => showPage("homePage"));
+$("chatBackBtn").addEventListener("click",() => showPage("homePage"));
+$("settingsBackBtn").addEventListener("click",() => showPage("homePage"));
+$("settingsBtn").addEventListener("click",() => showPage("settingsPage"));
 $("runBtn").addEventListener("click",runTool);
 $("sendBtn").addEventListener("click",sendChat);
-$("chatInput").addEventListener("keydown",e=>{
-  if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();sendChat();}
+
+$("chatInput").addEventListener("keydown",e => {
+  if(e.key === "Enter" && !e.shiftKey) {
+    e.preventDefault();
+    sendChat();
+  }
 });
-$("toolInput").addEventListener("keydown",e=>{
-  if(e.key==="Enter"&&(e.ctrlKey||e.metaKey)){e.preventDefault();runTool();}
+
+$("toolInput").addEventListener("keydown",e => {
+  if(e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
+    e.preventDefault();
+    runTool();
+  }
 });
-$("clearBtn").addEventListener("click",()=>{
-  $("toolInput").value="";$("toolOutput").textContent="";
-  $("toolImage").replaceChildren();lastOutput="";setStatus("toolStatus","");
+
+$("clearBtn").addEventListener("click",() => {
+  $("toolInput").value = "";
+  $("toolOutput").textContent = "";
+  $("toolImage").replaceChildren();
+  lastOutput = "";
+  setStatus("toolStatus","");
 });
-$("copyBtn").addEventListener("click",async()=>{
-  if(!lastOutput)return;
-  try{await navigator.clipboard.writeText(lastOutput);setStatus("toolStatus","Copied to clipboard.");}
-  catch{setStatus("toolStatus","Copy is unavailable in this browser.");}
+
+$("copyBtn").addEventListener("click",async() => {
+  if(!lastOutput) return;
+
+  try {
+    await navigator.clipboard.writeText(lastOutput);
+    setStatus("toolStatus","Copied to clipboard.");
+  } catch {
+    setStatus("toolStatus","Copy is unavailable in this browser.");
+  }
 });
-$("newChatBtn").addEventListener("click",()=>{
-  chatMessages=[];$("chatHistory").replaceChildren();setStatus("chatStatus","");
+
+$("newChatBtn").addEventListener("click",() => {
+  chatMessages = [];
+  $("chatHistory").replaceChildren();
+  setStatus("chatStatus","");
 });
-$("themeSelect").addEventListener("change",e=>applyTheme(e.target.value));
-$("interfaceLang").addEventListener("change",e=>{
-  localStorage.setItem("tinvin_language",e.target.value);
+
+$("themeSelect").addEventListener("change",e => applyTheme(e.target.value));
+
+$("interfaceLang").addEventListener("change",async e => {
+  const language = e.target.value;
+  localStorage.setItem("tinvin_language",language);
+  await translateInterface(language);
 });
 
 fillLanguageMenus();
-applyTheme(localStorage.getItem("tinvin_theme")||"purple");
-$("interfaceLang").value=localStorage.getItem("tinvin_language")||"English";
+applyTheme(localStorage.getItem("tinvin_theme") || "purple");
+$("interfaceLang").value = localStorage.getItem("tinvin_language") || "English";
+rememberOriginalTextNodes();
+
+const savedLanguage = localStorage.getItem("tinvin_language") || "English";
+if(savedLanguage !== "English") {
+  translateInterface(savedLanguage);
+}
 })();
 </script>
 </body>
