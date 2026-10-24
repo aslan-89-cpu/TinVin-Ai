@@ -1,609 +1,449 @@
 
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#0b1020">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#f7f2ff">
 <title>TinVin AI — Smart Workspace</title>
 <style>
-:root{--bg:#0b1020;--panel:#121a30;--line:#293657;--text:#f5f7ff;--muted:#aab5d0;--blue:#51b8ff;--gold:#e9bd63;--purple:#8b70ff}
+:root{
+  --bg:#f7f2ff;--card:#fff;--text:#20182e;--muted:#7d748b;
+  --primary:#8954d8;--soft:#eee5ff;--border:#e9e0f5;
+  --shadow:0 8px 26px #4b26720c;--radius:20px
+}
+[data-theme="blue"]{--bg:#eff6ff;--primary:#2878d5;--soft:#dcecff;--border:#d8e7f8}
+[data-theme="green"]{--bg:#effbf5;--primary:#22966c;--soft:#d9f5e8;--border:#d6eee3}
+[data-theme="orange"]{--bg:#fff6ec;--primary:#df8520;--soft:#ffebd2;--border:#f1e0ce}
+[data-theme="pink"]{--bg:#fff1f6;--primary:#d95791;--soft:#ffe0ee;--border:#f3d9e5}
+[data-theme="dark"]{--bg:#111321;--card:#1c2033;--text:#f8f5ff;--muted:#aaa7bf;--primary:#a58aff;--soft:#302847;--border:#34354b;--shadow:0 8px 26px #0003}
 *{box-sizing:border-box}
-body{margin:0;background:radial-gradient(ellipse at top,#18264a 0%,var(--bg) 55%);color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,Arial,sans-serif;min-height:100vh}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;transition:background .2s}
 button,input,textarea,select{font:inherit}
 button{cursor:pointer}
-.wrap{width:min(1100px,100%);margin:auto;padding:22px 16px 48px}
-.top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:28px}
-.brand{display:flex;align-items:center;gap:11px;font-weight:850;font-size:21px}
-.logo{width:42px;height:42px;border-radius:14px;display:grid;place-items:center;background:linear-gradient(135deg,var(--gold),#fff0b7);color:#11182b;font-weight:950}
-.top select{max-width:240px}
-.hero{padding:25px 0 24px}
-.eyebrow{color:var(--gold);font-weight:750;font-size:12px;letter-spacing:2px;text-transform:uppercase}
-.hero h1{font-size:clamp(32px,6vw,54px);line-height:1.08;margin:12px 0;background:linear-gradient(90deg,#fff,var(--gold),#83d2ff);-webkit-background-clip:text;background-clip:text;color:transparent;max-width:780px}
-.hero p{color:var(--muted);max-width:650px;line-height:1.65;margin:0}
-.tools{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:18px 0 22px}
-.tool{border:1px solid var(--line);background:linear-gradient(145deg,#17213b,#10182c);border-radius:17px;padding:16px;text-align:left;color:var(--text);min-height:108px;transition:.18s}
-.tool:hover,.tool.active{border-color:var(--gold);transform:translateY(-1px);box-shadow:0 8px 26px #0003}
-.tool.active{background:linear-gradient(145deg,#263453,#18233c)}
-.tool .ico{font-size:23px;margin-bottom:9px}
-.tool strong{display:block;font-size:14px}
-.tool small{display:block;color:var(--muted);margin-top:5px;line-height:1.4}
-.panel{border:1px solid var(--line);background:linear-gradient(145deg,#141e36ee,#0f1729f5);border-radius:22px;padding:clamp(16px,3vw,26px);box-shadow:0 18px 60px #0002}
-.panel-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:17px}
-.panel h2{font-size:21px;margin:0}
-.pill{border:1px solid #4b456c;background:#221f42;color:#d8d0ff;border-radius:999px;padding:7px 11px;font-size:12px}
-label{display:block;color:#d7def1;font-size:13px;font-weight:700;margin:14px 0 7px}
-textarea,input,select{width:100%;color:var(--text);background:#0b1325;border:1px solid #33415f;border-radius:12px;padding:12px 13px;outline:none}
-textarea{min-height:145px;resize:vertical;line-height:1.55}
-textarea:focus,input:focus,select:focus{border-color:var(--blue);box-shadow:0 0 0 3px #51b8ff18}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.btns{display:flex;flex-wrap:wrap;gap:10px;margin-top:17px}
-.primary,.secondary{border:0;border-radius:12px;padding:12px 17px;font-weight:800}
-.primary{background:linear-gradient(100deg,var(--gold),#ffe8a6);color:#151a2a;min-width:140px}
-.primary:disabled{opacity:.55;cursor:wait}
-.secondary{background:#202c47;color:var(--text);border:1px solid #344361}
-.status{color:var(--muted);font-size:13px;margin-top:12px;min-height:18px;overflow-wrap:anywhere}
-.result{margin-top:21px;border-top:1px solid var(--line);padding-top:18px}
-.result-top{display:flex;justify-content:space-between;align-items:center;gap:12px}
-.result h3{margin:0;font-size:16px}
-.output{white-space:pre-wrap;overflow-wrap:anywhere;color:#e9edfb;line-height:1.7;margin-top:12px;min-height:60px}
-.output:empty:before{content:attr(data-empty);color:#7f8ca8}
-.image-result{display:none;max-width:100%;border-radius:15px;margin-top:14px;border:1px solid var(--line)}
-.foot{text-align:center;color:#74819d;font-size:12px;padding:22px 0 0}
-.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#26334e;border:1px solid #485b7d;border-radius:12px;padding:11px 15px;max-width:calc(100% - 24px);z-index:9;display:none;box-shadow:0 10px 40px #0006}
+button:disabled{opacity:.55;cursor:not-allowed}
+.app{max-width:1120px;margin:auto;padding:18px}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:24px}
+.brand{font-size:25px;font-weight:850;letter-spacing:-1px;color:var(--primary)}
+.brand span{color:var(--text)}
+.top-actions{display:flex;gap:8px;align-items:center}
+.small-btn,.back-btn{border:1px solid var(--border);background:var(--card);color:var(--text);border-radius:12px;padding:10px 13px}
+.hero{background:linear-gradient(135deg,var(--card),var(--soft));border:1px solid var(--border);border-radius:28px;padding:27px;margin-bottom:22px;box-shadow:var(--shadow)}
+.eyebrow{font-size:12px;letter-spacing:1.5px;text-transform:uppercase;font-weight:800;color:var(--primary)}
+h1{font-size:clamp(28px,5vw,43px);letter-spacing:-1.6px;line-height:1.12;margin:12px 0}
+.hero p{color:var(--muted);line-height:1.7;max-width:620px}
+.hero-chip{display:inline-block;background:var(--card);border:1px solid var(--border);padding:8px 12px;border-radius:99px;font-size:12px;margin:6px 5px 0 0}
+.section-title{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:25px 0 14px}
+.section-title h2{font-size:20px;margin:0}
+.section-title span{font-size:12px;color:var(--muted)}
+.tools-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}
+.tool-card{border:1px solid var(--border);background:var(--card);border-radius:var(--radius);padding:19px;text-align:left;color:var(--text);box-shadow:var(--shadow);min-height:165px;transition:transform .16s,border .16s}
+.tool-card:hover{transform:translateY(-3px);border-color:var(--primary)}
+.tool-icon{width:45px;height:45px;border-radius:15px;background:var(--soft);display:grid;place-items:center;font-size:23px;margin-bottom:14px}
+.tool-card h3{font-size:16px;margin:0 0 7px}
+.tool-card p{font-size:12px;color:var(--muted);line-height:1.55;margin:0}
+.footer{padding:26px 0 12px;text-align:center;font-size:12px;color:var(--muted)}
+.page{display:none}
+.page.active{display:block;animation:appear .18s ease}
+@keyframes appear{from{opacity:.5;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.tool-heading{display:flex;align-items:center;gap:13px;margin:20px 0}
+.tool-heading .tool-icon{flex-shrink:0;margin:0}
+.tool-heading h1{font-size:27px;margin:0 0 5px;letter-spacing:-.8px}
+.tool-heading p{margin:0;color:var(--muted);font-size:13px}
+.panel{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:19px;box-shadow:var(--shadow);margin:14px 0}
+.field-label{display:block;font-size:13px;font-weight:700;margin:0 0 8px}
+.field,.textarea,.select{width:100%;padding:13px 14px;border:1px solid var(--border);background:var(--bg);color:var(--text);border-radius:13px;outline:none}
+.field:focus,.textarea:focus,.select:focus{border-color:var(--primary)}
+.textarea{min-height:145px;resize:vertical;line-height:1.65}
+.primary-btn{background:var(--primary);color:white;border:0;border-radius:13px;padding:13px 18px;font-weight:750}
+.secondary-btn{background:var(--soft);color:var(--text);border:1px solid var(--border);border-radius:13px;padding:12px 16px}
+.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:12px}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.output{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.75;font-size:14px;min-height:35px}
+.output:empty{display:none}
+.status{font-size:12px;color:var(--muted);margin-top:9px}
+.chat-layout{display:flex;flex-direction:column;gap:12px}
+.chat-history{min-height:180px;max-height:55vh;overflow:auto;display:flex;flex-direction:column;gap:12px}
+.bubble{max-width:92%;border:1px solid var(--border);background:var(--bg);padding:12px 14px;border-radius:16px;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.65;font-size:14px}
+.bubble.user{align-self:flex-end;background:var(--soft)}
+.bubble.assistant{align-self:flex-start;background:var(--card)}
+.bubble-label{font-size:10px;font-weight:800;color:var(--primary);margin-bottom:5px}
+.chat-compose{display:flex;gap:9px;align-items:flex-end}
+.chat-compose textarea{min-height:54px;max-height:150px;flex:1;resize:vertical}
+.image-result{width:100%;max-width:700px;border-radius:16px;border:1px solid var(--border);display:block;margin-top:10px}
+.settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+.settings-grid .panel{margin:0}
 .hidden{display:none!important}
-html[dir=rtl] body{direction:rtl}
-html[dir=rtl] .tool{text-align:right}
-html[dir=rtl] .eyebrow{letter-spacing:0}
-@media(max-width:760px){.tools{grid-template-columns:repeat(2,minmax(0,1fr))}.grid2{grid-template-columns:1fr}.top{align-items:flex-start}.brand{font-size:18px}.wrap{padding-top:15px}.hero{padding-top:15px}}
-@media(min-width:761px) and (max-width:960px){.tools{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:700px){
+ .app{padding:13px}.tools-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+ .tool-card{padding:14px;min-height:157px}.hero{padding:21px}
+ .topbar{align-items:flex-start}.top-actions{flex-wrap:wrap;justify-content:flex-end}
+ .two-col,.settings-grid{grid-template-columns:1fr}.chat-compose{align-items:stretch}
+ .chat-compose .primary-btn{padding:10px}
+}
+@media(max-width:390px){.tools-grid{grid-template-columns:1fr}.topbar{flex-direction:column}.top-actions{justify-content:flex-start}}
 </style>
 </head>
 <body>
-<div class="wrap">
-<header class="top">
-  <div class="brand"><div class="logo">TV</div><span>TinVin AI</span></div>
-  <select id="uiLanguage" aria-label="Interface language"></select>
+<div class="app">
+<header class="topbar">
+  <div class="brand">TinVin <span>AI</span></div>
+  <div class="top-actions">
+    <button class="small-btn" id="settingsBtn" type="button">⚙ Settings</button>
+  </div>
 </header>
 
-<section class="hero">
-  <div class="eyebrow" id="eyebrow">YOUR SMART WORKSPACE</div>
-  <h1 id="headline">Think bigger. Create smarter.</h1>
-  <p id="intro">Seven AI tools in one workspace. Write, learn, translate, plan, brainstorm, chat, and create images.</p>
+<main id="homePage" class="page active">
+  <section class="hero">
+    <div class="eyebrow">✦ Your AI workspace</div>
+    <h1>Think bigger.<br>Create smarter.</h1>
+    <p>One workspace for writing, chatting, translating, studying, business ideas and AI images.</p>
+    <span class="hero-chip">✦ 7 AI tools</span>
+    <span class="hero-chip">🌍 Multilingual</span>
+    <span class="hero-chip">🎨 Personal themes</span>
+  </section>
+
+  <div class="section-title"><h2>Your AI tools</h2><span>Choose a tool to get started</span></div>
+  <section class="tools-grid" id="toolsGrid">
+    <button class="tool-card" data-tool="writer"><div class="tool-icon">✍️</div><h3>AI Writer</h3><p>Write posts, emails, stories and professional content.</p></button>
+    <button class="tool-card" data-tool="chat"><div class="tool-icon">💬</div><h3>AI Chat</h3><p>Ask questions and keep your conversation history.</p></button>
+    <button class="tool-card" data-tool="translator"><div class="tool-icon">🌍</div><h3>AI Translator</h3><p>Translate between languages with clear results.</p></button>
+    <button class="tool-card" data-tool="business"><div class="tool-icon">📈</div><h3>Business Studio</h3><p>Explore business plans, marketing and growth ideas.</p></button>
+    <button class="tool-card" data-tool="study"><div class="tool-icon">📚</div><h3>Study Assistant</h3><p>Understand topics, practise and learn step by step.</p></button>
+    <button class="tool-card" data-tool="ideas"><div class="tool-icon">💡</div><h3>Idea Generator</h3><p>Discover fresh concepts for your next project.</p></button>
+    <button class="tool-card" data-tool="image"><div class="tool-icon">🎨</div><h3>Image Generator</h3><p>Turn your imagination into an AI-generated image.</p></button>
+  </section>
+  <footer class="footer">TinVin AI · Your ideas, powered by AI</footer>
+</main>
+
+<section id="toolPage" class="page">
+  <button class="back-btn" id="backBtn" type="button">← Back to Home</button>
+  <div class="tool-heading">
+    <div class="tool-icon" id="activeIcon">✍️</div>
+    <div><h1 id="activeTitle">AI Writer</h1><p id="activeDescription">Create something great.</p></div>
+  </div>
+  <div class="panel" id="toolPanel">
+    <label class="field-label" for="toolInput" id="inputLabel">What would you like to create?</label>
+    <textarea class="textarea" id="toolInput" placeholder="Type your request here..."></textarea>
+    <div id="translatorOptions" class="two-col hidden" style="margin-top:13px">
+      <div><label class="field-label" for="sourceLang">From</label><select class="select" id="sourceLang"></select></div>
+      <div><label class="field-label" for="targetLang">To</label><select class="select" id="targetLang"></select></div>
+    </div>
+    <div id="imageHint" class="status hidden">Describe the image you want to create. The Worker must have a working image model binding.</div>
+    <div class="actions">
+      <button class="primary-btn" id="runBtn" type="button">Generate</button>
+      <button class="secondary-btn" id="clearBtn" type="button">Clear</button>
+    </div>
+    <div id="toolStatus" class="status" role="status"></div>
+  </div>
+  <div class="panel">
+    <div class="section-title" style="margin-top:0"><h2 id="resultTitle">Result</h2><button id="copyBtn" class="secondary-btn" type="button">Copy text</button></div>
+    <div id="toolOutput" class="output"></div>
+    <div id="toolImage"></div>
+  </div>
 </section>
 
-<section class="tools" id="tools"></section>
-
-<section class="panel">
-  <div class="panel-head">
-    <h2 id="workspaceTitle">AI Writer</h2>
-    <span class="pill" id="toolPill">7 AI TOOLS</span>
-  </div>
-
-  <div id="standardFields">
-    <label id="promptLabel" for="prompt">What would you like to write?</label>
-    <textarea id="prompt" placeholder="Describe what you need..."></textarea>
-  </div>
-
-  <div id="translateFields" class="hidden">
-    <label id="textLabel" for="translateText">Text to translate</label>
-    <textarea id="translateText" placeholder="Enter text to translate..."></textarea>
-    <div class="grid2">
-      <div><label id="sourceLabel" for="sourceLanguage">From</label><select id="sourceLanguage"></select></div>
-      <div><label id="targetLabel" for="targetLanguage">To</label><select id="targetLanguage"></select></div>
+<section id="chatPage" class="page">
+  <button class="back-btn" id="chatBackBtn" type="button">← Back to Home</button>
+  <div class="tool-heading"><div class="tool-icon">💬</div><div><h1>AI Chat</h1><p>Your messages remain visible during the conversation.</p></div></div>
+  <div class="panel chat-layout">
+    <div id="chatHistory" class="chat-history" aria-live="polite"></div>
+    <label class="field-label" for="chatInput">Message</label>
+    <div class="chat-compose">
+      <textarea class="textarea" id="chatInput" placeholder="Ask anything, or ask AI to create an image..." rows="2"></textarea>
+      <button class="primary-btn" id="sendBtn" type="button">Send ↑</button>
     </div>
-  </div>
-
-  <div id="outputLanguageWrap">
-    <label id="outputLanguageLabel" for="outputLanguage">Answer language</label>
-    <select id="outputLanguage"></select>
-  </div>
-
-  <div class="btns">
-    <button class="primary" id="runButton">Generate</button>
-    <button class="secondary" id="clearButton">Clear</button>
-  </div>
-
-  <div class="status" id="status" role="status"></div>
-
-  <div class="result">
-    <div class="result-top">
-      <h3 id="resultTitle">Result</h3>
-      <div class="btns" style="margin:0">
-        <button class="secondary" id="copyButton">Copy</button>
-        <button class="secondary hidden" id="downloadButton">Download image</button>
-      </div>
-    </div>
-    <div class="output" id="output" aria-live="polite" data-empty="Your result will appear here."></div>
-    <img id="imageResult" class="image-result" alt="Generated image">
+    <div id="chatStatus" class="status" role="status"></div>
+    <div class="actions"><button id="newChatBtn" class="secondary-btn" type="button">New chat</button></div>
   </div>
 </section>
-<div class="foot">TinVin AI · Smart tools for everyone</div>
+
+<section id="settingsPage" class="page">
+  <button class="back-btn" id="settingsBackBtn" type="button">← Back to Home</button>
+  <div class="tool-heading"><div class="tool-icon">⚙️</div><div><h1>Settings</h1><p>Personalize your TinVin AI workspace.</p></div></div>
+  <div class="settings-grid">
+    <div class="panel">
+      <label class="field-label" for="themeSelect">Color theme</label>
+      <select id="themeSelect" class="select">
+        <option value="purple">Lavender purple</option><option value="blue">Ocean blue</option>
+        <option value="green">Emerald green</option><option value="orange">Warm orange</option>
+        <option value="pink">Soft pink</option><option value="dark">Dark mode</option>
+      </select>
+    </div>
+    <div class="panel">
+      <label class="field-label" for="interfaceLang">Interface language</label>
+      <select id="interfaceLang" class="select">
+        <option value="English">English</option><option value="Sorani Kurdish">کوردیی سۆرانی</option>
+        <option value="Kurmanji Kurdish">Kurdî Kurmancî</option><option value="Arabic">العربية</option>
+        <option value="Spanish">Español</option><option value="French">Français</option>
+        <option value="Portuguese">Português</option><option value="German">Deutsch</option>
+        <option value="Turkish">Türkçe</option><option value="Persian">فارسی</option>
+        <option value="Russian">Русский</option><option value="Chinese Simplified">简体中文</option>
+        <option value="Japanese">日本語</option><option value="Korean">한국어</option>
+        <option value="Hindi">हिन्दी</option><option value="Urdu">اردو</option>
+        <option value="Italian">Italiano</option><option value="Dutch">Nederlands</option>
+        <option value="Ukrainian">Українська</option><option value="Polish">Polski</option>
+      </select>
+      <p class="status">Tool output can be requested in any language. This selector currently saves your preference; full interface translation requires Worker support.</p>
+    </div>
+  </div>
+</section>
 </div>
-<div class="toast" id="toast"></div>
 
 <script>
 (() => {
-'use strict';
+"use strict";
 
-const API_BASE = 'https://tinvin-ai-server.aslan89aslan1.workers.dev';
+/*
+  Set this to your deployed TinVin AI Worker URL.
+  Never put your private AI API key in this file.
+*/
+const API_BASE = "https://tinvin-ai-server.aslan89aslan1.workers.dev";
 
-const languages = [
-  {code:'en',name:'English'},
-  {code:'ku',name:'Kurdish (Sorani)'},
-  {code:'kmr',name:'Kurdish (Kurmanji)'},
-  {code:'ar',name:'Arabic'},
-  {code:'es',name:'Spanish'},
-  {code:'pt',name:'Portuguese'},
-  {code:'de',name:'German'},
-  {code:'fr',name:'French'},
-  {code:'it',name:'Italian'},
-  {code:'tr',name:'Turkish'},
-  {code:'fa',name:'Persian'},
-  {code:'ru',name:'Russian'},
-  {code:'zh',name:'Chinese (Simplified)'},
-  {code:'ja',name:'Japanese'},
-  {code:'ko',name:'Korean'},
-  {code:'nl',name:'Dutch'},
-  {code:'hi',name:'Hindi'},
-  {code:'ur',name:'Urdu'},
-  {code:'uk',name:'Ukrainian'},
-  {code:'pl',name:'Polish'}
-];
-
-const tools = [
-  {id:'writer',icon:'✍️',name:'AI Writer',desc:'Posts, emails and more',label:'What would you like to write?',placeholder:'Tell me what you want to write, and include any details or tone...'},
-  {id:'chat',icon:'💬',name:'AI Chat',desc:'Ask questions and explore',label:'What would you like to ask?',placeholder:'Ask a question or explain what you need help with...'},
-  {id:'translate',icon:'🌐',name:'AI Translator',desc:'Translate between languages',label:'Text to translate',placeholder:'Enter the text you want translated...'},
-  {id:'business',icon:'📈',name:'Business Studio',desc:'Plans, marketing and growth',label:'What business task do you need?',placeholder:'Describe your business, audience, and goal...'},
-  {id:'study',icon:'🎓',name:'Study Assistant',desc:'Learn difficult topics',label:'What would you like to learn?',placeholder:'Enter a topic or question. Ask for a simple explanation...'},
-  {id:'ideas',icon:'💡',name:'Idea Generator',desc:'Fresh ideas and inspiration',label:'What do you need ideas for?',placeholder:'Describe the topic, goal, audience, or problem...'},
-  {id:'image',icon:'🎨',name:'Image Generator',desc:'Create images from text',label:'Describe the image',placeholder:'Describe the scene, style, colors, and details you want...'}
-];
-
-const en = {
-  eyebrow:'YOUR SMART WORKSPACE',
-  headline:'Think bigger. Create smarter.',
-  intro:'Seven AI tools in one workspace. Write, learn, translate, plan, brainstorm, chat, and create images.',
-  toolPill:'7 AI TOOLS',
-  promptPlaceholder:'Describe what you need...',
-  textPlaceholder:'Enter the text you want translated...',
-  sourceLabel:'From',
-  targetLabel:'To',
-  outputLanguageLabel:'Answer language',
-  runButton:'Generate',
-  clearButton:'Clear',
-  resultTitle:'Result',
-  copyButton:'Copy',
-  downloadButton:'Download image',
-  ready:'Ready',
-  working:'Working on it…',
-  empty:'Please enter some text first.',
-  copied:'Copied to clipboard.',
-  nothingToCopy:'Nothing to copy yet.',
-  copyUnavailable:'Copy is not available in this browser. Select the result and copy it.',
-  timeout:'This request took too long. Please try again.',
-  imageCreated:'Image created.',
-  imageError:'The server returned an image that could not be displayed.',
-  noImage:'No image was returned.',
-  interfaceError:'Interface translation failed. Please try again.',
-  requestError:'Something went wrong. Please try again.',
-  footer:'TinVin AI · Smart tools for everyone',
-  autoDetect:'Auto-detect',
-  toolNames:[
-    'AI Writer','AI Chat','AI Translator','Business Studio',
-    'Study Assistant','Idea Generator','Image Generator'
-  ],
-  toolDescriptions:[
-    'Posts, emails and more','Ask questions and explore',
-    'Translate between languages','Plans, marketing and growth',
-    'Learn difficult topics','Fresh ideas and inspiration',
-    'Create images from text'
-  ],
-  toolLabels:[
-    'What would you like to write?',
-    'What would you like to ask?',
-    'Text to translate',
-    'What business task do you need?',
-    'What would you like to learn?',
-    'What do you need ideas for?',
-    'Describe the image'
-  ],
-  toolPlaceholders:[
-    'Tell me what you want to write, and include any details or tone...',
-    'Ask a question or explain what you need help with...',
-    'Enter the text you want translated...',
-    'Describe your business, audience, and goal...',
-    'Enter a topic or question. Ask for a simple explanation...',
-    'Describe the topic, goal, audience, or problem...',
-    'Describe the scene, style, colors, and details you want...'
-  ]
+const definitions = {
+  writer:{title:"AI Writer",icon:"✍️",description:"Create clear, polished and engaging content.",label:"What would you like me to write?",placeholder:"Write a professional email, social post, story..."},
+  chat:{title:"AI Chat",icon:"💬",description:"Ask questions and explore ideas.",label:"Your message",placeholder:"Ask your question..."},
+  translator:{title:"AI Translator",icon:"🌍",description:"Translate text into your chosen language.",label:"Text to translate",placeholder:"Paste the text you want translated..."},
+  business:{title:"Business Studio",icon:"📈",description:"Build your next business idea.",label:"What business task can I help with?",placeholder:"Create a business plan, marketing strategy..."},
+  study:{title:"Study Assistant",icon:"📚",description:"Learn complicated topics step by step.",label:"What would you like to learn?",placeholder:"Explain a topic or create a study plan..."},
+  ideas:{title:"Idea Generator",icon:"💡",description:"Generate useful, original ideas.",label:"What do you need ideas for?",placeholder:"Give me ideas for an app, business, content..."},
+  image:{title:"Image Generator",icon:"🎨",description:"Create an image from a text prompt.",label:"Describe the image you want",placeholder:"A beautiful futuristic city at sunset..."}
 };
 
+const languages = [
+"English","Sorani Kurdish","Kurmanji Kurdish","Arabic","Spanish","Portuguese",
+"German","French","Italian","Turkish","Persian","Russian","Chinese Simplified",
+"Japanese","Korean","Dutch","Hindi","Urdu","Ukrainian","Polish"
+];
+
 const $ = id => document.getElementById(id);
-let activeTool = 'writer';
-let uiLang = 'en';
-let uiText = structuredClone(en);
-let imageUrl = '';
-let uiTranslationRequest = 0;
+const pages = ["homePage","toolPage","chatPage","settingsPage"];
+let activeTool = "writer";
+let lastOutput = "";
+let chatMessages = [];
+let busy = false;
 
-function escapeHtml(value) {
-  return String(value).replace(/[&<>"']/g, c => ({
-    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
-  }[c]));
+function showPage(id) {
+  pages.forEach(p => $(p).classList.toggle("active",p === id));
+  window.scrollTo({top:0,behavior:"smooth"});
 }
-
-function languageName(code) {
-  return languages.find(l => l.code === code)?.name || 'English';
+function applyTheme(theme) {
+  document.documentElement.dataset.theme = theme === "purple" ? "" : theme;
+  if(theme === "purple") document.documentElement.removeAttribute("data-theme");
+  localStorage.setItem("tinvin_theme",theme);
+  $("themeSelect").value = theme;
 }
+function setStatus(id,text){$(id).textContent=text||"";}
 
-function fillSelect(el, selected) {
-  el.innerHTML = languages.map(l =>
-    `<option value="${escapeHtml(l.name)}">${escapeHtml(l.name)}</option>`
-  ).join('');
-  if (selected) el.value = selected;
-}
-
-function showToast(message) {
-  $('toast').textContent = message;
-  $('toast').style.display = 'block';
-  clearTimeout(showToast.timer);
-  showToast.timer = setTimeout(() => $('toast').style.display = 'none', 3200);
-}
-
-function currentTool() {
-  return tools.find(t => t.id === activeTool) || tools[0];
-}
-
-function toolIndex() {
-  return Math.max(0, tools.findIndex(t => t.id === activeTool));
-}
-
-function renderTools() {
-  $('tools').innerHTML = tools.map((t, i) => `
-    <button class="tool ${t.id === activeTool ? 'active' : ''}" data-tool="${t.id}">
-      <div class="ico">${t.icon}</div>
-      <strong>${escapeHtml(uiText.toolNames?.[i] || t.name)}</strong>
-      <small>${escapeHtml(uiText.toolDescriptions?.[i] || t.desc)}</small>
-    </button>`).join('');
-
-  document.querySelectorAll('[data-tool]').forEach(button => {
-    button.addEventListener('click', () => selectTool(button.dataset.tool));
-  });
-}
-
-function applyUI() {
-  $('eyebrow').textContent = uiText.eyebrow || en.eyebrow;
-  $('headline').textContent = uiText.headline || en.headline;
-  $('intro').textContent = uiText.intro || en.intro;
-  $('toolPill').textContent = uiText.toolPill || en.toolPill;
-  $('sourceLabel').textContent = uiText.sourceLabel || en.sourceLabel;
-  $('targetLabel').textContent = uiText.targetLabel || en.targetLabel;
-  $('outputLanguageLabel').textContent = uiText.outputLanguageLabel || en.outputLanguageLabel;
-  $('runButton').textContent = uiText.runButton || en.runButton;
-  $('clearButton').textContent = uiText.clearButton || en.clearButton;
-  $('resultTitle').textContent = uiText.resultTitle || en.resultTitle;
-  $('copyButton').textContent = uiText.copyButton || en.copyButton;
-  $('downloadButton').textContent = uiText.downloadButton || en.downloadButton;
-  $('prompt').placeholder = uiText.promptPlaceholder || en.promptPlaceholder;
-  $('translateText').placeholder = uiText.textPlaceholder || en.textPlaceholder;
-  $('output').dataset.empty = uiText.resultEmpty || 'Your result will appear here.';
-  document.querySelector('.foot').textContent = uiText.footer || en.footer;
-
-  document.documentElement.lang = uiLang;
-  document.documentElement.dir =
-    ['ku','ar','fa','ur'].includes(uiLang) ? 'rtl' : 'ltr';
-
-  renderTools();
-
-  const i = toolIndex();
-  $('workspaceTitle').textContent = uiText.toolNames?.[i] || currentTool().name;
-  $('promptLabel').textContent = uiText.toolLabels?.[i] || currentTool().label;
-  $('prompt').placeholder = uiText.toolPlaceholders?.[i] || currentTool().placeholder;
-  $('textLabel').textContent = uiText.toolLabels?.[2] || en.toolLabels[2];
-  $('translateText').placeholder = uiText.toolPlaceholders?.[2] || en.toolPlaceholders[2];
-}
-
-function selectTool(id) {
-  activeTool = tools.some(t => t.id === id) ? id : 'writer';
-  const t = currentTool();
-  const i = toolIndex();
-
-  $('standardFields').classList.toggle('hidden', activeTool === 'translate');
-  $('translateFields').classList.toggle('hidden', activeTool !== 'translate');
-  $('outputLanguageWrap').classList.toggle('hidden', activeTool === 'translate' || activeTool === 'image');
-  $('downloadButton').classList.toggle('hidden', activeTool !== 'image');
-
-  $('status').textContent = '';
-  $('output').textContent = '';
-  $('imageResult').style.display = 'none';
-
-  $('workspaceTitle').textContent = uiText.toolNames?.[i] || t.name;
-  $('promptLabel').textContent = uiText.toolLabels?.[i] || t.label;
-  $('prompt').placeholder = uiText.toolPlaceholders?.[i] || t.placeholder;
-  $('textLabel').textContent = uiText.toolLabels?.[2] || en.toolLabels[2];
-  $('translateText').placeholder = uiText.toolPlaceholders?.[2] || en.toolPlaceholders[2];
-
-  renderTools();
-}
-
-async function requestJson(path, body, timeoutMs = 60000) {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), timeoutMs);
-
-  try {
-    const response = await fetch(API_BASE + path, {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify(body),
-      signal:controller.signal
+function fillLanguageMenus(){
+  for(const id of ["sourceLang","targetLang"]){
+    const sel=$(id);
+    sel.innerHTML="";
+    languages.forEach(name=>{
+      const opt=document.createElement("option");
+      opt.value=name;opt.textContent=name;sel.appendChild(opt);
     });
-
-    const data = await response.json().catch(() => ({}));
-
-    if (!response.ok || data.ok === false) {
-      throw new Error(data.error || `Request failed (${response.status})`);
-    }
-
-    return data;
-  } finally {
-    clearTimeout(timer);
   }
+  $("sourceLang").value="English";
+  $("targetLang").value="Sorani Kurdish";
 }
 
-async function translateUI(languageCode) {
-  const requestId = ++uiTranslationRequest;
-  uiLang = languageCode;
+function openTool(key){
+  if(!definitions[key]) return;
+  activeTool=key;
+  if(key==="chat"){showPage("chatPage");$("chatInput").focus();return;}
+  const d=definitions[key];
+  $("activeTitle").textContent=d.title;
+  $("activeIcon").textContent=d.icon;
+  $("activeDescription").textContent=d.description;
+  $("inputLabel").textContent=d.label;
+  $("toolInput").placeholder=d.placeholder;
+  $("toolInput").value="";
+  $("toolOutput").textContent="";
+  $("toolImage").replaceChildren();
+  $("translatorOptions").classList.toggle("hidden",key!=="translator");
+  $("imageHint").classList.toggle("hidden",key!=="image");
+  $("resultTitle").textContent=key==="image"?"Generated image":"Result";
+  $("copyBtn").classList.toggle("hidden",key==="image");
+  $("runBtn").textContent=key==="image"?"Generate image":key==="translator"?"Translate":"Generate";
+  setStatus("toolStatus","");
+  lastOutput="";
+  showPage("toolPage");
+  $("toolInput").focus();
+}
 
-  if (languageCode === 'en') {
-    uiText = structuredClone(en);
-    applyUI();
-    return;
+async function postJSON(path,data){
+  const response=await fetch(API_BASE+path,{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify(data)
+  });
+  let result;
+  try{result=await response.json();}
+  catch{throw new Error("The server returned an unreadable response.");}
+  if(!response.ok || result.ok===false){
+    throw new Error(result.error||result.message||("Request failed ("+response.status+")"));
   }
+  return result;
+}
 
-  const language = languageName(languageCode);
-  const cacheKey = 'tinvin_ui_translation_v7_' + languageCode;
+function extractText(data){
+  if(typeof data.text==="string")return data.text;
+  if(typeof data.output==="string")return data.output;
+  if(typeof data.response==="string")return data.response;
+  if(data.result && typeof data.result==="string")return data.result;
+  if(data.choices?.[0]?.message?.content){
+    const c=data.choices[0].message.content;
+    if(typeof c==="string")return c;
+    if(Array.isArray(c))return c.map(x=>x.text||"").join("\n");
+  }
+  return "";
+}
 
-  try {
-    const cached = localStorage.getItem(cacheKey);
-    if (cached) {
-      const parsed = JSON.parse(cached);
-      if (parsed && Array.isArray(parsed.toolNames) &&
-          Array.isArray(parsed.toolDescriptions) &&
-          Array.isArray(parsed.toolLabels) &&
-          Array.isArray(parsed.toolPlaceholders)) {
-        if (requestId !== uiTranslationRequest) return;
-        uiText = {...structuredClone(en), ...parsed};
-        applyUI();
-        return;
+function makeImage(data,container){
+  const raw=data.image||data.base64||data.data;
+  if(!raw) return false;
+  const img=document.createElement("img");
+  img.className="image-result";
+  img.alt="AI-generated image";
+  img.src=raw.startsWith("data:")?raw:
+    `data:${data.mimeType||"image/png"};base64,${raw}`;
+  container.appendChild(img);
+  return true;
+}
+
+function imageIntent(text){
+  return /\b(generate|create|draw|make|design|render)\b.{0,45}\b(image|picture|illustration|artwork|logo)\b|\b(image|picture|illustration|artwork|logo)\b.{0,35}\b(of|showing|with)\b/i.test(text);
+}
+
+async function runTool(){
+  if(busy)return;
+  const input=$("toolInput").value.trim();
+  if(!input){setStatus("toolStatus","Please enter a request first.");return;}
+  busy=true;$("runBtn").disabled=true;$("toolOutput").textContent="";
+  $("toolImage").replaceChildren();setStatus("toolStatus","Working...");
+  try{
+    let data;
+    if(activeTool==="image" || imageIntent(input)){
+      data=await postJSON("/api/image",{prompt:input});
+      if(!makeImage(data,$("toolImage")))throw new Error("The server did not return an image. Check the Worker image endpoint.");
+      lastOutput="";
+    }else{
+      const payload={tool:activeTool,message:input,prompt:input};
+      if(activeTool==="translator"){
+        payload.sourceLanguage=$("sourceLang").value;
+        payload.targetLanguage=$("targetLang").value;
+        payload.source=payload.sourceLanguage;
+        payload.target=payload.targetLanguage;
       }
+      data=await postJSON("/api/ai",payload);
+      const answer=extractText(data);
+      if(!answer)throw new Error("The server returned no text. Check the Worker response format.");
+      lastOutput=answer;$("toolOutput").textContent=answer;
     }
-  } catch (_) {}
-
-  uiText = structuredClone(en);
-  applyUI();
-  $('status').textContent = uiText.translating || 'Translating interface…';
-
-  try {
-    const payload = {
-      eyebrow:en.eyebrow,
-      headline:en.headline,
-      intro:en.intro,
-      toolPill:en.toolPill,
-      sourceLabel:en.sourceLabel,
-      targetLabel:en.targetLabel,
-      outputLanguageLabel:en.outputLanguageLabel,
-      runButton:en.runButton,
-      clearButton:en.clearButton,
-      resultTitle:en.resultTitle,
-      copyButton:en.copyButton,
-      downloadButton:en.downloadButton,
-      promptPlaceholder:en.promptPlaceholder,
-      textPlaceholder:en.textPlaceholder,
-      resultEmpty:'Your result will appear here.',
-      ready:en.ready,
-      working:en.working,
-      empty:en.empty,
-      copied:en.copied,
-      nothingToCopy:en.nothingToCopy,
-      copyUnavailable:en.copyUnavailable,
-      timeout:en.timeout,
-      imageCreated:en.imageCreated,
-      imageError:en.imageError,
-      noImage:en.noImage,
-      interfaceError:en.interfaceError,
-      requestError:en.requestError,
-      footer:en.footer,
-      autoDetect:en.autoDetect,
-      toolNames:en.toolNames,
-      toolDescriptions:en.toolDescriptions,
-      toolLabels:en.toolLabels,
-      toolPlaceholders:en.toolPlaceholders
-    };
-
-    const data = await requestJson('/api/ai', {
-      tool:'ui-translate',
-      outputLanguage:language,
-      prompt:JSON.stringify(payload)
-    }, 60000);
-
-    if (requestId !== uiTranslationRequest) return;
-
-    let raw = String(data.result || '').trim();
-    raw = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '');
-
-    const start = raw.indexOf('{');
-    const end = raw.lastIndexOf('}');
-    if (start < 0 || end <= start) throw new Error('The translation was not valid JSON.');
-
-    const translated = JSON.parse(raw.slice(start, end + 1));
-
-    if (!Array.isArray(translated.toolNames) ||
-        !Array.isArray(translated.toolDescriptions) ||
-        !Array.isArray(translated.toolLabels) ||
-        !Array.isArray(translated.toolPlaceholders)) {
-      throw new Error('The translated tool labels were missing.');
-    }
-
-    uiText = {...structuredClone(en), ...translated};
-    applyUI();
-    $('status').textContent = '';
-
-    try {
-      localStorage.setItem(cacheKey, JSON.stringify(translated));
-    } catch (_) {}
-  } catch (error) {
-    if (requestId !== uiTranslationRequest) return;
-    uiText = structuredClone(en);
-    applyUI();
-    $('status').textContent = '';
-    showToast(uiText.interfaceError || en.interfaceError);
-    console.error('Interface translation failed:', error);
+    setStatus("toolStatus","Finished.");
+  }catch(err){
+    setStatus("toolStatus","Error: "+(err.message||"Request failed"));
+  }finally{
+    busy=false;$("runBtn").disabled=false;
   }
 }
 
-async function runTool() {
-  const isTranslate = activeTool === 'translate';
-  const isImage = activeTool === 'image';
-  const prompt = (isTranslate ? $('translateText').value : $('prompt').value).trim();
-
-  if (!prompt) {
-    showToast(uiText.empty || en.empty);
-    return;
+function addBubble(role,text,imageData){
+  const bubble=document.createElement("div");
+  bubble.className="bubble "+role;
+  const label=document.createElement("div");
+  label.className="bubble-label";
+  label.textContent=role==="user"?"YOU":"TINVIN AI";
+  bubble.appendChild(label);
+  if(text){
+    const body=document.createElement("div");
+    body.textContent=text;
+    bubble.appendChild(body);
   }
-
-  $('runButton').disabled = true;
-  $('status').textContent = uiText.working || en.working;
-  $('output').textContent = '';
-  $('imageResult').style.display = 'none';
-  $('downloadButton').classList.toggle('hidden', !isImage);
-  imageUrl = '';
-
-  try {
-    if (isImage) {
-      const data = await requestJson('/api/image', {prompt}, 60000);
-
-      if (data.image) {
-        imageUrl = 'data:' + (data.mimeType || 'image/jpeg') + ';base64,' + data.image;
-      } else if (data.url) {
-        imageUrl = data.url;
-      } else {
-        throw new Error(data.error || uiText.noImage || en.noImage);
-      }
-
-      $('imageResult').onerror = () => {
-        $('status').textContent = uiText.imageError || en.imageError;
-      };
-      $('imageResult').src = imageUrl;
-      $('imageResult').style.display = 'block';
-      $('downloadButton').classList.remove('hidden');
-      $('status').textContent = uiText.imageCreated || en.imageCreated;
-    } else if (isTranslate) {
-      const target = $('targetLanguage').value;
-      const source = $('sourceLanguage').value;
-
-      const data = await requestJson('/api/ai', {
-        tool:'translate',
-        text:prompt,
-        sourceLanguage:source,
-        targetLanguage:target
-      }, 60000);
-
-      $('output').textContent = data.result || '';
-    } else {
-      const outputLanguage = $('outputLanguage').value || languageName(uiLang);
-
-      const data = await requestJson('/api/ai', {
-        tool:activeTool,
-        outputLanguage,
-        prompt
-      }, 60000);
-
-      $('output').textContent = data.result || '';
+  if(imageData){
+    const holder=document.createElement("div");
+    if(!makeImage(imageData,holder)){
+      const note=document.createElement("div");note.textContent="Image could not be displayed.";
+      holder.appendChild(note);
     }
+    bubble.appendChild(holder);
+  }
+  $("chatHistory").appendChild(bubble);
+  $("chatHistory").scrollTop=$("chatHistory").scrollHeight;
+}
 
-    if (!isImage && !$('output').textContent.trim()) {
-      throw new Error('The AI returned an empty answer.');
+async function sendChat(){
+  if(busy)return;
+  const text=$("chatInput").value.trim();
+  if(!text)return;
+  /*
+    Only the current message is sent. Previous turns remain visible,
+    but are not resent to the server in this basic version.
+  */
+  $("chatInput").value="";
+  chatMessages.push({role:"user",content:text});
+  addBubble("user",text);
+  busy=true;$("sendBtn").disabled=true;
+  setStatus("chatStatus","TinVin AI is thinking...");
+  try{
+    let data;
+    if(imageIntent(text)){
+      data=await postJSON("/api/image",{prompt:text});
+      if(!data.image&&!data.base64&&!data.data)throw new Error("No image was returned by the server.");
+      chatMessages.push({role:"assistant",content:"[Generated image]"});
+      addBubble("assistant","Here is your generated image:",data);
+    }else{
+      data=await postJSON("/api/ai",{tool:"chat",message:text,prompt:text});
+      const answer=extractText(data);
+      if(!answer)throw new Error("The server returned no text.");
+      chatMessages.push({role:"assistant",content:answer});
+      addBubble("assistant",answer);
     }
-
-    if (!isImage) $('status').textContent = uiText.ready || en.ready;
-  } catch (error) {
-    const message = error.name === 'AbortError'
-      ? (uiText.timeout || en.timeout)
-      : (error.message || uiText.requestError || en.requestError);
-
-    $('status').textContent = message;
-    showToast(message);
-    console.error('TinVin AI request failed:', error);
-  } finally {
-    $('runButton').disabled = false;
+    setStatus("chatStatus","");
+  }catch(err){
+    setStatus("chatStatus","Error: "+(err.message||"Request failed"));
+  }finally{
+    busy=false;$("sendBtn").disabled=false;$("chatInput").focus();
   }
 }
 
-$('runButton').addEventListener('click', runTool);
-
-$('clearButton').addEventListener('click', () => {
-  $('prompt').value = '';
-  $('translateText').value = '';
-  $('output').textContent = '';
-  $('imageResult').removeAttribute('src');
-  $('imageResult').style.display = 'none';
-  $('status').textContent = '';
-  imageUrl = '';
+$("toolsGrid").addEventListener("click",e=>{
+  const card=e.target.closest("[data-tool]");
+  if(card)openTool(card.dataset.tool);
+});
+$("backBtn").addEventListener("click",()=>showPage("homePage"));
+$("chatBackBtn").addEventListener("click",()=>showPage("homePage"));
+$("settingsBackBtn").addEventListener("click",()=>showPage("homePage"));
+$("settingsBtn").addEventListener("click",()=>showPage("settingsPage"));
+$("runBtn").addEventListener("click",runTool);
+$("sendBtn").addEventListener("click",sendChat);
+$("chatInput").addEventListener("keydown",e=>{
+  if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();sendChat();}
+});
+$("toolInput").addEventListener("keydown",e=>{
+  if(e.key==="Enter"&&(e.ctrlKey||e.metaKey)){e.preventDefault();runTool();}
+});
+$("clearBtn").addEventListener("click",()=>{
+  $("toolInput").value="";$("toolOutput").textContent="";
+  $("toolImage").replaceChildren();lastOutput="";setStatus("toolStatus","");
+});
+$("copyBtn").addEventListener("click",async()=>{
+  if(!lastOutput)return;
+  try{await navigator.clipboard.writeText(lastOutput);setStatus("toolStatus","Copied to clipboard.");}
+  catch{setStatus("toolStatus","Copy is unavailable in this browser.");}
+});
+$("newChatBtn").addEventListener("click",()=>{
+  chatMessages=[];$("chatHistory").replaceChildren();setStatus("chatStatus","");
+});
+$("themeSelect").addEventListener("change",e=>applyTheme(e.target.value));
+$("interfaceLang").addEventListener("change",e=>{
+  localStorage.setItem("tinvin_language",e.target.value);
 });
 
-$('copyButton').addEventListener('click', async () => {
-  const text = $('output').textContent;
-  if (!text) return showToast(uiText.nothingToCopy || en.nothingToCopy);
-
-  try {
-    await navigator.clipboard.writeText(text);
-    showToast(uiText.copied || en.copied);
-  } catch (_) {
-    showToast(uiText.copyUnavailable || en.copyUnavailable);
-  }
-});
-
-$('downloadButton').addEventListener('click', async () => {
-  if (!imageUrl) return;
-
-  try {
-    const response = await fetch(imageUrl);
-    const blob = await response.blob();
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'tinvin-ai-image.jpg';
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
-  } catch (_) {
-    window.open(imageUrl, '_blank', 'noopener');
-  }
-});
-
-fillSelect($('uiLanguage'), 'English');
-fillSelect($('sourceLanguage'), 'English');
-fillSelect($('targetLanguage'), 'Kurdish (Sorani)');
-fillSelect($('outputLanguage'), 'English');
-
-const autoOption = document.createElement('option');
-autoOption.value = 'Auto-detect';
-autoOption.textContent = 'Auto-detect';
-$('sourceLanguage').insertBefore(autoOption, $('sourceLanguage').firstChild);
-$('sourceLanguage').value = 'Auto-detect';
-
-$('uiLanguage').addEventListener('change', async event => {
-  const selected = languages.find(l => l.name === event.target.value);
-  const code = selected ? selected.code : 'en';
-  $('outputLanguage').value = languageName(code);
-  await translateUI(code);
-});
-
-renderTools();
-selectTool('writer');
-applyUI();
+fillLanguageMenus();
+applyTheme(localStorage.getItem("tinvin_theme")||"purple");
+$("interfaceLang").value=localStorage.getItem("tinvin_language")||"English";
 })();
 </script>
 </body>
