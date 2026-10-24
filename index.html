@@ -9,7 +9,8 @@
 :root{--bg:#100f25;--panel:#191832;--line:#343156;--text:#f5f4ff;--muted:#aaa8c9;--blue:#6478ff;--purple:#9a6bff}
 *{box-sizing:border-box}
 body{margin:0;background:radial-gradient(ellipse at 12% 0%,#272052,transparent 36%),radial-gradient(ellipse at 100% 30%,#172b55,transparent 32%),var(--bg);color:var(--text);font:15px/1.55 system-ui,-apple-system,sans-serif}
-button,input,textarea,select{font:inherit}button{cursor:pointer}
+button,input,textarea,select{font:inherit}
+button{cursor:pointer}
 .shell{width:min(1160px,calc(100% - 32px));margin:auto}
 .topbar{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:22px 0;border-bottom:1px solid #ffffff12}
 .brand{display:flex;align-items:center;gap:12px;font-size:20px;font-weight:800}
@@ -146,7 +147,9 @@ button,input,textarea,select{font:inherit}button{cursor:pointer}
 
 const API_BASE="https://tinvin-ai-server.aslan89aslan1.workers.dev";
 const $=id=>document.getElementById(id);
-const CACHE_PREFIX="tinvin_ui_translations_v3_";
+
+/* v4 avoids reusing old or incomplete interface translations */
+const CACHE_PREFIX="tinvin_ui_translations_v4_";
 const BATCH_SIZE=8;
 
 const languages=[
@@ -244,6 +247,7 @@ function flattenStrings(){
   }
   return strings;
 }
+
 const sourceStrings=flattenStrings();
 
 function fillSelect(select,items,includeAuto=false){
@@ -282,25 +286,26 @@ let toastTimer=null;
 function selectedLanguage(){
   return uiLanguages.find(x=>x.value===$("languageSelect").value)||uiLanguages[0];
 }
+
 function currentText(key){
   return currentStrings[key]||sourceStrings[key]||key;
 }
+
 function toast(message){
   $("toast").textContent=message;
   $("toast").classList.add("show");
   clearTimeout(toastTimer);
-  toastTimer=setTimeout(()=>$("toast").classList.remove("show"),3000);
+  toastTimer=setTimeout(()=>$("toast").classList.remove("show"),3500);
 }
 
 function applyStrings(){
   const s=currentStrings;
+
   for(const [id,key] of Object.entries(fieldMap)){
     const el=$(id);
-    if(el){
-      const value=s[key]||sourceStrings[key]||base[key]||key;
-      if(el.tagName==="INPUT"||el.tagName==="TEXTAREA")el.placeholder=value;
-      else el.textContent=value;
-    }
+    if(!el)continue;
+    const value=s[key]||sourceStrings[key]||base[key]||key;
+    el.textContent=value;
   }
 
   $("heroTitle").replaceChildren();
@@ -315,18 +320,22 @@ function applyStrings(){
     if(key)el.textContent=s[key]||base[key]||el.textContent;
   });
 
-  $("promptLabel").textContent=s[active+".label"]||toolDefs[active].label;
-  $("prompt").placeholder=s[active+".placeholder"]||toolDefs[active].placeholder;
-  $("workspaceSubtitle").textContent=s[active+".subtitle"]||toolDefs[active].subtitle;
-  $("promptHint").textContent=s[active+".hint"]||toolDefs[active].hint;
-  $("workspaceTitle").textContent=s[active+".title"]||toolDefs[active].title;
-  $("generateText").textContent=s.generate||base.generate;
-  $("closeText").textContent=s.close||base.close;
+  refreshWorkspace();
 
   const apiName=selectedLanguage().api;
   const rtlLanguages=["Kurdish (Sorani)","Arabic","Persian","Urdu","Pashto","Dari"];
   document.documentElement.lang=apiName==="Kurdish (Sorani)"?"ckb":apiName==="English"?"en":apiName;
   document.documentElement.dir=rtlLanguages.includes(apiName)?"rtl":"ltr";
+}
+
+function refreshWorkspace(){
+  $("workspaceTitle").textContent=currentText(active+".title");
+  $("workspaceSubtitle").textContent=currentText(active+".subtitle");
+  $("promptLabel").textContent=currentText(active+".label");
+  $("prompt").placeholder=currentText(active+".placeholder");
+  $("promptHint").textContent=currentText(active+".hint");
+  $("generateText").textContent=currentText("generate");
+  $("closeText").textContent=currentText("close");
 }
 
 function openTool(key){
@@ -354,38 +363,47 @@ function openTool(key){
   $("downloadBtn").classList.add("hidden");
   $("copyBtn").classList.remove("hidden");
   imageData="";
-  if(activeImageObjectUrl){URL.revokeObjectURL(activeImageObjectUrl);activeImageObjectUrl="";}
+
+  if(activeImageObjectUrl){
+    URL.revokeObjectURL(activeImageObjectUrl);
+    activeImageObjectUrl="";
+  }
+
   applyStrings();
   $("workspace").scrollIntoView({behavior:"smooth",block:"start"});
 }
 
-/* Interface translation is atomic: incomplete translation falls back to English. */
+/* Translate every UI string before applying any of them. */
 async function loadTranslations(){
   const requestId=++languageRequest;
   const selected=selectedLanguage();
   const apiName=selected.api;
 
+  currentStrings={...sourceStrings};
+  applyStrings();
+
   if(apiName==="English"){
-    currentStrings={...sourceStrings};
-    applyStrings();
-    if($("workspace").classList.contains("visible"))refreshWorkspace();
+    try{localStorage.removeItem(CACHE_PREFIX+encodeURIComponent(apiName));}catch{}
     return;
   }
 
   const cacheKey=CACHE_PREFIX+encodeURIComponent(apiName);
-  currentStrings={...sourceStrings};
-  applyStrings();
   toast("Translating interface…");
 
   try{
     const cached=localStorage.getItem(cacheKey);
+
     if(cached){
       const parsed=JSON.parse(cached);
-      const valid=parsed&&typeof parsed==="object"&&Object.keys(sourceStrings).every(k=>typeof parsed[k]==="string"&&parsed[k].trim());
+      const valid=parsed&&typeof parsed==="object"&&
+        Object.keys(sourceStrings).every(k=>
+          typeof parsed[k]==="string"&&parsed[k].trim()
+        );
+
       if(valid&&requestId===languageRequest){
         currentStrings={...sourceStrings,...parsed};
         applyStrings();
-        if($("workspace").classList.contains("visible"))refreshWorkspace();
+        toast("Interface language updated.");
         return;
       }
     }
@@ -395,11 +413,13 @@ async function loadTranslations(){
 
   const entries=Object.entries(sourceStrings);
   const batches=[];
+
   for(let i=0;i<entries.length;i+=BATCH_SIZE){
     batches.push(Object.fromEntries(entries.slice(i,i+BATCH_SIZE)));
   }
 
   const translations={};
+
   try{
     for(const batch of batches){
       if(requestId!==languageRequest)return;
@@ -412,55 +432,58 @@ async function loadTranslations(){
 
       let data;
       try{data=await response.json();}
-      catch{throw new Error("The translation server returned an invalid response.");}
+      catch{throw new Error("The translation server returned invalid JSON.");}
 
-      if(!response.ok||!data.ok||!data.translations){
+      if(!response.ok||data.ok===false||!data.translations){
         throw new Error(data.error||"Translation request failed.");
       }
 
       for(const key of Object.keys(batch)){
         const value=data.translations[key];
         if(typeof value!=="string"||!value.trim()){
-          throw new Error("A UI translation was missing.");
+          throw new Error("A UI translation was missing: "+key);
         }
         translations[key]=value.trim();
       }
     }
 
     if(requestId!==languageRequest)return;
-    if(!Object.keys(sourceStrings).every(k=>typeof translations[k]==="string"&&translations[k].trim())){
-      throw new Error("The translation was incomplete.");
-    }
+
+    const complete=Object.keys(sourceStrings).every(k=>
+      typeof translations[k]==="string"&&translations[k].trim()
+    );
+
+    if(!complete)throw new Error("The interface translation is incomplete.");
 
     currentStrings={...sourceStrings,...translations};
     applyStrings();
-    if($("workspace").classList.contains("visible"))refreshWorkspace();
+
     try{localStorage.setItem(cacheKey,JSON.stringify(translations));}
-    catch(error){console.warn("Could not cache translations:",error);}
+    catch(error){console.warn("Translation cache could not be saved:",error);}
+
     toast("Interface language updated.");
   }catch(error){
     if(requestId!==languageRequest)return;
+
     currentStrings={...sourceStrings};
     applyStrings();
-    if($("workspace").classList.contains("visible"))refreshWorkspace();
+
     try{localStorage.removeItem(cacheKey);}catch{}
-    console.warn("UI translation failed; keeping English:",error);
-    toast("Could not translate the full interface. English is shown; please retry later.");
+
+    console.error("Interface translation failed:",error);
+    toast("Interface translation failed. English is shown; please try again.");
   }
 }
 
-function refreshWorkspace(){
-  $("workspaceTitle").textContent=currentText(active+".title");
-  $("workspaceSubtitle").textContent=currentText(active+".subtitle");
-  $("promptLabel").textContent=currentText(active+".label");
-  $("prompt").placeholder=currentText(active+".placeholder");
-  $("promptHint").textContent=currentText(active+".hint");
-  $("generateText").textContent=currentText("generate");
-  $("closeText").textContent=currentText("close");
+function escapeHtml(value){
+  return String(value).replace(/[&<>"']/g,c=>({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+  }[c]));
 }
 
 async function generate(){
   const prompt=$("prompt").value.trim();
+
   if(!prompt){
     toast(currentText("empty"));
     $("prompt").focus();
@@ -469,13 +492,19 @@ async function generate(){
 
   const btn=$("generateBtn");
   const out=$("resultContent");
+
   btn.disabled=true;
   btn.innerHTML='<span class="spinner"></span> '+escapeHtml(currentText("working"));
   out.innerHTML='<div class="placeholder"><div class="busy"><span class="spinner"></span><span>'+escapeHtml(currentText("connecting"))+'</span></div></div>';
+
   $("copyBtn").classList.add("hidden");
   $("downloadBtn").classList.add("hidden");
   imageData="";
-  if(activeImageObjectUrl){URL.revokeObjectURL(activeImageObjectUrl);activeImageObjectUrl="";}
+
+  if(activeImageObjectUrl){
+    URL.revokeObjectURL(activeImageObjectUrl);
+    activeImageObjectUrl="";
+  }
 
   try{
     let endpoint,body;
@@ -483,7 +512,11 @@ async function generate(){
 
     if(active==="image"){
       endpoint="/api/image";
-      body={prompt,language:outputLanguage,outputLanguage};
+      body={
+        prompt,
+        language:outputLanguage,
+        outputLanguage
+      };
     }else if(active==="translate"){
       const targetLanguage=$("targetLanguage").value||"Kurdish (Sorani)";
       endpoint="/api/ai";
@@ -501,6 +534,7 @@ async function generate(){
       body={
         tool:active,
         prompt,
+        text:prompt,
         language:outputLanguage,
         outputLanguage
       };
@@ -514,16 +548,24 @@ async function generate(){
 
     const contentType=(res.headers.get("content-type")||"").toLowerCase();
 
-    /* Current Worker can return the generated image as raw image bytes. */
+    if(!res.ok){
+      let message="Request failed ("+res.status+").";
+      try{
+        const err=await res.json();
+        message=err.error||err.message||message;
+      }catch{}
+      throw new Error(message);
+    }
+
+    /* Image endpoint may return raw image bytes or JSON base64. */
     if(active==="image"&&contentType.startsWith("image/")){
-      if(!res.ok)throw new Error("Image request failed ("+res.status+").");
       const blob=await res.blob();
       activeImageObjectUrl=URL.createObjectURL(blob);
       imageData=activeImageObjectUrl;
+
       const img=document.createElement("img");
       img.src=imageData;
       img.alt=prompt;
-      img.id="generatedImage";
       out.replaceChildren(img);
       $("downloadBtn").classList.remove("hidden");
       return;
@@ -533,12 +575,15 @@ async function generate(){
     try{data=await res.json();}
     catch{throw new Error("The server returned an invalid response.");}
 
-    if(!res.ok||data.ok===false){
+    if(data.ok===false){
       throw new Error(data.error||data.message||"AI request failed.");
     }
 
     if(active==="image"){
-      if(!data.image)throw new Error(data.error||"The image provider returned no image.");
+      if(!data.image){
+        throw new Error(data.error||"The image provider returned no image.");
+      }
+
       imageData=String(data.image).startsWith("data:")
         ?data.image
         :"data:"+(data.mimeType||"image/jpeg")+";base64,"+data.image;
@@ -546,22 +591,25 @@ async function generate(){
       const img=document.createElement("img");
       img.src=imageData;
       img.alt=prompt;
-      img.id="generatedImage";
       out.replaceChildren(img);
       $("downloadBtn").classList.remove("hidden");
     }else{
       const answer=data.answer??data.result??data.text??data.translation;
+
       if(typeof answer!=="string"||!answer.trim()){
         throw new Error(data.error||"The AI provider returned no text.");
       }
-      out.textContent=answer;
+
+      out.textContent=answer.trim();
       $("copyBtn").classList.remove("hidden");
     }
   }catch(error){
     out.replaceChildren();
     const p=document.createElement("div");
     p.className="error";
-    p.textContent=error&&error.message?error.message:"Something went wrong. Please try again.";
+    p.textContent=error&&error.message
+      ?error.message
+      :"Something went wrong. Please try again.";
     out.appendChild(p);
   }finally{
     btn.disabled=false;
@@ -569,17 +617,17 @@ async function generate(){
   }
 }
 
-function escapeHtml(value){
-  return String(value).replace(/[&<>"']/g,c=>({
-    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
-  }[c]));
-}
-
 async function copyResult(){
   const img=$("resultContent").querySelector("img");
   const value=$("resultContent").innerText.trim();
-  if(img){toast("This result is an image. Use Download image.");return;}
+
+  if(img){
+    toast("This result is an image. Use Download image.");
+    return;
+  }
+
   if(!value)return;
+
   try{
     await navigator.clipboard.writeText(value);
     toast(currentText("copied"));
@@ -600,6 +648,7 @@ async function downloadImage(){
   try{
     const response=await fetch(imageData);
     if(!response.ok)throw new Error("Could not prepare the image.");
+
     const blob=await response.blob();
     const mime=blob.type||"image/png";
     const extension=mime.includes("jpeg")?"jpg":mime.includes("webp")?"webp":"png";
@@ -620,6 +669,7 @@ async function downloadImage(){
     setTimeout(()=>URL.revokeObjectURL(objectUrl),60000);
   }catch(error){
     if(error&&error.name==="AbortError")return;
+
     try{
       const opened=window.open(imageData,"_blank");
       toast(opened?"Open the image and choose Save Image.":currentText("saveImage"));
