@@ -16,7 +16,7 @@ button{cursor:pointer}
 .top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:28px}
 .brand{display:flex;align-items:center;gap:11px;font-weight:850;font-size:21px}
 .logo{width:42px;height:42px;border-radius:14px;display:grid;place-items:center;background:linear-gradient(135deg,var(--gold),#fff0b7);color:#11182b;font-weight:950}
-.top select{max-width:190px}
+.top select{max-width:220px}
 .hero{padding:25px 0 24px}
 .eyebrow{color:var(--gold);font-weight:750;font-size:12px;letter-spacing:2px;text-transform:uppercase}
 .hero h1{font-size:clamp(32px,6vw,54px);line-height:1.08;margin:12px 0;background:linear-gradient(90deg,#fff,var(--gold),#83d2ff);-webkit-background-clip:text;background-clip:text;color:transparent;max-width:780px}
@@ -42,7 +42,7 @@ textarea:focus,input:focus,select:focus{border-color:var(--blue);box-shadow:0 0 
 .primary{background:linear-gradient(100deg,var(--gold),#ffe8a6);color:#151a2a;min-width:140px}
 .primary:disabled{opacity:.55;cursor:wait}
 .secondary{background:#202c47;color:var(--text);border:1px solid #344361}
-.status{color:var(--muted);font-size:13px;margin-top:12px;min-height:18px}
+.status{color:var(--muted);font-size:13px;margin-top:12px;min-height:18px;overflow-wrap:anywhere}
 .result{margin-top:21px;border-top:1px solid var(--line);padding-top:18px}
 .result-top{display:flex;justify-content:space-between;align-items:center;gap:12px}
 .result h3{margin:0;font-size:16px}
@@ -127,42 +127,60 @@ html[dir=rtl] .tool{text-align:right}
 const API_BASE = 'https://tinvin-ai-server.aslan89aslan1.workers.dev';
 
 const languages = [
-{code:'en',name:'English'},{code:'ku',name:'Kurdish Sorani'},{code:'kmr',name:'Kurdish Kurmanji'},
-{code:'ar',name:'Arabic'},{code:'fa',name:'Persian'},{code:'es',name:'Spanish'},{code:'fr',name:'French'},
-{code:'de',name:'German'},{code:'it',name:'Italian'},{code:'pt',name:'Portuguese'},{code:'ru',name:'Russian'},
-{code:'tr',name:'Turkish'},{code:'zh',name:'Chinese'},{code:'ja',name:'Japanese'},{code:'ko',name:'Korean'},
-{code:'hi',name:'Hindi'},{code:'ur',name:'Urdu'},{code:'ps',name:'Pashto'},{code:'fa-AF',name:'Dari'},
-{code:'nl',name:'Dutch'},{code:'pl',name:'Polish'},{code:'uk',name:'Ukrainian'},{code:'sv',name:'Swedish'},
-{code:'no',name:'Norwegian'},{code:'da',name:'Danish'},{code:'fi',name:'Finnish'},{code:'el',name:'Greek'},
-{code:'he',name:'Hebrew'},{code:'id',name:'Indonesian'},{code:'ms',name:'Malay'},{code:'th',name:'Thai'},
-{code:'vi',name:'Vietnamese'},{code:'bn',name:'Bengali'},{code:'ta',name:'Tamil'},{code:'te',name:'Telugu'},
-{code:'mr',name:'Marathi'},{code:'gu',name:'Gujarati'},{code:'pa',name:'Punjabi'},{code:'sw',name:'Swahili'},
-{code:'am',name:'Amharic'},{code:'ro',name:'Romanian'},{code:'hu',name:'Hungarian'},{code:'cs',name:'Czech'},
-{code:'sk',name:'Slovak'},{code:'bg',name:'Bulgarian'},{code:'sr',name:'Serbian'},{code:'hr',name:'Croatian'},
-{code:'fil',name:'Filipino'},{code:'uz',name:'Uzbek'},{code:'az',name:'Azerbaijani'}
+  {code:'en',name:'English'},
+  {code:'ku',name:'Kurdish (Sorani)'},
+  {code:'kmr',name:'Kurdish (Kurmanji)'},
+  {code:'ar',name:'Arabic'},
+  {code:'es',name:'Spanish'},
+  {code:'pt',name:'Portuguese'},
+  {code:'de',name:'German'},
+  {code:'fr',name:'French'},
+  {code:'it',name:'Italian'},
+  {code:'tr',name:'Turkish'},
+  {code:'fa',name:'Persian'},
+  {code:'ru',name:'Russian'},
+  {code:'zh',name:'Chinese (Simplified)'},
+  {code:'ja',name:'Japanese'},
+  {code:'ko',name:'Korean'},
+  {code:'nl',name:'Dutch'},
+  {code:'hi',name:'Hindi'},
+  {code:'ur',name:'Urdu'},
+  {code:'uk',name:'Ukrainian'},
+  {code:'pl',name:'Polish'}
 ];
 
 const tools = [
-{id:'writer',icon:'✍️',name:'AI Writer',desc:'Posts, emails and more',label:'What would you like to write?',placeholder:'Tell me what you want to write, and include any details or tone...'},
-{id:'chat',icon:'💬',name:'AI Chat',desc:'Ask questions and explore',label:'What would you like to ask?',placeholder:'Ask a question or explain what you need help with...'},
-{id:'translate',icon:'🌐',name:'AI Translator',desc:'Translate between languages',label:'Text to translate',placeholder:'Enter the text you want translated...'},
-{id:'business',icon:'📈',name:'Business Studio',desc:'Plans, marketing and growth',label:'What business task do you need?',placeholder:'Describe your business, audience, and goal...'},
-{id:'study',icon:'🎓',name:'Study Assistant',desc:'Learn difficult topics',label:'What would you like to learn?',placeholder:'Enter a topic or question. Ask for a simple explanation...'},
-{id:'ideas',icon:'💡',name:'Idea Generator',desc:'Fresh ideas and inspiration',label:'What do you need ideas for?',placeholder:'Describe the topic, goal, audience, or problem...'},
-{id:'image',icon:'🎨',name:'Image Generator',desc:'Create images from text',label:'Describe the image',placeholder:'Describe the scene, style, colors, and details you want...'}
+  {id:'writer',icon:'✍️',name:'AI Writer',desc:'Posts, emails and more',label:'What would you like to write?',placeholder:'Tell me what you want to write, and include any details or tone...'},
+  {id:'chat',icon:'💬',name:'AI Chat',desc:'Ask questions and explore',label:'What would you like to ask?',placeholder:'Ask a question or explain what you need help with...'},
+  {id:'translate',icon:'🌐',name:'AI Translator',desc:'Translate between languages',label:'Text to translate',placeholder:'Enter the text you want translated...'},
+  {id:'business',icon:'📈',name:'Business Studio',desc:'Plans, marketing and growth',label:'What business task do you need?',placeholder:'Describe your business, audience, and goal...'},
+  {id:'study',icon:'🎓',name:'Study Assistant',desc:'Learn difficult topics',label:'What would you like to learn?',placeholder:'Enter a topic or question. Ask for a simple explanation...'},
+  {id:'ideas',icon:'💡',name:'Idea Generator',desc:'Fresh ideas and inspiration',label:'What do you need ideas for?',placeholder:'Describe the topic, goal, audience, or problem...'},
+  {id:'image',icon:'🎨',name:'Image Generator',desc:'Create images from text',label:'Describe the image',placeholder:'Describe the scene, style, colors, and details you want...'}
 ];
 
 const en = {
-eyebrow:'YOUR SMART WORKSPACE',
-headline:'Think bigger. Create smarter.',
-intro:'Seven AI tools in one workspace. Write, learn, translate, plan, brainstorm, chat, and create images.',
-workspaceTitle:'AI Writer',toolPill:'7 AI TOOLS',
-promptLabel:'What would you like to create?',promptPlaceholder:'Describe what you need...',
-textLabel:'Text to translate',sourceLabel:'From',targetLabel:'To',
-outputLanguageLabel:'Answer language',runButton:'Generate',clearButton:'Clear',
-resultTitle:'Result',copyButton:'Copy',downloadButton:'Download image',
-ready:'Ready',working:'Working on it…',empty:'Please enter some text first.',
-copied:'Copied to clipboard.',toastTranslation:'Interface translation unavailable. English is shown.'
+  eyebrow:'YOUR SMART WORKSPACE',
+  headline:'Think bigger. Create smarter.',
+  intro:'Seven AI tools in one workspace. Write, learn, translate, plan, brainstorm, chat, and create images.',
+  workspaceTitle:'AI Writer',
+  toolPill:'7 AI TOOLS',
+  promptLabel:'What would you like to create?',
+  promptPlaceholder:'Describe what you need...',
+  textLabel:'Text to translate',
+  sourceLabel:'From',
+  targetLabel:'To',
+  outputLanguageLabel:'Answer language',
+  runButton:'Generate',
+  clearButton:'Clear',
+  resultTitle:'Result',
+  copyButton:'Copy',
+  downloadButton:'Download image',
+  ready:'Ready',
+  working:'Working on it…',
+  empty:'Please enter some text first.',
+  copied:'Copied to clipboard.',
+  toastTranslation:'Interface translation failed. English is shown.'
 };
 
 const $ = id => document.getElementById(id);
@@ -170,16 +188,25 @@ let activeTool = 'writer';
 let uiLang = 'en';
 let uiText = {...en};
 let imageUrl = '';
+let uiTranslationRequest = 0;
 
 function escapeHtml(s) {
   return String(s).replace(/[&<>"']/g, c => ({
-    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+    '&':'&amp;',
+    '<':'&lt;',
+    '>':'&gt;',
+    '"':'&quot;',
+    "'":'&#39;'
   }[c]));
+}
+
+function languageName(code) {
+  return languages.find(l => l.code === code)?.name || 'English';
 }
 
 function fillSelect(el, selected) {
   el.innerHTML = languages.map(l =>
-    `<option value="${escapeHtml(l.code)}">${escapeHtml(l.name)}</option>`
+    `<option value="${escapeHtml(l.name)}" data-code="${escapeHtml(l.code)}">${escapeHtml(l.name)}</option>`
   ).join('');
   if (selected) el.value = selected;
 }
@@ -216,14 +243,19 @@ function selectTool(id) {
   $('workspaceTitle').textContent = t.name;
   $('promptLabel').textContent = t.label;
   $('prompt').placeholder = t.placeholder;
+
   $('standardFields').classList.toggle('hidden', id === 'translate');
   $('translateFields').classList.toggle('hidden', id !== 'translate');
   $('outputLanguageWrap').classList.toggle('hidden', id === 'translate' || id === 'image');
   $('downloadButton').classList.toggle('hidden', id !== 'image');
-  $('status').textContent = '';
 
-  if (id === 'translate') $('textLabel').textContent = t.label;
-  if (id === 'image') $('outputLanguageWrap').classList.add('hidden');
+  $('status').textContent = '';
+  $('output').textContent = '';
+
+  if (id === 'translate') {
+    $('textLabel').textContent = t.label;
+    $('translateText').placeholder = t.placeholder;
+  }
 }
 
 async function requestJson(path, body, timeoutMs = 45000) {
@@ -239,70 +271,133 @@ async function requestJson(path, body, timeoutMs = 45000) {
     });
 
     const data = await response.json().catch(() => ({}));
-    if (!response.ok) throw new Error(data.error || `Request failed (${response.status})`);
+
+    if (!response.ok || data.ok === false) {
+      throw new Error(data.error || `Request failed (${response.status})`);
+    }
+
     return data;
   } finally {
     clearTimeout(timer);
   }
 }
 
-async function translateUI(language) {
-  if (language === 'en') {
+function applyUI() {
+  const ids = [
+    'eyebrow','headline','intro','workspaceTitle','toolPill',
+    'promptLabel','textLabel','sourceLabel','targetLabel',
+    'outputLanguageLabel','runButton','clearButton','resultTitle',
+    'copyButton','downloadButton'
+  ];
+
+  ids.forEach(id => {
+    if ($(id) && uiText[id]) $(id).textContent = uiText[id];
+  });
+
+  $('prompt').placeholder = uiText.promptPlaceholder || en.promptPlaceholder;
+
+  document.documentElement.lang = uiLang;
+  document.documentElement.dir =
+    ['ku','ar','fa','ur'].includes(uiLang) ? 'rtl' : 'ltr';
+
+  // Keep the selected tool's own labels after applying interface translations.
+  const t = currentTool();
+  $('workspaceTitle').textContent = t.name;
+  $('promptLabel').textContent = t.label;
+  $('prompt').placeholder = t.placeholder;
+
+  if (activeTool === 'translate') {
+    $('textLabel').textContent = t.label;
+    $('translateText').placeholder = t.placeholder;
+  }
+}
+
+/*
+  The current Worker has /api/ai but does not have /api/ui-translate.
+  Therefore this function uses the existing /api/ai endpoint to translate
+  the interface labels. If translation fails, the app remains usable in English.
+*/
+async function translateUI(languageCode) {
+  const requestId = ++uiTranslationRequest;
+
+  if (languageCode === 'en') {
     uiText = {...en};
     applyUI();
     return;
   }
 
-  const cacheKey = 'tinvin_ui_translations_v5_' + language;
+  const language = languageName(languageCode);
+  const cacheKey = 'tinvin_ui_translation_v6_' + languageCode;
 
   try {
     const cached = localStorage.getItem(cacheKey);
     if (cached) {
-      uiText = {...en, ...JSON.parse(cached)};
-      applyUI();
-      return;
+      const parsed = JSON.parse(cached);
+      if (parsed && typeof parsed === 'object') {
+        uiText = {...en, ...parsed};
+        if (requestId === uiTranslationRequest) applyUI();
+        return;
+      }
     }
   } catch (_) {}
 
+  const labels = {
+    eyebrow:en.eyebrow,
+    headline:en.headline,
+    intro:en.intro,
+    workspaceTitle:en.workspaceTitle,
+    toolPill:en.toolPill,
+    promptLabel:en.promptLabel,
+    promptPlaceholder:en.promptPlaceholder,
+    textLabel:en.textLabel,
+    sourceLabel:en.sourceLabel,
+    targetLabel:en.targetLabel,
+    outputLanguageLabel:en.outputLanguageLabel,
+    runButton:en.runButton,
+    clearButton:en.clearButton,
+    resultTitle:en.resultTitle,
+    copyButton:en.copyButton,
+    downloadButton:en.downloadButton,
+    ready:en.ready,
+    working:en.working,
+    empty:en.empty,
+    copied:en.copied
+  };
+
   try {
-    const response = await requestJson('/api/ui-translate', {
-      language,
-      strings:en
-    }, 30000);
+    const data = await requestJson('/api/ai', {
+      tool:'chat',
+      prompt:
+        'Translate every string value in the following JSON object into ' +
+        language + '. Return ONLY a valid JSON object with exactly the same keys. ' +
+        'Do not add markdown fences or explanations. Preserve the meaning. ' +
+        'For Kurdish Sorani, use natural Iraqi Kurdish Sorani in Arabic-based script, not Arabic or Latin transliteration.\n\n' +
+        JSON.stringify(labels)
+    }, 45000);
 
-    const translations = response.translations || response.result;
-    if (!translations || typeof translations !== 'object') {
-      throw new Error('Invalid translation response');
-    }
+    if (requestId !== uiTranslationRequest) return;
 
-    uiText = {...en, ...translations};
+    let raw = String(data.result || data.answer || data.text || '').trim();
+    raw = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '');
+
+    const start = raw.indexOf('{');
+    const end = raw.lastIndexOf('}');
+    if (start < 0 || end <= start) throw new Error('Invalid interface translation.');
+
+    const translated = JSON.parse(raw.slice(start, end + 1));
+    uiText = {...en, ...translated};
     applyUI();
 
     try {
-      localStorage.setItem(cacheKey, JSON.stringify(uiText));
+      localStorage.setItem(cacheKey, JSON.stringify(translated));
     } catch (_) {}
   } catch (error) {
+    if (requestId !== uiTranslationRequest) return;
     uiText = {...en};
     applyUI();
-    showToast(en.toastTranslation);
-    console.warn('TinVin UI translation:', error);
+    showToast('Interface translation failed. English is shown.');
+    console.warn('TinVin interface translation failed:', error);
   }
-}
-
-function applyUI() {
-  const ids = [
-    'eyebrow','headline','intro','workspaceTitle','toolPill','promptLabel',
-    'textLabel','sourceLabel','targetLabel','outputLanguageLabel',
-    'runButton','clearButton','resultTitle','copyButton','downloadButton'
-  ];
-
-  ids.forEach(id => {
-    if ($ (id) && uiText[id]) $(id).textContent = uiText[id];
-  });
-
-  $('prompt').placeholder = uiText.promptPlaceholder || 'Describe what you need...';
-  document.documentElement.lang = uiLang;
-  document.documentElement.dir = ['ku','ar','fa','fa-AF','ur','ps'].includes(uiLang) ? 'rtl' : 'ltr';
 }
 
 async function runTool() {
@@ -324,16 +419,19 @@ async function runTool() {
 
   try {
     if (isImage) {
-      const data = await requestJson('/api/image', {prompt, language:uiLang}, 60000);
+      const data = await requestJson('/api/image', {prompt}, 60000);
 
       if (data.image) {
-        imageUrl = 'data:' + (data.contentType || 'image/png') + ';base64,' + data.image;
+        imageUrl = 'data:' + (data.mimeType || 'image/jpeg') + ';base64,' + data.image;
       } else if (data.url) {
         imageUrl = data.url;
       } else {
         throw new Error(data.error || 'No image was returned.');
       }
 
+      $('imageResult').onerror = () => {
+        $('status').textContent = 'The server returned an image that could not be displayed.';
+      };
       $('imageResult').src = imageUrl;
       $('imageResult').style.display = 'block';
       $('downloadButton').classList.remove('hidden');
@@ -345,25 +443,21 @@ async function runTool() {
       const data = await requestJson('/api/ai', {
         tool:'translate',
         text:prompt,
-        prompt,
-        language:target,
-        outputLanguage:target,
-        targetLanguage:target,
-        sourceLanguage:source
+        sourceLanguage:source === 'Auto-detect' ? 'Auto-detect' : source,
+        targetLanguage:target
       }, 60000);
 
-      $('output').textContent = data.answer || data.result || data.text || data.translation || '';
+      $('output').textContent = data.result || data.answer || data.text || data.translation || '';
     } else {
-      const outputLanguage = $('outputLanguage').value || uiLang;
+      const outputLanguage = $('outputLanguage').value || languageName(uiLang);
       const data = await requestJson('/api/ai', {
         tool:activeTool,
-        prompt,
-        text:prompt,
-        language:outputLanguage,
-        outputLanguage
+        prompt:
+          'Please answer in ' + outputLanguage + '.\n\n' + prompt,
+        text:prompt
       }, 60000);
 
-      $('output').textContent = data.answer || data.result || data.text || '';
+      $('output').textContent = data.result || data.answer || data.text || '';
     }
 
     if (!isImage && !$('output').textContent.trim()) {
@@ -390,6 +484,7 @@ $('clearButton').addEventListener('click', () => {
   $('prompt').value = '';
   $('translateText').value = '';
   $('output').textContent = '';
+  $('imageResult').removeAttribute('src');
   $('imageResult').style.display = 'none';
   $('status').textContent = '';
   imageUrl = '';
@@ -416,23 +511,29 @@ $('downloadButton').addEventListener('click', async () => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'tinvin-ai-image.png';
+    a.download = 'tinvin-ai-image.jpg';
+    document.body.appendChild(a);
     a.click();
-    URL.revokeObjectURL(url);
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
   } catch (_) {
     window.open(imageUrl, '_blank', 'noopener');
   }
 });
 
-fillSelect($('uiLanguage'), 'en');
-fillSelect($('sourceLanguage'), 'en');
-fillSelect($('targetLanguage'), 'ku');
-fillSelect($('outputLanguage'), 'en');
+fillSelect($('uiLanguage'), 'English');
+fillSelect($('sourceLanguage'), 'English');
+fillSelect($('targetLanguage'), 'Kurdish (Sorani)');
+fillSelect($('outputLanguage'), 'English');
 
-$('sourceLanguage').insertAdjacentHTML('afterbegin', '<option value="auto">Auto-detect</option>');
-$('sourceLanguage').value = 'auto';
+$('sourceLanguage').insertAdjacentHTML(
+  'afterbegin',
+  '<option value="Auto-detect">Auto-detect</option>'
+);
+$('sourceLanguage').value = 'Auto-detect';
+
 $('uiLanguage').addEventListener('change', async event => {
-  uiLang = event.target.value;
+  uiLang = languages.find(l => l.name === event.target.value)?.code || 'en';
   await translateUI(uiLang);
 });
 
