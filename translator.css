@@ -1,0 +1,62 @@
+
+/* TinVin AI - Translator Styles */
+
+#toolPage[data-tool="translator"] .tool-title .tool-icon {
+  color: #fff;
+  background: linear-gradient(135deg, #0ea5e9, #6366f1);
+}
+
+#toolPage[data-tool="translator"] .field textarea {
+  min-height: 180px;
+}
+
+#toolPage[data-tool="translator"] #translatorOptions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 18px 0;
+}
+
+#toolPage[data-tool="translator"] #translatorOptions.hidden {
+  display: none;
+}
+
+#toolPage[data-tool="translator"] #translatorOptions label {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 750;
+}
+
+#toolPage[data-tool="translator"] #sourceLang,
+#toolPage[data-tool="translator"] #targetLang {
+  min-width: 0;
+  width: 100%;
+  border-radius: 13px;
+  background: var(--panel-soft);
+}
+
+#toolPage[data-tool="translator"] #runBtn {
+  background: linear-gradient(135deg, #0ea5e9, #6366f1);
+}
+
+#toolPage[data-tool="translator"] #outputBox {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  line-height: 1.9;
+}
+
+#toolPage[data-tool="translator"] #toolOutput {
+  unicode-bidi: plaintext;
+}
+
+@media (max-width: 480px) {
+  #toolPage[data-tool="translator"] #translatorOptions {
+    grid-template-columns: 1fr;
+  }
+
+  #toolPage[data-tool="translator"] .action-row button {
+    flex: 1;
+  }
+}
