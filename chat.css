@@ -1,0 +1,121 @@
+
+/* TinVin AI - Chat Styles */
+
+#chatPage .chat-panel {
+  display: flex;
+  flex-direction: column;
+  min-height: 65vh;
+  overflow: hidden;
+}
+
+#chatPage .chat-history {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 14px;
+  min-height: 280px;
+  max-height: 55vh;
+  padding: 12px 4px 18px;
+  overflow-y: auto;
+  scroll-behavior: smooth;
+}
+
+#chatPage .chat-bubble {
+  width: fit-content;
+  max-width: 88%;
+  padding: 13px 16px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--panel-soft);
+  color: var(--text);
+  line-height: 1.65;
+  overflow-wrap: anywhere;
+  animation: chatMessageIn .2s ease;
+}
+
+#chatPage .chat-bubble.user {
+  align-self: flex-end;
+  border-color: transparent;
+  border-bottom-right-radius: 5px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  color: #fff;
+}
+
+#chatPage .chat-bubble.assistant {
+  align-self: flex-start;
+  border-bottom-left-radius: 5px;
+}
+
+#chatPage .chat-message {
+  white-space: pre-wrap;
+}
+
+#chatPage .chat-image {
+  display: block;
+  max-width: 100%;
+  max-height: 420px;
+  margin-top: 10px;
+  border-radius: 14px;
+  object-fit: contain;
+}
+
+#chatPage .chat-composer {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+
+#chatPage #chatInput {
+  flex: 1;
+  min-height: 48px;
+  max-height: 150px;
+  resize: vertical;
+  border-radius: 16px;
+}
+
+#chatPage #sendBtn {
+  flex: 0 0 auto;
+  min-width: 48px;
+  min-height: 48px;
+  border-radius: 15px;
+}
+
+#chatPage #newChatBtn {
+  margin-bottom: 14px;
+}
+
+#chatPage #chatStatus {
+  min-height: 20px;
+  padding: 8px 2px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+@keyframes chatMessageIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 600px) {
+  #chatPage .chat-panel {
+    min-height: 70vh;
+    padding: 15px;
+  }
+
+  #chatPage .chat-history {
+    max-height: 58vh;
+  }
+
+  #chatPage .chat-bubble {
+    max-width: 94%;
+  }
+}
