@@ -1,604 +1,396 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#f7f2ff">
-<title>TinVin AI — Smart Workspace</title>
-<style>
-:root{
-  --bg:#f7f2ff;--card:#fff;--text:#20182e;--muted:#7d748b;
-  --primary:#8954d8;--soft:#eee5ff;--border:#e9e0f5;
-  --shadow:0 8px 26px #4b26720c;--radius:20px
-}
-[data-theme="blue"]{--bg:#eff6ff;--primary:#2878d5;--soft:#dcecff;--border:#d8e7f8}
-[data-theme="green"]{--bg:#effbf5;--primary:#22966c;--soft:#d9f5e8;--border:#d6eee3}
-[data-theme="orange"]{--bg:#fff6ec;--primary:#df8520;--soft:#ffebd2;--border:#f1e0ce}
-[data-theme="pink"]{--bg:#fff1f6;--primary:#d95791;--soft:#ffe0ee;--border:#f3d9e5}
-[data-theme="dark"]{--bg:#111321;--card:#1c2033;--text:#f8f5ff;--muted:#aaa7bf;--primary:#a58aff;--soft:#302847;--border:#34354b;--shadow:0 8px 26px #0003}
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;transition:background .2s}
-button,input,textarea,select{font:inherit}
-button{cursor:pointer}
-button:disabled{opacity:.55;cursor:not-allowed}
-.app{max-width:1120px;margin:auto;padding:18px}
-.topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:24px}
-.brand{font-size:25px;font-weight:850;letter-spacing:-1px;color:var(--primary)}
-.brand span{color:var(--text)}
-.top-actions{display:flex;gap:8px;align-items:center}
-.small-btn,.back-btn{border:1px solid var(--border);background:var(--card);color:var(--text);border-radius:12px;padding:10px 13px}
-.hero{background:linear-gradient(135deg,var(--card),var(--soft));border:1px solid var(--border);border-radius:28px;padding:27px;margin-bottom:22px;box-shadow:var(--shadow)}
-.eyebrow{font-size:12px;letter-spacing:1.5px;text-transform:uppercase;font-weight:800;color:var(--primary)}
-h1{font-size:clamp(28px,5vw,43px);letter-spacing:-1.6px;line-height:1.12;margin:12px 0}
-.hero p{color:var(--muted);line-height:1.7;max-width:620px}
-.hero-chip{display:inline-block;background:var(--card);border:1px solid var(--border);padding:8px 12px;border-radius:99px;font-size:12px;margin:6px 5px 0 0}
-.section-title{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:25px 0 14px}
-.section-title h2{font-size:20px;margin:0}
-.section-title span{font-size:12px;color:var(--muted)}
-.tools-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}
-.tool-card{border:1px solid var(--border);background:var(--card);border-radius:var(--radius);padding:19px;text-align:left;color:var(--text);box-shadow:var(--shadow);min-height:165px;transition:transform .16s,border .16s}
-.tool-card:hover{transform:translateY(-3px);border-color:var(--primary)}
-.tool-icon{width:45px;height:45px;border-radius:15px;background:var(--soft);display:grid;place-items:center;font-size:23px;margin-bottom:14px}
-.tool-card h3{font-size:16px;margin:0 0 7px}
-.tool-card p{font-size:12px;color:var(--muted);line-height:1.55;margin:0}
-.footer{padding:26px 0 12px;text-align:center;font-size:12px;color:var(--muted)}
-.page{display:none}
-.page.active{display:block;animation:appear .18s ease}
-@keyframes appear{from{opacity:.5;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
-.tool-heading{display:flex;align-items:center;gap:13px;margin:20px 0}
-.tool-heading .tool-icon{flex-shrink:0;margin:0}
-.tool-heading h1{font-size:27px;margin:0 0 5px;letter-spacing:-.8px}
-.tool-heading p{margin:0;color:var(--muted);font-size:13px}
-.panel{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:19px;box-shadow:var(--shadow);margin:14px 0}
-.field-label{display:block;font-size:13px;font-weight:700;margin:0 0 8px}
-.field,.textarea,.select{width:100%;padding:13px 14px;border:1px solid var(--border);background:var(--bg);color:var(--text);border-radius:13px;outline:none}
-.field:focus,.textarea:focus,.select:focus{border-color:var(--primary)}
-.textarea{min-height:145px;resize:vertical;line-height:1.65}
-.primary-btn{background:var(--primary);color:white;border:0;border-radius:13px;padding:13px 18px;font-weight:750}
-.secondary-btn{background:var(--soft);color:var(--text);border:1px solid var(--border);border-radius:13px;padding:12px 16px}
-.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:12px}
-.two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.output{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.75;font-size:14px;min-height:35px}
-.output:empty{display:none}
-.status{font-size:12px;color:var(--muted);margin-top:9px}
-.chat-layout{display:flex;flex-direction:column;gap:12px}
-.chat-history{min-height:180px;max-height:55vh;overflow:auto;display:flex;flex-direction:column;gap:12px}
-.bubble{max-width:92%;border:1px solid var(--border);background:var(--bg);padding:12px 14px;border-radius:16px;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.65;font-size:14px}
-.bubble.user{align-self:flex-end;background:var(--soft)}
-.bubble.assistant{align-self:flex-start;background:var(--card)}
-.bubble-label{font-size:10px;font-weight:800;color:var(--primary);margin-bottom:5px}
-.chat-compose{display:flex;gap:9px;align-items:flex-end}
-.chat-compose textarea{min-height:54px;max-height:150px;flex:1;resize:vertical}
-.image-result{width:100%;max-width:700px;border-radius:16px;border:1px solid var(--border);display:block;margin-top:10px}
-.settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px}
-.settings-grid .panel{margin:0}
-.hidden{display:none!important}
-@media(max-width:700px){
- .app{padding:13px}.tools-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
- .tool-card{padding:14px;min-height:157px}.hero{padding:21px}
- .topbar{align-items:flex-start}.top-actions{flex-wrap:wrap;justify-content:flex-end}
- .two-col,.settings-grid{grid-template-columns:1fr}.chat-compose{align-items:stretch}
- .chat-compose .primary-btn{padding:10px}
-}
-@media(max-width:390px){.tools-grid{grid-template-columns:1fr}.topbar{flex-direction:column}.top-actions{justify-content:flex-start}}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0b1020">
+  <meta name="description" content="TinVin AI — Your smart AI workspace">
+  <title>TinVin AI — Smart Workspace</title>
+
+  <!-- Main styles -->
+  <link rel="stylesheet" href="style.css">
+
+  <!-- Individual tool styles -->
+  <link rel="stylesheet" href="writer.css">
+  <link rel="stylesheet" href="chat.css">
+  <link rel="stylesheet" href="translator.css">
+  <link rel="stylesheet" href="business.css">
+  <link rel="stylesheet" href="study.css">
+  <link rel="stylesheet" href="ideas.css">
+  <link rel="stylesheet" href="image.css">
+
+  <!-- QR Scanner and Premium styles -->
+  <link rel="stylesheet" href="qr.css">
+  <link rel="stylesheet" href="premium.css">
 </head>
+
 <body>
+
 <div class="app">
-<header class="topbar">
-  <div class="brand">TinVin <span>AI</span></div>
-  <div class="top-actions">
-    <button class="small-btn" id="settingsBtn" type="button">⚙ Settings</button>
-  </div>
-</header>
-<main id="homePage" class="page active">
-  <section class="hero">
-    <div class="eyebrow">✦ Your AI workspace</div>
-    <h1>Think bigger.<br>Create smarter.</h1>
-    <p>One workspace for writing, chatting, translating, studying, business ideas and AI images.</p>
-    <span class="hero-chip">✦ 7 AI tools</span>
-    <span class="hero-chip">🌍 Multilingual</span>
-    <span class="hero-chip">🎨 Personal themes</span>
+
+  <!-- TOP BAR -->
+  <header class="topbar">
+    <div class="brand">TinVin <span>AI</span></div>
+
+    <div class="top-actions">
+      <button
+        id="premiumTopBtn"
+        class="premium-top-btn"
+        type="button"
+        onclick="window.TinVinPremium?.open()">
+        👑 Premium
+      </button>
+
+      <button class="small-btn" id="settingsBtn" type="button">
+        ⚙ Settings
+      </button>
+    </div>
+  </header>
+
+
+  <!-- HOME PAGE -->
+  <main id="homePage" class="page active">
+
+    <section class="hero">
+      <div class="eyebrow">✦ Your AI workspace</div>
+
+      <h1>
+        Think bigger.<br>
+        Create smarter.
+      </h1>
+
+      <p>
+        One workspace for writing, chatting, translating,
+        studying, business ideas, QR scanning and AI images.
+      </p>
+
+      <span class="hero-chip">✦ 7 AI tools</span>
+      <span class="hero-chip">📷 QR Scanner</span>
+      <span class="hero-chip">🌍 Multilingual</span>
+      <span class="hero-chip">🎨 Personal themes</span>
+    </section>
+
+
+    <div class="section-title">
+      <h2>Your AI tools</h2>
+      <span>Choose a tool to get started</span>
+    </div>
+
+
+    <section class="tools-grid" id="toolsGrid">
+
+      <button class="tool-card" data-tool="writer" type="button">
+        <div class="tool-icon">✍️</div>
+        <h3>AI Writer</h3>
+        <p>Write posts, emails, stories and professional content.</p>
+      </button>
+
+      <button class="tool-card" data-tool="chat" type="button">
+        <div class="tool-icon">💬</div>
+        <h3>AI Chat</h3>
+        <p>Ask questions and keep your conversation history.</p>
+      </button>
+
+      <button class="tool-card" data-tool="translator" type="button">
+        <div class="tool-icon">🌍</div>
+        <h3>AI Translator</h3>
+        <p>Translate between languages with clear results.</p>
+      </button>
+
+      <button class="tool-card" data-tool="business" type="button">
+        <div class="tool-icon">📈</div>
+        <h3>Business Studio</h3>
+        <p>Explore business plans, marketing and growth ideas.</p>
+      </button>
+
+      <button class="tool-card" data-tool="study" type="button">
+        <div class="tool-icon">📚</div>
+        <h3>Study Assistant</h3>
+        <p>Understand topics, practise and learn step by step.</p>
+      </button>
+
+      <button class="tool-card" data-tool="ideas" type="button">
+        <div class="tool-icon">💡</div>
+        <h3>Idea Generator</h3>
+        <p>Discover fresh concepts for your next project.</p>
+      </button>
+
+      <button class="tool-card" data-tool="image" type="button">
+        <div class="tool-icon">🎨</div>
+        <h3>Image Generator</h3>
+        <p>Turn your imagination into an AI-generated image.</p>
+      </button>
+
+      <!-- QR Scanner card is added by app.js -->
+
+    </section>
+
+    <footer class="footer">
+      TinVin AI · Your ideas, powered by AI
+    </footer>
+
+  </main>
+
+
+
+  <!-- GENERAL TOOL PAGE -->
+  <section id="toolPage" class="page">
+
+    <button class="back-btn" id="backBtn" type="button">
+      ← Back to Home
+    </button>
+
+    <div class="tool-heading">
+      <div class="tool-icon" id="activeIcon">✍️</div>
+
+      <div>
+        <h1 id="activeTitle">AI Writer</h1>
+        <p id="activeDescription">Create something great.</p>
+      </div>
+    </div>
+
+
+    <div class="panel" id="toolPanel">
+
+      <label class="field-label" for="toolInput" id="inputLabel">
+        What would you like to create?
+      </label>
+
+      <textarea
+        class="textarea"
+        id="toolInput"
+        placeholder="Type your request here...">
+      </textarea>
+
+
+      <!-- TRANSLATOR OPTIONS -->
+      <div id="translatorOptions" class="two-col hidden" style="margin-top:13px">
+
+        <div>
+          <label class="field-label" for="sourceLang">From</label>
+          <select class="select" id="sourceLang"></select>
+        </div>
+
+        <div>
+          <label class="field-label" for="targetLang">To</label>
+          <select class="select" id="targetLang"></select>
+        </div>
+
+      </div>
+
+
+      <div id="imageHint" class="status hidden">
+        Describe the image you want to create.
+      </div>
+
+
+      <div class="actions">
+        <button class="primary-btn" id="runBtn" type="button">
+          Generate
+        </button>
+
+        <button class="secondary-btn" id="clearBtn" type="button">
+          Clear
+        </button>
+      </div>
+
+      <div id="toolStatus" class="status" role="status"></div>
+
+    </div>
+
+
+    <!-- RESULT PANEL -->
+    <div class="panel" id="outputBox">
+
+      <div class="section-title" style="margin-top:0">
+        <h2 id="resultTitle">Result</h2>
+
+        <button
+          id="copyBtn"
+          class="secondary-btn"
+          type="button">
+          Copy text
+        </button>
+      </div>
+
+      <div id="toolOutput" class="output"></div>
+
+      <img
+        id="toolImage"
+        class="image-result"
+        alt="AI-generated image"
+        hidden>
+
+    </div>
+
   </section>
-  <div class="section-title"><h2>Your AI tools</h2><span>Choose a tool to get started</span></div>
-  <section class="tools-grid" id="toolsGrid">
-    <button class="tool-card" data-tool="writer"><div class="tool-icon">✍️</div><h3>AI Writer</h3><p>Write posts, emails, stories and professional content.</p></button>
-    <button class="tool-card" data-tool="chat"><div class="tool-icon">💬</div><h3>AI Chat</h3><p>Ask questions and keep your conversation history.</p></button>
-    <button class="tool-card" data-tool="translator"><div class="tool-icon">🌍</div><h3>AI Translator</h3><p>Translate between languages with clear results.</p></button>
-    <button class="tool-card" data-tool="business"><div class="tool-icon">📈</div><h3>Business Studio</h3><p>Explore business plans, marketing and growth ideas.</p></button>
-    <button class="tool-card" data-tool="study"><div class="tool-icon">📚</div><h3>Study Assistant</h3><p>Understand topics, practise and learn step by step.</p></button>
-    <button class="tool-card" data-tool="ideas"><div class="tool-icon">💡</div><h3>Idea Generator</h3><p>Discover fresh concepts for your next project.</p></button>
-    <button class="tool-card" data-tool="image"><div class="tool-icon">🎨</div><h3>Image Generator</h3><p>Turn your imagination into an AI-generated image.</p></button>
+
+
+
+  <!-- CHAT PAGE -->
+  <section id="chatPage" class="page">
+
+    <button class="back-btn" id="chatBackBtn" type="button">
+      ← Back to Home
+    </button>
+
+    <div class="tool-heading">
+      <div class="tool-icon">💬</div>
+
+      <div>
+        <h1>AI Chat</h1>
+        <p>Your messages remain visible during the conversation.</p>
+      </div>
+    </div>
+
+
+    <div class="panel chat-layout">
+
+      <div
+        id="chatHistory"
+        class="chat-history"
+        aria-live="polite">
+      </div>
+
+      <label class="field-label" for="chatInput">
+        Message
+      </label>
+
+      <div class="chat-compose">
+
+        <textarea
+          class="textarea"
+          id="chatInput"
+          placeholder="Ask anything, or ask AI to create an image..."
+          rows="2">
+        </textarea>
+
+        <button class="primary-btn" id="sendBtn" type="button">
+          Send ↑
+        </button>
+
+      </div>
+
+      <div id="chatStatus" class="status" role="status"></div>
+
+      <div class="actions">
+        <button id="newChatBtn" class="secondary-btn" type="button">
+          New chat
+        </button>
+      </div>
+
+    </div>
+
   </section>
-  <footer class="footer">TinVin AI · Your ideas, powered by AI</footer>
-</main>
-<section id="toolPage" class="page">
-  <button class="back-btn" id="backBtn" type="button">← Back to Home</button>
-  <div class="tool-heading">
-    <div class="tool-icon" id="activeIcon">✍️</div>
-    <div><h1 id="activeTitle">AI Writer</h1><p id="activeDescription">Create something great.</p></div>
-  </div>
-  <div class="panel" id="toolPanel">
-    <label class="field-label" for="toolInput" id="inputLabel">What would you like to create?</label>
-    <textarea class="textarea" id="toolInput" placeholder="Type your request here..."></textarea>
-    <div id="translatorOptions" class="two-col hidden" style="margin-top:13px">
-      <div><label class="field-label" for="sourceLang">From</label><select class="select" id="sourceLang"></select></div>
-      <div><label class="field-label" for="targetLang">To</label><select class="select" id="targetLang"></select></div>
+
+
+
+  <!-- SETTINGS PAGE -->
+  <section id="settingsPage" class="page">
+
+    <button class="back-btn" id="settingsBackBtn" type="button">
+      ← Back to Home
+    </button>
+
+    <div class="tool-heading">
+      <div class="tool-icon">⚙️</div>
+
+      <div>
+        <h1>Settings</h1>
+        <p>Personalize your TinVin AI workspace.</p>
+      </div>
     </div>
-    <div id="imageHint" class="status hidden">Describe the image you want to create.</div>
-    <div class="actions">
-      <button class="primary-btn" id="runBtn" type="button">Generate</button>
-      <button class="secondary-btn" id="clearBtn" type="button">Clear</button>
+
+
+    <div class="settings-grid">
+
+      <!-- THEME SETTINGS -->
+      <div class="panel">
+
+        <label class="field-label" for="themeSelect">
+          Color theme
+        </label>
+
+        <select id="themeSelect" class="select">
+
+          <option value="black">Black Mode</option>
+          <option value="navy">Navy Gold</option>
+          <option value="blue">Ocean Blue</option>
+          <option value="purple">Lavender Purple</option>
+          <option value="green">Emerald Green</option>
+          <option value="pink">Soft Pink</option>
+          <option value="orange">Warm Orange</option>
+
+        </select>
+
+      </div>
+
+
+      <!-- LANGUAGE SETTINGS -->
+      <div class="panel">
+
+        <label class="field-label" for="interfaceLang">
+          Interface language
+        </label>
+
+        <select id="interfaceLang" class="select">
+
+          <option value="English">English</option>
+          <option value="Sorani Kurdish">کوردیی سۆرانی</option>
+          <option value="Kurmanji Kurdish">Kurdî Kurmancî</option>
+          <option value="Arabic">العربية</option>
+          <option value="Spanish">Español</option>
+          <option value="French">Français</option>
+          <option value="Portuguese">Português</option>
+          <option value="German">Deutsch</option>
+          <option value="Turkish">Türkçe</option>
+          <option value="Persian">فارسی</option>
+          <option value="Russian">Русский</option>
+          <option value="Chinese Simplified">简体中文</option>
+          <option value="Japanese">日本語</option>
+          <option value="Korean">한국어</option>
+          <option value="Hindi">हिन्दी</option>
+          <option value="Urdu">اردو</option>
+          <option value="Italian">Italiano</option>
+          <option value="Dutch">Nederlands</option>
+          <option value="Ukrainian">Українська</option>
+          <option value="Polish">Polski</option>
+
+        </select>
+
+        <p class="status">
+          Choose a language to translate the visible interface.
+          Tool responses can use other languages too.
+        </p>
+
+        <div id="languageStatus" class="status" role="status"></div>
+
+      </div>
+
     </div>
-    <div id="toolStatus" class="status" role="status"></div>
-  </div>
-  <div class="panel">
-    <div class="section-title" style="margin-top:0"><h2 id="resultTitle">Result</h2><button id="copyBtn" class="secondary-btn" type="button">Copy text</button></div>
-    <div id="toolOutput" class="output"></div>
-    <div id="toolImage"></div>
-  </div>
-</section>
-<section id="chatPage" class="page">
-  <button class="back-btn" id="chatBackBtn" type="button">← Back to Home</button>
-  <div class="tool-heading"><div class="tool-icon">💬</div><div><h1>AI Chat</h1><p>Your messages remain visible during the conversation.</p></div></div>
-  <div class="panel chat-layout">
-    <div id="chatHistory" class="chat-history" aria-live="polite"></div>
-    <label class="field-label" for="chatInput">Message</label>
-    <div class="chat-compose">
-      <textarea class="textarea" id="chatInput" placeholder="Ask anything, or ask AI to create an image..." rows="2"></textarea>
-      <button class="primary-btn" id="sendBtn" type="button">Send ↑</button>
-    </div>
-    <div id="chatStatus" class="status" role="status"></div>
-    <div class="actions"><button id="newChatBtn" class="secondary-btn" type="button">New chat</button></div>
-  </div>
-</section>
-<section id="settingsPage" class="page">
-  <button class="back-btn" id="settingsBackBtn" type="button">← Back to Home</button>
-  <div class="tool-heading"><div class="tool-icon">⚙️</div><div><h1>Settings</h1><p>Personalize your TinVin AI workspace.</p></div></div>
-  <div class="settings-grid">
-    <div class="panel">
-      <label class="field-label" for="themeSelect">Color theme</label>
-      <select id="themeSelect" class="select">
-        <option value="purple">Lavender purple</option><option value="blue">Ocean blue</option>
-        <option value="green">Emerald green</option><option value="orange">Warm orange</option>
-        <option value="pink">Soft pink</option><option value="dark">Dark mode</option>
-      </select>
-    </div>
-    <div class="panel">
-      <label class="field-label" for="interfaceLang">Interface language</label>
-      <select id="interfaceLang" class="select">
-        <option value="English">English</option>
-        <option value="Sorani Kurdish">کوردیی سۆرانی</option>
-        <option value="Kurmanji Kurdish">Kurdî Kurmancî</option>
-        <option value="Arabic">العربية</option>
-        <option value="Spanish">Español</option><option value="French">Français</option>
-        <option value="Portuguese">Português</option><option value="German">Deutsch</option>
-        <option value="Turkish">Türkçe</option><option value="Persian">فارسی</option>
-        <option value="Russian">Русский</option><option value="Chinese Simplified">简体中文</option>
-        <option value="Japanese">日本語</option><option value="Korean">한국어</option>
-        <option value="Hindi">हिन्दी</option><option value="Urdu">اردو</option>
-        <option value="Italian">Italiano</option><option value="Dutch">Nederlands</option>
-        <option value="Ukrainian">Українська</option><option value="Polish">Polski</option>
-      </select>
-      <p class="status">Choose a language to translate the visible interface. Tool responses can use other languages too.</p>
-      <div id="languageStatus" class="status" role="status"></div>
-    </div>
-  </div>
-</section>
+
+  </section>
+
 </div>
-<script>
-(() => {
-"use strict";
-const API_BASE = "https://tinvin-ai-server.aslan89aslan1.workers.dev";
-const definitions = {
-  writer:{title:"AI Writer",icon:"✍️",description:"Create clear, polished and engaging content.",label:"What would you like me to write?",placeholder:"Write a professional email, social post, story..."},
-  chat:{title:"AI Chat",icon:"💬",description:"Ask questions and explore ideas.",label:"Your message",placeholder:"Ask your question..."},
-  translator:{title:"AI Translator",icon:"🌍",description:"Translate text into your chosen language.",label:"Text to translate",placeholder:"Paste the text you want translated..."},
-  business:{title:"Business Studio",icon:"📈",description:"Build your next business idea.",label:"What business task can I help with?",placeholder:"Create a business plan, marketing strategy..."},
-  study:{title:"Study Assistant",icon:"📚",description:"Learn complicated topics step by step.",label:"What would you like to learn?",placeholder:"Explain a topic or create a study plan..."},
-  ideas:{title:"Idea Generator",icon:"💡",description:"Generate useful, original ideas.",label:"What do you need ideas for?",placeholder:"Give me ideas for an app, business, content..."},
-  image:{title:"Image Generator",icon:"🎨",description:"Create an image from a text prompt.",label:"Describe the image you want",placeholder:"A beautiful futuristic city at sunset..."}
-};
-const languages = [
-"English","Sorani Kurdish","Kurmanji Kurdish","Arabic","Persian","Turkish",
-"Spanish","French","German","Italian","Portuguese","Brazilian Portuguese",
-"Russian","Ukrainian","Polish","Dutch","Swedish","Norwegian","Danish","Finnish",
-"Greek","Romanian","Hungarian","Czech","Slovak","Bulgarian","Serbian","Croatian",
-"Bosnian","Albanian","Macedonian","Armenian","Georgian","Azerbaijani","Kazakh",
-"Uzbek","Turkmen","Pashto","Urdu","Hindi","Bengali","Punjabi","Gujarati","Marathi",
-"Tamil","Telugu","Malayalam","Kannada","Thai","Vietnamese","Indonesian","Malay",
-"Filipino","Chinese Simplified","Chinese Traditional","Japanese","Korean","Swahili",
-"Amharic","Somali","Hausa","Yoruba","Zulu","Afrikaans","Nepali","Sinhala","Khmer",
-"Lao","Mongolian","Burmese"
-];
-const $ = id => document.getElementById(id);
-const pages = ["homePage","toolPage","chatPage","settingsPage"];
-let activeTool = "writer";
-let lastOutput = "";
-let chatMessages = [];
-let busy = false;
-let translationRun = 0;
-let translatedNodes = [];
-const originalText = new WeakMap();
-const originalPlaceholders = new WeakMap();
-function showPage(id) {
-  pages.forEach(p => $(p).classList.toggle("active",p === id));
-  window.scrollTo({top:0,behavior:"smooth"});
-}
-function applyTheme(theme) {
-  if(!["purple","blue","green","orange","pink","dark"].includes(theme)) theme = "purple";
-  if(theme === "purple") document.documentElement.removeAttribute("data-theme");
-  else document.documentElement.dataset.theme = theme;
-  localStorage.setItem("tinvin_theme",theme);
-  $("themeSelect").value = theme;
-}
-function setStatus(id,text) {
-  $(id).textContent = text || "";
-}
-function fillLanguageMenus() {
-  for(const id of ["sourceLang","targetLang"]) {
-    const sel = $(id);
-    sel.replaceChildren();
-    languages.forEach(name => {
-      const opt = document.createElement("option");
-      opt.value = name;
-      opt.textContent = name;
-      sel.appendChild(opt);
-    });
-  }
-  $("sourceLang").value = "English";
-  $("targetLang").value = "Sorani Kurdish";
-}
-async function postJSON(path,data) {
-  const response = await fetch(API_BASE + path,{
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body:JSON.stringify(data)
-  });
-  let result;
-  try { result = await response.json(); }
-  catch { throw new Error("The server returned an unreadable response."); }
-  if(!response.ok || result.ok === false) {
-    throw new Error(result.error || result.message || ("Request failed (" + response.status + ")"));
-  }
-  return result;
-}
-function extractText(data) {
-  if(typeof data.text === "string") return data.text;
-  if(typeof data.output === "string") return data.output;
-  if(typeof data.response === "string") return data.response;
-  if(typeof data.result === "string") return data.result;
-  const c = data.choices?.[0]?.message?.content;
-  if(typeof c === "string") return c;
-  if(Array.isArray(c)) return c.map(x => x.text || "").join("\n");
-  return "";
-}
-function makeImage(data,container) {
-  const raw = data.image || data.base64 || data.data;
-  if(!raw) return false;
-  const img = document.createElement("img");
-  img.className = "image-result";
-  img.alt = "AI-generated image";
-  img.src = raw.startsWith("data:") ? raw :
-    `data:${data.mimeType || "image/png"};base64,${raw}`;
-  container.appendChild(img);
-  return true;
-}
-function imageIntent(text) {
-  return /\b(generate|create|draw|make|design|render)\b.{0,45}\b(image|picture|illustration|artwork|logo)\b|\b(image|picture|illustration|artwork|logo)\b.{0,35}\b(of|showing|with)\b/i.test(text);
-}
-function openTool(key) {
-  if(!definitions[key]) return;
-  activeTool = key;
-  if(key === "chat") {
-    showPage("chatPage");
-    $("chatInput").focus();
-    return;
-  }
-  const d = definitions[key];
-  $("activeTitle").textContent = d.title;
-  $("activeIcon").textContent = d.icon;
-  $("activeDescription").textContent = d.description;
-  $("inputLabel").textContent = d.label;
-  $("toolInput").placeholder = d.placeholder;
-  $("toolInput").value = "";
-  $("toolOutput").textContent = "";
-  $("toolImage").replaceChildren();
-  $("translatorOptions").classList.toggle("hidden",key !== "translator");
-  $("imageHint").classList.toggle("hidden",key !== "image");
-  $("resultTitle").textContent = key === "image" ? "Generated image" : "Result";
-  $("copyBtn").classList.toggle("hidden",key === "image");
-  $("runBtn").textContent = key === "image" ? "Generate image" : key === "translator" ? "Translate" : "Generate";
-  setStatus("toolStatus","");
-  lastOutput = "";
-  showPage("toolPage");
-  const lang = localStorage.getItem("tinvin_language") || "English";
-  if(lang !== "English") translateInterface(lang);
-  $("toolInput").focus();
-}
-async function runTool() {
-  if(busy) return;
-  const input = $("toolInput").value.trim();
-  if(!input) {
-    setStatus("toolStatus","Please enter a request first.");
-    return;
-  }
-  busy = true;
-  $("runBtn").disabled = true;
-  $("toolOutput").textContent = "";
-  $("toolImage").replaceChildren();
-  setStatus("toolStatus","Working...");
-  try {
-    let data;
-    if(activeTool === "image" || imageIntent(input)) {
-      data = await postJSON("/api/image",{prompt:input});
-      if(!makeImage(data,$("toolImage"))) {
-        throw new Error("The server did not return an image. Check the Worker image binding.");
-      }
-      lastOutput = "";
-    } else {
-      const payload = {tool:activeTool,message:input,prompt:input};
-      if(activeTool === "translator") {
-        payload.sourceLanguage = $("sourceLang").value;
-        payload.targetLanguage = $("targetLang").value;
-      }
-      data = await postJSON("/api/ai",payload);
-      const answer = extractText(data);
-      if(!answer) throw new Error("The server returned no text.");
-      lastOutput = answer;
-      $("toolOutput").textContent = answer;
-    }
-    setStatus("toolStatus","Finished.");
-  } catch(err) {
-    setStatus("toolStatus","Error: " + (err.message || "Request failed"));
-  } finally {
-    busy = false;
-    $("runBtn").disabled = false;
-  }
-}
-function addBubble(role,text,imageData) {
-  const bubble = document.createElement("div");
-  bubble.className = "bubble " + role;
-  const label = document.createElement("div");
-  label.className = "bubble-label";
-  label.textContent = role === "user" ? "YOU" : "TINVIN AI";
-  bubble.appendChild(label);
-  if(text) {
-    const body = document.createElement("div");
-    body.textContent = text;
-    bubble.appendChild(body);
-  }
-  if(imageData) {
-    const holder = document.createElement("div");
-    if(!makeImage(imageData,holder)) {
-      const note = document.createElement("div");
-      note.textContent = "Image could not be displayed.";
-      holder.appendChild(note);
-    }
-    bubble.appendChild(holder);
-  }
-  $("chatHistory").appendChild(bubble);
-  $("chatHistory").scrollTop = $("chatHistory").scrollHeight;
-}
-async function sendChat() {
-  if(busy) return;
-  const input = $("chatInput");
-  const text = input.value.trim();
-  if(!text) return;
-  // Keep the existing chat behavior: clear only the composer,
-  // preserve visible messages and send prior turns separately.
-  input.value = "";
-  const previousHistory = chatMessages.map(item => ({...item}));
-  chatMessages.push({role:"user",content:text});
-  addBubble("user",text);
-  busy = true;
-  $("sendBtn").disabled = true;
-  setStatus("chatStatus","TinVin AI is thinking...");
-  try {
-    if(imageIntent(text)) {
-      const data = await postJSON("/api/image",{prompt:text});
-      if(!data.image && !data.base64 && !data.data) {
-        throw new Error("No image was returned by the server.");
-      }
-      chatMessages.push({role:"assistant",content:"[Generated image]"});
-      addBubble("assistant","Here is your generated image:",data);
-    } else {
-      const data = await postJSON("/api/ai",{
-        tool:"chat",message:text,history:previousHistory
-      });
-      const answer = extractText(data);
-      if(!answer) throw new Error("The server returned no text.");
-      chatMessages.push({role:"assistant",content:answer});
-      addBubble("assistant",answer);
-    }
-    setStatus("chatStatus","");
-  } catch(err) {
-    setStatus("chatStatus","Error: " + (err.message || "Request failed"));
-  } finally {
-    busy = false;
-    $("sendBtn").disabled = false;
-    input.focus();
-  }
-}
-function rememberOriginalTextNodes() {
-  const walker = document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);
-  let node;
-  while((node = walker.nextNode())) {
-    const parent = node.parentElement;
-    if(!parent || parent.closest("script,style,.brand")) continue;
-    if(!node.nodeValue.trim()) continue;
-    if(!originalText.has(node)) originalText.set(node,node.nodeValue);
-  }
-  document.querySelectorAll("[placeholder]").forEach(el => {
-    if(!originalPlaceholders.has(el)) {
-      originalPlaceholders.set(el,el.getAttribute("placeholder"));
-    }
-  });
-}
-function restoreEnglishText() {
-  for(const [node,original] of translatedNodes) {
-    if(node.isConnected) node.nodeValue = original;
-  }
-  translatedNodes = [];
-  document.querySelectorAll("[placeholder]").forEach(el => {
-    const original = originalPlaceholders.get(el);
-    if(original !== undefined) el.setAttribute("placeholder",original);
-  });
-}
-function getTranslatableNodes() {
-  rememberOriginalTextNodes();
-  const items = [];
-  const walker = document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);
-  let node;
-  while((node = walker.nextNode())) {
-    const parent = node.parentElement;
-    if(!parent || !node.nodeValue.trim()) continue;
-    if(parent.closest("script,style,.brand")) continue;
-    if(parent.closest("#sourceLang,#targetLang,#interfaceLang,#themeSelect")) continue;
-    const original = originalText.get(node) ?? node.nodeValue;
-    items.push({node,original});
-  }
-  return items;
-}
-async function translateInterface(language) {
-  const runId = ++translationRun;
-  restoreEnglishText();
-  if(!language || language === "English") {
-    document.documentElement.lang = "en";
-    setStatus("languageStatus","Interface language: English");
-    return;
-  }
-  setStatus("languageStatus","Translating interface...");
-  const items = getTranslatableNodes();
-  const batchSize = 20;
-  try {
-    for(let start = 0; start < items.length; start += batchSize) {
-      if(runId !== translationRun) return;
-      const batch = items.slice(start,start + batchSize);
-      const payload = {};
-      batch.forEach((item,index) => payload["s" + index] = item.original.trim());
-      const result = await postJSON("/api/ai",{
-        tool:"ui-translate",
-        message:JSON.stringify(payload),
-        targetLanguage:language
-      });
-      let translated;
-      try {
-        const raw = extractText(result);
-        const clean = raw.replace(/^```(?:json)?\s*/i,"").replace(/\s*```$/,"");
-        translated = JSON.parse(clean);
-      } catch {
-        throw new Error("The translation service returned invalid JSON.");
-      }
-      if(!translated || typeof translated !== "object") {
-        throw new Error("The translation service returned an invalid result.");
-      }
-      if(runId !== translationRun) return;
-      batch.forEach((item,index) => {
-        const value = translated["s" + index];
-        if(typeof value === "string" && value.trim()) {
-          translatedNodes.push([item.node,item.original]);
-          item.node.nodeValue = item.original.replace(item.original.trim(),value.trim());
-        }
-      });
-    }
-    const fields = [...document.querySelectorAll("input[placeholder],textarea[placeholder]")];
-    const fieldData = fields.map(el => ({
-      el,original:originalPlaceholders.get(el) ?? el.getAttribute("placeholder")
-    })).filter(x => x.original);
-    for(let start = 0; start < fieldData.length; start += 20) {
-      if(runId !== translationRun) return;
-      const batch = fieldData.slice(start,start + 20);
-      const obj = {};
-      batch.forEach((x,i) => obj["p" + i] = x.original);
-      const result = await postJSON("/api/ai",{
-        tool:"ui-translate",
-        message:JSON.stringify(obj),
-        targetLanguage:language
-      });
-      let translated = {};
-      try {
-        const raw = extractText(result);
-        translated = JSON.parse(raw.replace(/^```(?:json)?\s*/i,"").replace(/\s*```$/,""));
-      } catch {}
-      if(runId === translationRun) {
-        batch.forEach((x,i) => {
-          if(typeof translated["p" + i] === "string") {
-            x.el.setAttribute("placeholder",translated["p" + i]);
-          }
-        });
-      }
-    }
-    document.documentElement.lang =
-      language === "Sorani Kurdish" ? "ckb" :
-      language === "Arabic" ? "ar" :
-      language === "Kurmanji Kurdish" ? "ku-Latn" : "en";
-    setStatus("languageStatus","Interface translated to " + language + ".");
-  } catch(err) {
-    if(runId === translationRun) {
-      setStatus("languageStatus","Could not translate the full interface: " + (err.message || "Please try again."));
-    }
-  }
-}
-$("toolsGrid").addEventListener("click",e => {
-  const card = e.target.closest("[data-tool]");
-  if(card) openTool(card.dataset.tool);
-});
-$("backBtn").addEventListener("click",() => showPage("homePage"));
-$("chatBackBtn").addEventListener("click",() => showPage("homePage"));
-$("settingsBackBtn").addEventListener("click",() => showPage("homePage"));
-$("settingsBtn").addEventListener("click",() => showPage("settingsPage"));
-$("runBtn").addEventListener("click",runTool);
-$("sendBtn").addEventListener("click",sendChat);
-$("chatInput").addEventListener("keydown",e => {
-  if(e.key === "Enter" && !e.shiftKey) {
-    e.preventDefault();
-    sendChat();
-  }
-});
-$("toolInput").addEventListener("keydown",e => {
-  if(e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
-    e.preventDefault();
-    runTool();
-  }
-});
-$("clearBtn").addEventListener("click",() => {
-  $("toolInput").value = "";
-  $("toolOutput").textContent = "";
-  $("toolImage").replaceChildren();
-  lastOutput = "";
-  setStatus("toolStatus","");
-});
-$("copyBtn").addEventListener("click",async() => {
-  if(!lastOutput) return;
-  try {
-    await navigator.clipboard.writeText(lastOutput);
-    setStatus("toolStatus","Copied to clipboard.");
-  } catch {
-    setStatus("toolStatus","Copy is unavailable in this browser.");
-  }
-});
-$("newChatBtn").addEventListener("click",() => {
-  chatMessages = [];
-  $("chatHistory").replaceChildren();
-  setStatus("chatStatus","");
-});
-$("themeSelect").addEventListener("change",e => applyTheme(e.target.value));
-$("interfaceLang").addEventListener("change",async e => {
-  const language = e.target.value;
-  localStorage.setItem("tinvin_language",language);
-  await translateInterface(language);
-});
-fillLanguageMenus();
-applyTheme(localStorage.getItem("tinvin_theme") || "purple");
-$("interfaceLang").value = localStorage.getItem("tinvin_language") || "English";
-rememberOriginalTextNodes();
-const savedLanguage = localStorage.getItem("tinvin_language") || "English";
-if(savedLanguage !== "English") translateInterface(savedLanguage);
-})();
-</script>
+
+
+<!-- APPLICATION SCRIPTS -->
+<!-- defer keeps the execution order after the HTML is loaded -->
+
+<script src="app.js" defer></script>
+
+<script src="writer.js" defer></script>
+<script src="chat.js" defer></script>
+<script src="translator.js" defer></script>
+<script src="business.js" defer></script>
+<script src="study.js" defer></script>
+<script src="ideas.js" defer></script>
+<script src="image.js" defer></script>
+
+<!-- Keep these existing files -->
 <script src="qr.js" defer></script>
 <script src="premium.js" defer></script>
-</body>
+
 </body>
 </html>
