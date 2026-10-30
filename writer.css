@@ -1,0 +1,38 @@
+
+/* TinVin AI - Writer Tool */
+
+#toolPage[data-tool="writer"] .tool-title {
+  position: relative;
+}
+
+#toolPage[data-tool="writer"] .tool-title .tool-icon {
+  background: linear-gradient(135deg, #8b5cf6, #51b8ff);
+  color: #fff;
+}
+
+#toolPage[data-tool="writer"] .field textarea {
+  min-height: 190px;
+}
+
+#toolPage[data-tool="writer"] #runBtn {
+  background: linear-gradient(135deg, #8b5cf6, #51b8ff);
+}
+
+#toolPage[data-tool="writer"] #outputBox {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+#toolPage[data-tool="writer"] #copyBtn {
+  margin-top: 12px;
+}
+
+@media (max-width: 600px) {
+  #toolPage[data-tool="writer"] .field textarea {
+    min-height: 160px;
+  }
+
+  #toolPage[data-tool="writer"] .action-row button {
+    flex: 1;
+  }
+}
