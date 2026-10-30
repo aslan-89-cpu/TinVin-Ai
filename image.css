@@ -1,0 +1,93 @@
+/* TinVin AI - Image Generator */
+
+#toolPage[data-tool="image"] .tool-title {
+  color: var(--gold, #e9bd63);
+}
+
+#toolPage[data-tool="image"] .field {
+  margin-bottom: 20px;
+}
+
+#toolPage[data-tool="image"] .field label {
+  display: block;
+  margin-bottom: 10px;
+  color: var(--text, #ffffff);
+  font-weight: 600;
+}
+
+#toolPage[data-tool="image"] .field textarea,
+#toolPage[data-tool="image"] #toolInput {
+  width: 100%;
+  min-height: 130px;
+  padding: 16px;
+  border: 1px solid rgba(233, 189, 99, 0.3);
+  border-radius: 16px;
+  outline: none;
+  background: rgba(255, 255, 255, 0.045);
+  color: var(--text, #ffffff);
+  font: inherit;
+  resize: vertical;
+}
+
+#toolPage[data-tool="image"] #toolInput:focus {
+  border-color: var(--gold, #e9bd63);
+  box-shadow: 0 0 0 3px rgba(233, 189, 99, 0.1);
+}
+
+#toolPage[data-tool="image"] #runBtn {
+  width: 100%;
+  min-height: 50px;
+  border: 0;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #e9bd63, #c99535);
+  color: #111827;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 0.2s, opacity 0.2s;
+}
+
+#toolPage[data-tool="image"] #runBtn:hover {
+  transform: translateY(-2px);
+}
+
+#toolPage[data-tool="image"] #runBtn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+#toolPage[data-tool="image"] #outputBox {
+  display: none;
+  margin-top: 22px;
+  padding: 16px;
+  border: 1px solid rgba(233, 189, 99, 0.25);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+#toolPage[data-tool="image"] #outputBox.show {
+  display: block;
+}
+
+#toolPage[data-tool="image"] #toolImage {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 600px;
+  object-fit: contain;
+  border-radius: 14px;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+#toolPage[data-tool="image"] #toolImage[hidden] {
+  display: none;
+}
+
+#toolPage[data-tool="image"] #copyBtn {
+  margin-top: 14px;
+  border: 1px solid rgba(233, 189, 99, 0.4);
+  border-radius: 10px;
+  padding: 10px 16px;
+  background: rgba(233, 189, 99, 0.1);
+  color: var(--gold, #e9bd63);
+  cursor: pointer;
+}
