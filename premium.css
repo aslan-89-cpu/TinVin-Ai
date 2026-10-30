@@ -1,0 +1,127 @@
+/* TinVin AI - Premium Design */
+
+#premiumPage,
+.premium-page {
+  width: 100%;
+  padding: 20px;
+}
+
+.premium-card {
+  position: relative;
+  width: 100%;
+  max-width: 650px;
+  margin: 0 auto;
+  padding: 24px;
+  overflow: hidden;
+  border: 1px solid rgba(233, 189, 99, 0.45);
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at top right, rgba(233, 189, 99, 0.18), transparent 45%),
+    linear-gradient(145deg, #20243a, #111827);
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.3);
+}
+
+.premium-card h2,
+.premium-title {
+  color: #e9bd63;
+  font-weight: 900;
+}
+
+.premium-card p {
+  color: rgba(255, 255, 255, 0.78);
+  line-height: 1.7;
+}
+
+.premium-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 14px;
+  border: 1px solid rgba(233, 189, 99, 0.4);
+  border-radius: 30px;
+  background: rgba(233, 189, 99, 0.12);
+  color: #e9bd63;
+  font-weight: 800;
+}
+
+.premium-plans {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+  margin-top: 22px;
+}
+
+.premium-plan {
+  padding: 18px;
+  border: 1px solid rgba(233, 189, 99, 0.25);
+  border-radius: 17px;
+  background: rgba(255, 255, 255, 0.045);
+  transition: transform 0.2s, border-color 0.2s;
+}
+
+.premium-plan:hover {
+  transform: translateY(-3px);
+  border-color: #e9bd63;
+}
+
+.premium-plan h3 {
+  color: #ffffff;
+  margin-bottom: 8px;
+}
+
+.premium-price {
+  color: #e9bd63;
+  font-size: 27px;
+  font-weight: 900;
+}
+
+.premium-plan button,
+.premium-button {
+  width: 100%;
+  min-height: 48px;
+  margin-top: 14px;
+  border: 0;
+  border-radius: 13px;
+  background: linear-gradient(135deg, #e9bd63, #c99535);
+  color: #111827;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.premium-plan button:hover,
+.premium-button:hover {
+  filter: brightness(1.1);
+}
+
+.premium-features {
+  display: grid;
+  gap: 12px;
+  margin-top: 22px;
+}
+
+.premium-feature {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #ffffff;
+}
+
+.premium-feature::before {
+  content: "✓";
+  color: #e9bd63;
+  font-weight: 900;
+}
+
+.premium-payment {
+  margin-top: 22px;
+  padding: 16px;
+  border: 1px solid rgba(233, 189, 99, 0.2);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.035);
+}
+
+@media (min-width: 600px) {
+  .premium-plans {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
