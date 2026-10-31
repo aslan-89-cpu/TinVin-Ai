@@ -9,23 +9,41 @@
     return;
   }
 
-  const { $, postJSON, extractText, setStatus, setLastOutput } = core;
+  const {
+    $,
+    postJSON,
+    extractText,
+    setStatus,
+    setLastOutput
+  } = core;
+
+  let busy = false;
 
   async function run() {
-    const input = $("toolInput");
-    const output = $("toolOutput");
-    const resultBox = $("outputBox");
+    if (busy) return;
+
+    const input = $("writerInput");
+    const output = $("writerOutput");
+    const resultBox = $("writerOutputBox");
+    const runBtn = $("writerRunBtn");
 
     const message = input?.value.trim();
 
     if (!message) {
-      setStatus("toolStatus", "Please enter what you want me to write.");
+      setStatus(
+        "writerStatus",
+        "Please enter what you want me to write."
+      );
       return;
     }
 
-    setStatus("toolStatus", "Writing your content...");
+    busy = true;
+    runBtn.disabled = true;
+    runBtn.textContent = "Writing...";
+
+    setStatus("writerStatus", "Writing your content...");
     output.textContent = "";
-    resultBox?.classList.remove("show");
+    resultBox.classList.add("hidden");
 
     try {
       const result = await postJSON("/api/ai", {
@@ -41,18 +59,54 @@
 
       output.textContent = text;
       setLastOutput(text);
-      resultBox?.classList.add("show");
 
-      setStatus("toolStatus", "Your content is ready.");
+      resultBox.classList.remove("hidden");
+
+      setStatus("writerStatus", "Your content is ready.");
     } catch (error) {
       setStatus(
-        "toolStatus",
+        "writerStatus",
         error.message || "Writer request failed. Please try again."
       );
+    } finally {
+      busy = false;
+      runBtn.disabled = false;
+      runBtn.textContent = "Generate";
     }
   }
 
-  window.TinVinTools = window.TinVinTools || {};
-  window.TinVinTools.writer = { run };
+  function clear() {
+    $("writerInput").value = "";
+    $("writerOutput").textContent = "";
+    $("writerOutputBox").classList.add("hidden");
+    setStatus("writerStatus", "");
+    setLastOutput("");
+  }
 
+  async function copy() {
+    const text = $("writerOutput").textContent;
+
+    if (!text) return;
+
+    try {
+      await navigator.clipboard.writeText(text);
+      setStatus("writerStatus", "Copied to clipboard.");
+    } catch {
+      setStatus("writerStatus", "Copy is unavailable in this browser.");
+    }
+  }
+
+  $("writerRunBtn").addEventListener("click", run);
+  $("writerClearBtn").addEventListener("click", clear);
+  $("writerCopyBtn").addEventListener("click", copy);
+
+  $("writerInput").addEventListener("keydown", event => {
+    if (event.key === "Enter" && (event.ctrlKey || event.metaKey)) {
+      event.preventDefault();
+      run();
+    }
+  });
+
+  window.TinVinTools = window.TinVinTools || {};
+  window.TinVinTools.writer = { run, clear };
 })();
