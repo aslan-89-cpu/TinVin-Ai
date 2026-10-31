@@ -2,6 +2,7 @@
 /* =========================================
    TinVin AI - QR Scanner & Generator
    Standalone frontend module
+   Floating QR button removed
 ========================================= */
 
 (() => {
@@ -51,22 +52,6 @@
   const style = document.createElement("style");
 
   style.textContent = `
-    #tinvin-qr-button {
-      position: fixed;
-      right: 18px;
-      bottom: 95px;
-      z-index: 9990;
-      border: 1px solid rgba(233,189,99,.5);
-      border-radius: 50px;
-      padding: 12px 17px;
-      color: #111827;
-      background: linear-gradient(135deg,#f5d78b,#d6a83e);
-      font-size: 14px;
-      font-weight: 800;
-      cursor: pointer;
-      box-shadow: 0 5px 22px rgba(0,0,0,.25);
-    }
-
     #tinvin-qr-overlay {
       position: fixed;
       inset: 0;
@@ -327,12 +312,6 @@
 
   document.body.appendChild(overlay);
 
-  const button = document.createElement("button");
-  button.id = "tinvin-qr-button";
-  button.type = "button";
-  button.textContent = "▦ QR Tools";
-  document.body.appendChild(button);
-
   const $ = id => document.getElementById(id);
 
   function showMode(mode) {
@@ -506,10 +485,6 @@
     link.download = "TinVin-QR.png";
     link.click();
   }
-
-  button.addEventListener("click", () => {
-    overlay.classList.add("open");
-  });
 
   $("tvqr-close").addEventListener("click", async () => {
     await stopScanner();
