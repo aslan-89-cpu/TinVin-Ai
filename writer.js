@@ -30,16 +30,13 @@
     const message = input?.value.trim();
 
     if (!message) {
-      setStatus(
-        "writerStatus",
-        "Please enter what you want me to write."
-      );
+      setStatus("writerStatus", "Please enter what you want me to write.");
       return;
     }
 
     busy = true;
     runBtn.disabled = true;
-    runBtn.textContent = "Writing...";
+    runBtn.textContent = "Sending...";
 
     setStatus("writerStatus", "Writing your content...");
     output.textContent = "";
@@ -71,7 +68,7 @@
     } finally {
       busy = false;
       runBtn.disabled = false;
-      runBtn.textContent = "Generate";
+      runBtn.textContent = "Send";
     }
   }
 
