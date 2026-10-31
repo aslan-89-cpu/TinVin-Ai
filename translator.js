@@ -2,348 +2,109 @@
 (() => {
   "use strict";
 
-  const API_BASE = "https://tinvin-ai-server.aslan89aslan1.workers.dev";
-  const STORAGE_KEY = "tinvin_language";
+  const core = window.TinVinCore;
 
-  const languages = [
-    "English", "Sorani Kurdish", "Kurmanji Kurdish", "Arabic",
-    "Persian", "Turkish", "Spanish", "French", "German",
-    "Italian", "Portuguese", "Brazilian Portuguese", "Russian",
-    "Ukrainian", "Polish", "Dutch", "Swedish", "Norwegian",
-    "Danish", "Finnish", "Greek", "Romanian", "Hungarian",
-    "Czech", "Slovak", "Bulgarian", "Serbian", "Croatian",
-    "Bosnian", "Albanian", "Macedonian", "Armenian", "Georgian",
-    "Azerbaijani", "Kazakh", "Uzbek", "Turkmen", "Pashto",
-    "Urdu", "Hindi", "Bengali", "Punjabi", "Gujarati", "Marathi",
-    "Tamil", "Telugu", "Malayalam", "Kannada", "Thai",
-    "Vietnamese", "Indonesian", "Malay", "Filipino",
-    "Chinese Simplified", "Chinese Traditional", "Japanese",
-    "Korean", "Swahili", "Amharic", "Somali", "Hausa",
-    "Yoruba", "Zulu", "Afrikaans", "Nepali", "Sinhala",
-    "Khmer", "Lao", "Mongolian", "Burmese"
-  ];
-
-  const originalTexts = new WeakMap();
-  const originalPlaceholders = new WeakMap();
-
-  let translatedNodes = [];
-  let runId = 0;
-
-  const $ = id => document.getElementById(id);
-
-  function rememberOriginals() {
-    const walker = document.createTreeWalker(
-      document.body,
-      NodeFilter.SHOW_TEXT
-    );
-
-    let node;
-
-    while ((node = walker.nextNode())) {
-      const parent = node.parentElement;
-
-      if (
-        !parent ||
-        !node.nodeValue.trim() ||
-        parent.closest("script,style")
-      ) continue;
-
-      if (!originalTexts.has(node)) {
-        originalTexts.set(node, node.nodeValue);
-      }
-    }
-
-    document.querySelectorAll("[placeholder]").forEach(el => {
-      if (!originalPlaceholders.has(el)) {
-        originalPlaceholders.set(
-          el,
-          el.getAttribute("placeholder")
-        );
-      }
-    });
+  if (!core) {
+    console.error("TinVin Core is not loaded.");
+    return;
   }
 
-  function restoreOriginals() {
-    translatedNodes.forEach(([node, original]) => {
-      if (node.isConnected) {
-        node.nodeValue = original;
-      }
-    });
+  const { $, postJSON, extractText, setStatus, setLastOutput } = core;
 
-    translatedNodes = [];
+  const languages = core.languages || [];
 
-    document.querySelectorAll("[placeholder]").forEach(el => {
-      const original = originalPlaceholders.get(el);
+  async function run() {
+    const input = $("toolInput");
+    const output = $("toolOutput");
+    const resultBox = $("outputBox");
+    const sourceSelect = $("sourceLang");
+    const targetSelect = $("targetLang");
 
-      if (original !== undefined) {
-        el.setAttribute("placeholder", original);
-      }
-    });
-  }
+    const message = input?.value.trim();
+    const sourceLanguage = sourceSelect?.value || "English";
+    const targetLanguage = targetSelect?.value || "Sorani Kurdish";
 
-  async function postJSON(data) {
-    const response = await fetch(API_BASE + "/api/ai", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(data)
-    });
-
-    const result = await response.json();
-
-    if (!response.ok || result.ok === false) {
-      throw new Error(
-        result.error || result.message || "Translation failed"
-      );
-    }
-
-    return result;
-  }
-
-  function extractText(data) {
-    if (typeof data.text === "string") return data.text;
-    if (typeof data.output === "string") return data.output;
-    if (typeof data.response === "string") return data.response;
-    if (typeof data.result === "string") return data.result;
-
-    const content = data.choices?.[0]?.message?.content;
-
-    if (typeof content === "string") return content;
-
-    if (Array.isArray(content)) {
-      return content.map(item => item.text || "").join("\n");
-    }
-
-    return "";
-  }
-
-  function parseJSON(raw) {
-    const clean = raw
-      .replace(/^```(?:json)?\s*/i, "")
-      .replace(/\s*```$/i, "")
-      .trim();
-
-    return JSON.parse(clean);
-  }
-
-  function getNodes() {
-    rememberOriginals();
-
-    const walker = document.createTreeWalker(
-      document.body,
-      NodeFilter.SHOW_TEXT
-    );
-
-    const items = [];
-    let node;
-
-    while ((node = walker.nextNode())) {
-      const parent = node.parentElement;
-
-      if (
-        !parent ||
-        !node.nodeValue.trim() ||
-        parent.closest("script,style") ||
-        parent.closest("select,option")
-      ) continue;
-
-      const original = originalTexts.get(node);
-
-      if (original) {
-        items.push({ node, original });
-      }
-    }
-
-    return items;
-  }
-
-  async function translateBatch(items, language, currentRun) {
-    const payload = {};
-
-    items.forEach((item, index) => {
-      payload["s" + index] = item.original.trim();
-    });
-
-    const result = await postJSON({
-      tool: "ui-translate",
-      message: JSON.stringify(payload),
-      targetLanguage: language
-    });
-
-    if (currentRun !== runId) return;
-
-    const translated = parseJSON(extractText(result));
-
-    items.forEach((item, index) => {
-      const value = translated["s" + index];
-
-      if (typeof value === "string" && value.trim()) {
-        translatedNodes.push([item.node, item.original]);
-
-        item.node.nodeValue = item.original.replace(
-          item.original.trim(),
-          value.trim()
-        );
-      }
-    });
-  }
-
-  async function translatePlaceholders(language, currentRun) {
-    const fields = [
-      ...document.querySelectorAll(
-        "input[placeholder],textarea[placeholder]"
-      )
-    ];
-
-    const items = fields.map(el => ({
-      el,
-      original:
-        originalPlaceholders.get(el) ??
-        el.getAttribute("placeholder")
-    })).filter(item => item.original);
-
-    for (let start = 0; start < items.length; start += 20) {
-      if (currentRun !== runId) return;
-
-      const batch = items.slice(start, start + 20);
-      const payload = {};
-
-      batch.forEach((item, index) => {
-        payload["p" + index] = item.original;
-      });
-
-      const result = await postJSON({
-        tool: "ui-translate",
-        message: JSON.stringify(payload),
-        targetLanguage: language
-      });
-
-      if (currentRun !== runId) return;
-
-      const translated = parseJSON(extractText(result));
-
-      batch.forEach((item, index) => {
-        const value = translated["p" + index];
-
-        if (typeof value === "string" && value.trim()) {
-          item.el.setAttribute("placeholder", value.trim());
-        }
-      });
-    }
-  }
-
-  async function setLanguage(language) {
-    const currentRun = ++runId;
-
-    localStorage.setItem(STORAGE_KEY, language);
-
-    restoreOriginals();
-
-    if (!language || language === "English") {
-      document.documentElement.lang = "en";
-      document.documentElement.dir = "ltr";
-      updateStatus("English");
+    if (!message) {
+      setStatus("toolStatus", "Please enter text to translate.");
       return;
     }
 
-    updateStatus("Translating...");
+    if (!targetLanguage) {
+      setStatus("toolStatus", "Please select a target language.");
+      return;
+    }
+
+    if (sourceLanguage === targetLanguage) {
+      setStatus("toolStatus", "Please choose two different languages.");
+      return;
+    }
+
+    setStatus("toolStatus", "Translating...");
+    if (output) output.textContent = "";
+    if (resultBox) resultBox.dir = "auto";
 
     try {
-      const items = getNodes();
+      const result = await postJSON("/api/ai", {
+        tool: "translate",
+        message,
+        sourceLanguage,
+        targetLanguage
+      });
 
-      for (let start = 0; start < items.length; start += 20) {
-        if (currentRun !== runId) return;
+      const translated = extractText(result);
 
-        await translateBatch(
-          items.slice(start, start + 20),
-          language,
-          currentRun
-        );
+      if (!translated.trim()) {
+        throw new Error("The translation service returned an empty result.");
       }
 
-      await translatePlaceholders(language, currentRun);
+      if (output) {
+        output.textContent = translated.trim();
+        output.dir = "auto";
+      }
 
-      if (currentRun !== runId) return;
-
-      const isRTL = [
-        "Sorani Kurdish",
-        "Arabic",
-        "Persian",
-        "Urdu"
-      ].includes(language);
-
-      document.documentElement.dir = isRTL ? "rtl" : "ltr";
-
-      document.documentElement.lang =
-        language === "Sorani Kurdish" ? "ckb" :
-        language === "Kurmanji Kurdish" ? "kmr" :
-        language === "Arabic" ? "ar" :
-        language === "Persian" ? "fa" :
-        "en";
-
-      updateStatus(language);
+      setLastOutput(translated.trim());
+      setStatus("toolStatus", "Translation completed successfully.");
 
     } catch (error) {
-      if (currentRun === runId) {
-        updateStatus("Translation failed: " + error.message);
-        console.error("TinVin translation:", error);
-      }
-    }
-  }
-
-  function updateStatus(message) {
-    const status = $("languageStatus");
-
-    if (status) {
-      status.textContent = message === "Translating..."
-        ? message
-        : "Interface language: " + message;
+      console.error("TinVin AI Translator:", error);
+      setStatus(
+        "toolStatus",
+        "Translation failed: " + (error.message || "Please try again.")
+      );
     }
   }
 
   function initialize() {
-    rememberOriginals();
+    const source = $("sourceLang");
+    const target = $("targetLang");
 
-    const selector = $("interfaceLang");
-
-    if (selector) {
-      selector.replaceChildren();
-
+    if (source && !source.options.length) {
       languages.forEach(language => {
-        const option = document.createElement("option");
-        option.value = language;
-        option.textContent = language;
-        selector.appendChild(option);
-      });
-
-      selector.value =
-        localStorage.getItem(STORAGE_KEY) || "English";
-
-      selector.addEventListener("change", event => {
-        setLanguage(event.target.value);
+        source.add(new Option(language, language));
       });
     }
 
-    const saved = localStorage.getItem(STORAGE_KEY) || "English";
-
-    if (selector) selector.value = saved;
-
-    if (saved !== "English") {
-      setLanguage(saved);
+    if (target && !target.options.length) {
+      languages.forEach(language => {
+        target.add(new Option(language, language));
+      });
     }
+
+    if (source && !source.value) source.value = "English";
+    if (target && !target.value) target.value = "Sorani Kurdish";
+
+    window.TinVinTools = window.TinVinTools || {};
+
+    window.TinVinTools.translator = {
+      run
+    };
+
+    console.log("TinVin AI Translator loaded successfully.");
   }
 
-  window.TinVinTranslate = {
-    languages,
-    setLanguage,
-    restoreEnglish: () => setLanguage("English")
-  };
-
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", initialize);
+    document.addEventListener("DOMContentLoaded", initialize, { once: true });
   } else {
     initialize();
   }
-
 })();
