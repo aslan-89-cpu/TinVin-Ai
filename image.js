@@ -1,3 +1,4 @@
+
 (() => {
   "use strict";
 
@@ -8,12 +9,7 @@
     return;
   }
 
-  const {
-    $,
-    postJSON,
-    setStatus,
-    setLastOutput
-  } = core;
+  const { $, postJSON, setStatus, setLastOutput } = core;
 
   async function run() {
     const input = $("toolInput");
@@ -28,44 +24,86 @@
       return;
     }
 
+    if (!image) {
+      setStatus("toolStatus", "Image display element was not found.");
+      return;
+    }
+
     setStatus("toolStatus", "Creating your image...");
     resultBox?.classList.remove("show");
 
     if (output) output.textContent = "";
-    if (image) {
-      image.src = "";
-      image.hidden = true;
-    }
+
+    image.hidden = true;
+    image.removeAttribute("src");
 
     try {
-      const result = await postJSON("/api/image", {
-        prompt
+      const result = await postJSON("/api/image", { prompt });
+
+      if (!result || result.ok === false) {
+        throw new Error(result?.error || "Image generation failed.");
+      }
+
+      let imageUrl = "";
+
+      // Cloudflare Workers AI returns Base64 image data.
+      if (typeof result.image === "string" && result.image.trim()) {
+        const imageData = result.image.trim();
+
+        if (imageData.startsWith("data:image/")) {
+          imageUrl = imageData;
+        } else {
+          const mimeType = result.mimeType || "image/png";
+
+          if (!mimeType.startsWith("image/")) {
+            throw new Error("Invalid image format returned by the server.");
+          }
+
+          imageUrl = `data:${mimeType};base64,${imageData}`;
+        }
+      }
+
+      // Also support regular image URLs.
+      if (!imageUrl) {
+        imageUrl =
+          result.imageUrl ||
+          result.image_url ||
+          result.url ||
+          "";
+      }
+
+      if (
+        typeof imageUrl !== "string" ||
+        !imageUrl.trim()
+      ) {
+        throw new Error("The server did not return image data.");
+      }
+
+      image.alt = "AI generated image";
+
+      await new Promise((resolve, reject) => {
+        image.onload = () => resolve();
+        image.onerror = () => reject(
+          new Error("The generated image could not be displayed.")
+        );
+
+        image.src = imageUrl;
       });
 
-      const imageUrl =
-        result?.imageUrl ||
-        result?.image_url ||
-        result?.url ||
-        result?.image;
-
-      if (!imageUrl || typeof imageUrl !== "string") {
-        throw new Error("The image provider did not return an image.");
-      }
-
-      if (image) {
-        image.src = imageUrl;
-        image.hidden = false;
-        image.alt = "AI generated image";
-      } else if (output) {
-        output.textContent = imageUrl;
-      }
+      image.hidden = false;
 
       setLastOutput(imageUrl);
+
       resultBox?.classList.add("show");
 
       setStatus("toolStatus", "Your image is ready.");
+
     } catch (error) {
-      console.error("Image Generator error:", error);
+      console.error("TinVin Image Generator error:", error);
+
+      image.hidden = true;
+      image.removeAttribute("src");
+
       setStatus(
         "toolStatus",
         error.message || "Image generation failed. Please try again."
