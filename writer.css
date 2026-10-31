@@ -1,38 +1,34 @@
 
-/* TinVin AI - Writer Tool */
+/* TinVin AI - Dedicated Writer Page */
 
-#toolPage[data-tool="writer"] .tool-title {
-  position: relative;
-}
-
-#toolPage[data-tool="writer"] .tool-title .tool-icon {
+#writerPage .tool-heading .tool-icon {
   background: linear-gradient(135deg, #8b5cf6, #51b8ff);
   color: #fff;
 }
 
-#toolPage[data-tool="writer"] .field textarea {
+#writerPage #writerInput {
   min-height: 190px;
 }
 
-#toolPage[data-tool="writer"] #runBtn {
+#writerPage #writerRunBtn {
   background: linear-gradient(135deg, #8b5cf6, #51b8ff);
 }
 
-#toolPage[data-tool="writer"] #outputBox {
+#writerPage #writerOutputBox {
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
 
-#toolPage[data-tool="writer"] #copyBtn {
+#writerPage #writerCopyBtn {
   margin-top: 12px;
 }
 
 @media (max-width: 600px) {
-  #toolPage[data-tool="writer"] .field textarea {
+  #writerPage #writerInput {
     min-height: 160px;
   }
 
-  #toolPage[data-tool="writer"] .action-row button {
+  #writerPage .actions button {
     flex: 1;
   }
 }
