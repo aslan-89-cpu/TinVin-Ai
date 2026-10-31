@@ -6,17 +6,61 @@
   color: #fff;
 }
 
-#writerPage #writerInput {
-  min-height: 190px;
+/* Arrange the result above the writing area */
+#writerPage.active {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
-#writerPage #writerRunBtn {
-  background: linear-gradient(135deg, #8b5cf6, #51b8ff);
+#writerPage > .panel:first-of-type {
+  order: 2;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: end;
+  gap: 10px;
 }
 
 #writerPage #writerOutputBox {
+  order: 1;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
+}
+
+#writerPage .field-label {
+  grid-column: 1 / -1;
+  margin-bottom: 0;
+}
+
+#writerPage #writerInput {
+  grid-column: 1;
+  width: 100%;
+  min-height: 48px;
+  height: 48px;
+  resize: vertical;
+  padding: 12px 14px;
+}
+
+#writerPage .actions {
+  display: contents;
+}
+
+#writerPage #writerRunBtn {
+  grid-column: 2;
+  min-height: 48px;
+  white-space: nowrap;
+  background: linear-gradient(135deg, #8b5cf6, #51b8ff);
+}
+
+#writerPage #writerClearBtn {
+  grid-column: 3;
+  min-height: 48px;
+  white-space: nowrap;
+}
+
+#writerPage #writerStatus {
+  grid-column: 1 / -1;
+  margin-top: 0;
 }
 
 #writerPage #writerCopyBtn {
@@ -24,11 +68,31 @@
 }
 
 @media (max-width: 600px) {
-  #writerPage #writerInput {
-    min-height: 160px;
+  #writerPage > .panel:first-of-type {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px;
+    padding: 12px;
   }
 
-  #writerPage .actions button {
-    flex: 1;
+  #writerPage #writerInput {
+    grid-column: 1;
+    min-height: 46px;
+    height: 46px;
+    font-size: 14px;
+  }
+
+  #writerPage #writerRunBtn {
+    grid-column: 2;
+    min-height: 46px;
+    padding: 0 15px;
+  }
+
+  #writerPage #writerClearBtn {
+    grid-column: 1 / -1;
+    min-height: 38px;
+  }
+
+  #writerPage #writerStatus {
+    grid-column: 1 / -1;
   }
 }
