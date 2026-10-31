@@ -20,27 +20,20 @@
   const languages = core.languages || [];
 
   // ==========================================
-  // 1. AI TRANSLATOR TOOL
+  // AI TRANSLATOR
   // ==========================================
 
   async function run() {
     const input = $("toolInput");
     const output = $("toolOutput");
     const resultBox = $("outputBox");
-    const sourceSelect = $("sourceLang");
-    const targetSelect = $("targetLang");
 
     const message = input?.value.trim();
-    const sourceLanguage = sourceSelect?.value || "English";
-    const targetLanguage = targetSelect?.value || "Sorani Kurdish";
+    const sourceLanguage = $("sourceLang")?.value || "English";
+    const targetLanguage = $("targetLang")?.value || "Sorani Kurdish";
 
     if (!message) {
       setStatus("toolStatus", "Please enter text to translate.");
-      return;
-    }
-
-    if (!targetLanguage) {
-      setStatus("toolStatus", "Please select a target language.");
       return;
     }
 
@@ -56,24 +49,24 @@
 
     try {
       const result = await postJSON("/api/ai", {
-        tool: "translate",
+        tool: "translator",
         message,
         sourceLanguage,
         targetLanguage
       });
 
-      const translated = extractText(result);
+      const translated = extractText(result).trim();
 
-      if (!translated.trim()) {
+      if (!translated) {
         throw new Error("The translation service returned an empty result.");
       }
 
       if (output) {
-        output.textContent = translated.trim();
+        output.textContent = translated;
         output.dir = "auto";
       }
 
-      setLastOutput(translated.trim());
+      setLastOutput(translated);
 
       setStatus(
         "toolStatus",
@@ -81,7 +74,7 @@
       );
 
     } catch (error) {
-      console.error("TinVin AI Translator:", error);
+      console.error("TinVin Translator:", error);
 
       setStatus(
         "toolStatus",
@@ -91,7 +84,7 @@
   }
 
   // ==========================================
-  // 2. INTERFACE TRANSLATION
+  // INTERFACE TRANSLATION
   // ==========================================
 
   let translationRun = 0;
@@ -151,7 +144,6 @@
     rememberOriginalTextNodes();
 
     const items = [];
-
     const walker = document.createTreeWalker(
       document.body,
       NodeFilter.SHOW_TEXT
@@ -184,18 +176,19 @@
     return items;
   }
 
-  function parseTranslationJSON(raw) {
-    const clean = raw
+  function parseJSON(raw) {
+    const clean = String(raw || "")
       .replace(/^```(?:json)?\s*/i, "")
-      .replace(/\s*```$/, "");
+      .replace(/\s*```$/, "")
+      .trim();
 
-    const parsed = JSON.parse(clean);
+    const result = JSON.parse(clean);
 
-    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
-      throw new Error("The translation service returned invalid JSON.");
+    if (!result || typeof result !== "object" || Array.isArray(result)) {
+      throw new Error("Invalid translation response.");
     }
 
-    return parsed;
+    return result;
   }
 
   async function translateBatch(payload, language) {
@@ -205,7 +198,7 @@
       targetLanguage: language
     });
 
-    return parseTranslationJSON(extractText(result));
+    return parseJSON(extractText(result));
   }
 
   async function translateInterface(language) {
@@ -224,16 +217,13 @@
       return;
     }
 
-    setStatus(
-      "languageStatus",
-      "Translating interface..."
-    );
+    setStatus("languageStatus", "Translating interface...");
 
     const items = getTranslatableNodes();
     const batchSize = 20;
 
     try {
-      // Translate visible text.
+      // Translate normal interface text.
       for (let start = 0; start < items.length; start += batchSize) {
         if (runId !== translationRun) return;
 
@@ -268,7 +258,7 @@
       // Translate placeholders.
       const fields = [
         ...document.querySelectorAll(
-          "input[placeholder],textarea[placeholder]"
+          "input[placeholder], textarea[placeholder]"
         )
       ];
 
@@ -318,7 +308,7 @@
 
     } catch (error) {
       if (runId === translationRun) {
-        console.error("TinVin interface translation:", error);
+        console.error("TinVin Interface Translation:", error);
 
         setStatus(
           "languageStatus",
@@ -330,10 +320,11 @@
   }
 
   // ==========================================
-  // 3. INITIALIZATION
+  // INITIALIZATION
   // ==========================================
 
   function initialize() {
+    // Fill translator language menus if needed.
     const source = $("sourceLang");
     const target = $("targetLang");
 
@@ -385,14 +376,14 @@
         try {
           localStorage.setItem("tinvin_language", language);
         } catch (error) {
-          console.warn("Could not save interface language:", error);
+          console.warn("Language preference could not be saved:", error);
         }
 
         await translateInterface(language);
       });
     }
 
-    // Remember original English text.
+    // Save original English text.
     rememberOriginalTextNodes();
 
     // Restore saved language after refresh.
@@ -405,9 +396,7 @@
       document.documentElement.lang = "en";
     }
 
-    console.log(
-      "TinVin Translator and Interface Translation loaded successfully."
-    );
+    console.log("TinVin Translator loaded successfully.");
   }
 
   if (document.readyState === "loading") {
