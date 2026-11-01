@@ -1,4 +1,6 @@
 
+/* TinVin AI - ChatGPT Style Chat */
+
 (() => {
   "use strict";
 
@@ -9,10 +11,22 @@
     return;
   }
 
-  const { $, postJSON, extractText, makeImage, setStatus } = core;
+  const { $, postJSON, extractText } = core;
 
   const history = [];
   let sending = false;
+
+  function setChatStatus(message) {
+    const status = $("chatStatus");
+    if (status) status.textContent = message || "";
+  }
+
+  function scrollChatToBottom() {
+    const container = $("chatHistory");
+    if (!container) return;
+
+    container.scrollTop = container.scrollHeight;
+  }
 
   function addBubble(role, content, imageUrl = "") {
     const container = $("chatHistory");
@@ -33,27 +47,45 @@
       image.src = imageUrl;
       image.alt = "AI-generated image";
       image.className = "chat-image";
+      image.loading = "lazy";
       bubble.appendChild(image);
     }
 
     container.appendChild(bubble);
-    container.scrollTop = container.scrollHeight;
+
+    scrollChatToBottom();
 
     return bubble;
   }
 
-  function setChatStatus(message) {
-    const status = $("chatStatus");
+  function getImageSource(result) {
+    const raw =
+      result.image ||
+      result.imageUrl ||
+      result.image_url ||
+      result.url ||
+      result.base64 ||
+      result.data;
 
-    if (status) {
-      status.textContent = message || "";
+    if (!raw || typeof raw !== "string") return "";
+
+    if (
+      raw.startsWith("data:") ||
+      raw.startsWith("https://") ||
+      raw.startsWith("http://")
+    ) {
+      return raw;
     }
+
+    return `data:${result.mimeType || result.mime_type || "image/png"};base64,${raw}`;
   }
 
   async function send() {
     if (sending) return;
 
     const input = $("chatInput");
+    const sendButton = $("sendBtn");
+
     if (!input) return;
 
     const message = input.value.trim();
@@ -62,40 +94,49 @@
 
     sending = true;
 
-    const sendButton = $("sendBtn");
-    if (sendButton) sendButton.disabled = true;
+    if (sendButton) {
+      sendButton.disabled = true;
+      sendButton.textContent = "Sending...";
+    }
 
-    // Keep the visible conversation and clear only the input.
-    input.value = "";
-
-    addBubble("user", message);
-    setChatStatus("TinVin AI is thinking...");
-
+    // Preserve previous conversation for the AI.
     const previousHistory = history.map(item => ({
       role: item.role,
       content: item.content
     }));
 
+    // Add the new user message.
+    history.push({
+      role: "user",
+      content: message
+    });
+
+    input.value = "";
+
+    addBubble("user", message);
+    setChatStatus("TinVin AI is thinking...");
+
     try {
       let answer = "";
       let imageUrl = "";
 
-      if (core.imageIntent(message)) {
+      const wantsImage =
+        typeof core.imageIntent === "function" &&
+        core.imageIntent(message);
+
+      if (wantsImage) {
         const result = await postJSON("/api/image", {
           prompt: message
         });
 
-        const rawImage =
-          result.image ||
-          result.base64 ||
-          result.data;
+        imageUrl = getImageSource(result);
 
-        if (rawImage) {
-          imageUrl = rawImage.startsWith("data:")
-            ? rawImage
-            : `data:${result.mimeType || "image/png"};base64,${rawImage}`;
-        } else {
+        if (!imageUrl) {
           answer = extractText(result);
+
+          if (!answer) {
+            throw new Error("The image could not be generated.");
+          }
         }
       } else {
         const result = await postJSON("/api/ai", {
@@ -106,42 +147,55 @@
 
         answer = extractText(result);
 
-        if (!answer) {
+        if (!answer || !answer.trim()) {
           throw new Error("The AI returned an empty response.");
         }
+
+        answer = answer.trim();
       }
 
       if (imageUrl) {
         addBubble("assistant", "Your image is ready.", imageUrl);
+
+        history.push({
+          role: "assistant",
+          content: "Image generated successfully."
+        });
       } else {
         addBubble("assistant", answer);
-      }
 
-      // Save each turn once for the next conversation request.
-      history.push(
-        { role: "user", content: message },
-        {
+        history.push({
           role: "assistant",
-          content: imageUrl ? "Image generated successfully." : answer
-        }
-      );
+          content: answer
+        });
+      }
 
       setChatStatus("");
 
     } catch (error) {
-      addBubble(
-        "assistant",
+      const errorMessage =
         "Sorry, something went wrong: " +
-        (error.message || "Please try again.")
-      );
+        (error.message || "Please try again.");
+
+      addBubble("assistant", errorMessage);
+
+      history.push({
+        role: "assistant",
+        content: errorMessage
+      });
 
       setChatStatus("Message could not be completed.");
+
     } finally {
       sending = false;
 
-      if (sendButton) sendButton.disabled = false;
+      if (sendButton) {
+        sendButton.disabled = false;
+        sendButton.textContent = "Send ↑";
+      }
 
-      input.focus();
+      // Do not focus the input here.
+      // This prevents unwanted mobile screen jumping.
     }
   }
 
@@ -154,13 +208,13 @@
 
     if (container) {
       container.replaceChildren();
+      container.scrollTop = 0;
     }
 
     const input = $("chatInput");
 
     if (input) {
       input.value = "";
-      input.focus();
     }
 
     setChatStatus("");
