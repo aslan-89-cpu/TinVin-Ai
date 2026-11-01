@@ -1,4 +1,6 @@
 
+/* TinVin AI - ChatGPT Style Writer */
+
 (() => {
   "use strict";
 
@@ -20,10 +22,23 @@
   let busy = false;
   let history = [];
 
-  function isWriterPage() {
-    return $("activeTitle")?.textContent
-      ?.toLowerCase()
-      .includes("writer");
+  function activateWriterLayout() {
+    const title = $("activeTitle");
+    const page = $("toolPage");
+
+    if (!title || !page) return;
+
+    const isWriter = title.textContent.toLowerCase().includes("writer");
+
+    page.classList.toggle("writer-active", isWriter);
+
+    const runBtn = $("runBtn");
+    const input = $("toolInput");
+
+    if (isWriter) {
+      if (runBtn && !busy) runBtn.textContent = "Send ↑";
+      if (input) input.placeholder = "Message TinVin AI...";
+    }
   }
 
   function renderHistory() {
@@ -59,7 +74,6 @@
 
     setLastOutput(assistantMessages.join("\n\n"));
 
-    // Newest conversation stays at the top.
     output.scrollTop = 0;
   }
 
@@ -72,10 +86,7 @@
     const message = input?.value.trim();
 
     if (!message) {
-      setStatus(
-        "toolStatus",
-        "Please enter what you want me to write."
-      );
+      setStatus("toolStatus", "Please enter a message.");
       input?.focus();
       return;
     }
@@ -84,23 +95,19 @@
 
     if (runBtn) {
       runBtn.disabled = true;
-      runBtn.textContent = "Writing...";
+      runBtn.textContent = "Sending...";
     }
 
-    const userMessage = {
+    history.unshift({
       role: "user",
       text: message
-    };
-
-    // Put the newest request at the beginning.
-    history.unshift(userMessage);
+    });
 
     renderHistory();
 
-    // Empty the input after sending.
-    if (input) input.value = "";
+    input.value = "";
 
-    setStatus("toolStatus", "Writing your content...");
+    setStatus("toolStatus", "TinVin AI is thinking...");
 
     try {
       const result = await postJSON("/api/ai", {
@@ -114,23 +121,26 @@
         throw new Error("The AI returned an empty response.");
       }
 
-      // Put the response immediately under its request.
-      const userIndex = history.indexOf(userMessage);
-
-      history.splice(userIndex + 1, 0, {
+      history.splice(1, 0, {
         role: "assistant",
         text: responseText.trim()
       });
 
       renderHistory();
 
-      setStatus("toolStatus", "Your content is ready.");
+      setStatus("toolStatus", "");
 
     } catch (error) {
-      // Keep the request visible if the server fails.
+      history.splice(1, 0, {
+        role: "assistant",
+        text: "Sorry, something went wrong. Please try again."
+      });
+
+      renderHistory();
+
       setStatus(
         "toolStatus",
-        error.message || "Writer request failed. Please try again."
+        error.message || "Writer request failed."
       );
 
     } finally {
@@ -138,7 +148,7 @@
 
       if (runBtn) {
         runBtn.disabled = false;
-        runBtn.textContent = "Generate";
+        runBtn.textContent = "Send ↑";
       }
 
       input?.focus();
@@ -151,6 +161,7 @@
     history = [];
 
     const input = $("toolInput");
+
     if (input) input.value = "";
 
     renderHistory();
@@ -168,22 +179,15 @@
       .join("\n\n");
 
     if (!text) {
-      setStatus(
-        "toolStatus",
-        "There is no AI response to copy."
-      );
+      setStatus("toolStatus", "There is no AI response to copy.");
       return;
     }
 
     try {
       await navigator.clipboard.writeText(text);
       setStatus("toolStatus", "Copied to clipboard.");
-
     } catch {
-      setStatus(
-        "toolStatus",
-        "Copy is unavailable in this browser."
-      );
+      setStatus("toolStatus", "Copy is unavailable in this browser.");
     }
   }
 
@@ -191,6 +195,7 @@
     history = [];
 
     const output = $("toolOutput");
+
     if (output) output.replaceChildren();
 
     $("outputBox")?.classList.remove("show");
@@ -208,6 +213,19 @@
     reset
   };
 
+  const titleElement = $("activeTitle");
+
+  if (titleElement && window.MutationObserver) {
+    const observer = new MutationObserver(activateWriterLayout);
+
+    observer.observe(titleElement, {
+      childList: true,
+      characterData: true,
+      subtree: true
+    });
+  }
+
+  activateWriterLayout();
   renderHistory();
 
 })();
