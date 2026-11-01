@@ -1,222 +1,128 @@
 
-(() => {
-  "use strict";
+/* TinVin AI - Writer Chat Layout */
 
-  const core = window.TinVinCore;
+#toolPage.writer-active {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
 
-  if (!core) {
-    console.error("TinVinCore is not loaded.");
-    return;
+/* Writer heading */
+#toolPage.writer-active .tool-heading .tool-icon {
+  background: linear-gradient(135deg, #8b5cf6, #51b8ff);
+  color: #fff;
+}
+
+/* Chat history ABOVE input */
+#toolPage.writer-active #outputBox {
+  order: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+#toolPage.writer-active #outputBox.hidden {
+  display: none !important;
+}
+
+#toolPage.writer-active #toolOutput {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-height: 55vh;
+  overflow-y: auto;
+  overflow-wrap: anywhere;
+}
+
+/* Messages */
+#toolPage.writer-active .writer-message {
+  padding: 13px 15px;
+  border-radius: 14px;
+  line-height: 1.65;
+  white-space: pre-wrap;
+}
+
+#toolPage.writer-active .writer-user {
+  background: rgba(81, 184, 255, 0.13);
+  border: 1px solid rgba(81, 184, 255, 0.25);
+}
+
+#toolPage.writer-active .writer-assistant {
+  background: rgba(139, 92, 246, 0.13);
+  border: 1px solid rgba(139, 92, 246, 0.25);
+}
+
+#toolPage.writer-active .writer-message-label {
+  font-size: 12px;
+  font-weight: 700;
+  opacity: .75;
+  margin-bottom: 7px;
+}
+
+#toolPage.writer-active .writer-message-content {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/* Input panel BELOW history */
+#toolPage.writer-active #toolPanel {
+  order: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Input */
+#toolPage.writer-active #toolInput {
+  width: 100%;
+  min-height: 90px;
+  height: 90px;
+  padding: 13px 14px;
+  resize: vertical;
+  line-height: 1.5;
+}
+
+/* Buttons */
+#toolPage.writer-active .actions {
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  margin: 0;
+}
+
+#toolPage.writer-active #runBtn {
+  flex: 1;
+  min-height: 46px;
+  background: linear-gradient(135deg, #8b5cf6, #51b8ff);
+}
+
+#toolPage.writer-active #clearBtn {
+  min-height: 46px;
+}
+
+/* Status and copy */
+#toolPage.writer-active #toolStatus {
+  margin-top: 0;
+}
+
+#toolPage.writer-active #copyBtn {
+  margin-top: 12px;
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+  #toolPage.writer-active #toolOutput {
+    max-height: 48vh;
   }
 
-  const {
-    $,
-    postJSON,
-    extractText,
-    setStatus,
-    setLastOutput
-  } = core;
-
-  let busy = false;
-  let history = [];
-
-  function renderHistory() {
-    const output = $("toolOutput");
-    const resultBox = $("outputBox");
-
-    if (!output || !resultBox) return;
-
-    output.replaceChildren();
-
-    history.forEach(item => {
-      const message = document.createElement("div");
-      message.className = `writer-message writer-${item.role}`;
-
-      const label = document.createElement("div");
-      label.className = "writer-message-label";
-
-      label.textContent =
-        item.role === "user" ? "You" : "TinVin AI";
-
-      const content = document.createElement("div");
-      content.className = "writer-message-content";
-      content.textContent = item.text;
-
-      message.append(label, content);
-      output.appendChild(message);
-    });
-
-    const hasMessages = history.length > 0;
-
-    resultBox.classList.toggle("show", hasMessages);
-
-    const assistantMessages = history
-      .filter(item => item.role === "assistant")
-      .map(item => item.text);
-
-    setLastOutput(assistantMessages.join("\n\n"));
-
-    // Keep the newest message at the top.
-    if (hasMessages) {
-      output.scrollTop = 0;
-    }
+  #toolPage.writer-active #toolInput {
+    min-height: 75px;
+    height: 75px;
+    font-size: 14px;
   }
 
-  async function run() {
-    if (busy) return;
-
-    const input = $("toolInput");
-    const runBtn = $("runBtn");
-
-    const message = input?.value.trim();
-
-    if (!message) {
-      setStatus(
-        "toolStatus",
-        "Please enter what you want me to write."
-      );
-
-      input?.focus();
-      return;
-    }
-
-    busy = true;
-
-    if (runBtn) {
-      runBtn.disabled = true;
-      runBtn.textContent = "Writing...";
-    }
-
-    const userMessage = {
-      role: "user",
-      text: message
-    };
-
-    // New request goes to the top.
-    history.unshift(userMessage);
-
-    renderHistory();
-
-    // Clear input after sending.
-    if (input) {
-      input.value = "";
-    }
-
-    setStatus("toolStatus", "Writing your content...");
-
-    try {
-      const result = await postJSON("/api/ai", {
-        tool: "writer",
-        message
-      });
-
-      const responseText = extractText(result);
-
-      if (!responseText || !responseText.trim()) {
-        throw new Error("The AI returned an empty response.");
-      }
-
-      // Put the AI response directly below its request.
-      const userIndex = history.indexOf(userMessage);
-
-      history.splice(userIndex + 1, 0, {
-        role: "assistant",
-        text: responseText.trim()
-      });
-
-      renderHistory();
-
-      setStatus("toolStatus", "Your content is ready.");
-
-    } catch (error) {
-      // Keep the request visible if AI fails.
-      setStatus(
-        "toolStatus",
-        error.message || "Writer request failed. Please try again."
-      );
-
-    } finally {
-      busy = false;
-
-      if (runBtn) {
-        runBtn.disabled = false;
-        runBtn.textContent = "Generate";
-      }
-
-      input?.focus();
-    }
+  #toolPage.writer-active .actions button {
+    flex: 1;
   }
-
-  function clear() {
-    if (busy) return;
-
-    history = [];
-
-    const input = $("toolInput");
-
-    if (input) {
-      input.value = "";
-    }
-
-    renderHistory();
-
-    setStatus("toolStatus", "");
-    setLastOutput("");
-
-    input?.focus();
-  }
-
-  async function copy() {
-    const text = history
-      .filter(item => item.role === "assistant")
-      .map(item => item.text)
-      .join("\n\n");
-
-    if (!text) {
-      setStatus(
-        "toolStatus",
-        "There is no AI response to copy."
-      );
-      return;
-    }
-
-    try {
-      await navigator.clipboard.writeText(text);
-
-      setStatus("toolStatus", "Copied to clipboard.");
-
-    } catch {
-      setStatus(
-        "toolStatus",
-        "Copy is unavailable in this browser."
-      );
-    }
-  }
-
-  function reset() {
-    history = [];
-
-    const output = $("toolOutput");
-
-    if (output) {
-      output.replaceChildren();
-    }
-
-    $("outputBox")?.classList.remove("show");
-
-    setStatus("toolStatus", "");
-    setLastOutput("");
-  }
-
-  window.TinVinTools = window.TinVinTools || {};
-
-  window.TinVinTools.writer = {
-    run,
-    clear,
-    copy,
-    reset
-  };
-
-  renderHistory();
-
-})();
+}
