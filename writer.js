@@ -169,7 +169,6 @@
     setStatus("toolStatus", "");
     setLastOutput("");
 
-    input?.focus();
   }
 
   async function copy() {
