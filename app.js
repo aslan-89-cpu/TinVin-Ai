@@ -100,12 +100,27 @@
 
   window.TinVinTools = window.TinVinTools || {};
 
+  // Keep the shared output panel hidden until a tool returns a result.
+  function ensureOutputVisibilityStyle() {
+    if ($("tinvinOutputVisibilityStyle")) return;
+
+    const style = document.createElement("style");
+    style.id = "tinvinOutputVisibilityStyle";
+    style.textContent = `
+      #outputBox:not(.show) {
+        display: none !important;
+      }
+    `;
+
+    document.head.appendChild(style);
+  }
+
   // Create a separate Writer page automatically.
-  // No manual index.html changes are required.
   function ensureWriterPage() {
     if ($("writerPage")) return;
 
     const app = document.querySelector(".app");
+
     if (!app) {
       console.error("TinVin app container was not found.");
       return;
@@ -128,7 +143,7 @@
         </div>
       </div>
 
-      <div class="panel">
+      <div class="panel" id="writerPanel">
         <label class="field-label" for="writerInput">
           What would you like me to write?
         </label>
@@ -179,21 +194,27 @@
   function showPage(id) {
     pages.forEach(page => {
       const element = $(page);
+
       if (element) {
         element.classList.toggle("active", page === id);
       }
     });
 
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth"
+    });
   }
 
   function setStatus(id, message) {
     const element = $(id);
-    if (element) element.textContent = message || "";
+
+    if (element) {
+      element.textContent = message || "";
+    }
   }
 
   // Seven saved themes.
-  // Old "dark" settings are converted to Black Mode.
   function applyTheme(theme) {
     const allowed = [
       "purple", "navy", "blue", "green",
@@ -214,12 +235,16 @@
     } catch {}
 
     const selector = $("themeSelect");
-    if (selector) selector.value = theme;
+
+    if (selector) {
+      selector.value = theme;
+    }
   }
 
   function fillLanguageMenus() {
     ["sourceLang", "targetLang"].forEach(id => {
       const select = $(id);
+
       if (!select) return;
 
       select.replaceChildren();
@@ -232,7 +257,10 @@
       });
     });
 
-    if ($("sourceLang")) $("sourceLang").value = "English";
+    if ($("sourceLang")) {
+      $("sourceLang").value = "English";
+    }
+
     if ($("targetLang")) {
       $("targetLang").value = "Sorani Kurdish";
     }
@@ -241,7 +269,9 @@
   async function postJSON(path, data) {
     const response = await fetch(API_BASE + path, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json"
+      },
       body: JSON.stringify(data)
     });
 
@@ -294,11 +324,13 @@
 
   function makeImage(data, container) {
     const raw = data?.image || data?.base64 || data?.data;
+
     if (!raw || !container) return false;
 
-    const src = typeof raw === "string" && raw.startsWith("data:")
-      ? raw
-      : `data:${data.mimeType || "image/png"};base64,${raw}`;
+    const src =
+      typeof raw === "string" && raw.startsWith("data:")
+        ? raw
+        : `data:${data.mimeType || "image/png"};base64,${raw}`;
 
     if (container.tagName === "IMG") {
       container.src = src;
@@ -312,6 +344,7 @@
     img.className = "image-result";
     img.alt = "AI-generated image";
     img.src = src;
+
     container.appendChild(img);
 
     return true;
@@ -329,8 +362,12 @@
       if (window.TinVinQR?.open) {
         window.TinVinQR.open();
       } else {
-        setStatus("toolStatus", "QR Scanner is loading. Please try again.");
+        setStatus(
+          "toolStatus",
+          "QR Scanner is loading. Please try again."
+        );
       }
+
       return;
     }
 
@@ -367,7 +404,7 @@
       return;
     }
 
-    // Other tools continue using their existing page.
+    // Other tools use the shared tool page.
     const item = definitions[key];
 
     if ($("toolPage")) {
@@ -401,6 +438,7 @@
 
     clearImage($("toolImage"));
 
+    // Hide the previous result when opening another tool.
     $("outputBox")?.classList.remove("show");
 
     $("translatorOptions")?.classList.toggle(
@@ -498,6 +536,7 @@
     rememberOriginalTextNodes();
 
     const items = [];
+
     const walker = document.createTreeWalker(
       document.body,
       NodeFilter.SHOW_TEXT
@@ -521,7 +560,10 @@
 
       const original = originalText.get(node) ?? node.nodeValue;
 
-      items.push({ node, original });
+      items.push({
+        node,
+        original
+      });
     }
 
     return items;
@@ -564,6 +606,7 @@
 
         try {
           const raw = extractText(result);
+
           const clean = raw
             .replace(/^```(?:json)?\s*/i, "")
             .replace(/\s*```$/, "");
@@ -587,7 +630,10 @@
           const value = translated["s" + index];
 
           if (typeof value === "string" && value.trim()) {
-            translatedNodes.push([item.node, item.original]);
+            translatedNodes.push([
+              item.node,
+              item.original
+            ]);
 
             item.node.nodeValue = item.original.replace(
               item.original.trim(),
@@ -807,6 +853,10 @@
     }
 
     clearImage($("toolImage"));
+
+    // Hide the result when the user clears the tool.
+    $("outputBox")?.classList.remove("show");
+
     lastOutput = "";
 
     setStatus("toolStatus", "");
@@ -854,6 +904,7 @@
   });
 
   // Start application.
+  ensureOutputVisibilityStyle();
   ensureWriterPage();
   fillLanguageMenus();
   ensureQRCard();
