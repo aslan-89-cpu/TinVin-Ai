@@ -1,6 +1,4 @@
 
-/* TinVin AI - ChatGPT Style Chat */
-
 (() => {
   "use strict";
 
@@ -11,8 +9,9 @@
     return;
   }
 
-  const { $, postJSON, extractText } = core;
+  const { $, postJSON, extractText, setStatus } = core;
 
+  // Keep conversation in chronological order for the API.
   const history = [];
   let sending = false;
 
@@ -21,11 +20,51 @@
     if (status) status.textContent = message || "";
   }
 
-  function scrollChatToBottom() {
-    const container = $("chatHistory");
-    if (!container) return;
+  function isImageRequest(text) {
+    const message = String(text || "").toLowerCase();
 
-    container.scrollTop = container.scrollHeight;
+    const english =
+      /\b(generate|create|draw|make|design|render|produce)\b.{0,100}\b(image|picture|photo|illustration|artwork|logo|wallpaper)\b|\b(image|picture|photo|illustration|artwork|logo|wallpaper)\b.{0,60}\b(of|showing|with)\b/i;
+
+    const sorani =
+      /(وێنە|وێنەی|وێنەیەک|وێنەیەکی|وێنەکان).{0,100}(دروست|بکە|کێشە|نیشان|ڕەسم|بۆم)|(?:دروست|بکە|کێشە|ڕەسم).{0,80}(وێنە|وێنەی)/;
+
+    const kurmanji =
+      /(wêne|wêneyek|resim).{0,100}(çêke|biafirîne|nîşan|xêz)|(?:çêke|biafirîne|xêz).{0,80}(wêne|resim)/i;
+
+    const arabic =
+      /(صورة|صور|ارسم|أنشئ|انشئ|اصنع|أنشئ لي|صمم).{0,100}(صورة|رسم|شعار)|(?:أنشئ|انشئ|ارسم|اصنع|صمم).{0,80}(صورة|شعار)/;
+
+    return english.test(message) ||
+      sorani.test(message) ||
+      kurmanji.test(message) ||
+      arabic.test(message);
+  }
+
+  function getImageSource(result) {
+    if (!result) return "";
+
+    const raw =
+      result.image ||
+      result.imageUrl ||
+      result.image_url ||
+      result.url ||
+      result.base64 ||
+      result.data;
+
+    if (typeof raw !== "string" || !raw.trim()) return "";
+
+    const value = raw.trim();
+
+    if (
+      value.startsWith("data:image/") ||
+      value.startsWith("https://") ||
+      value.startsWith("http://")
+    ) {
+      return value;
+    }
+
+    return `data:${result.mimeType || "image/png"};base64,${value}`;
   }
 
   function addBubble(role, content, imageUrl = "") {
@@ -53,31 +92,53 @@
 
     container.appendChild(bubble);
 
-    scrollChatToBottom();
+    // Newest messages stay visible at the bottom.
+    container.scrollTop = container.scrollHeight;
 
     return bubble;
   }
 
-  function getImageSource(result) {
-    const raw =
-      result.image ||
-      result.imageUrl ||
-      result.image_url ||
-      result.url ||
-      result.base64 ||
-      result.data;
+  function renderHistory() {
+    const container = $("chatHistory");
+    if (!container) return;
 
-    if (!raw || typeof raw !== "string") return "";
+    container.replaceChildren();
 
-    if (
-      raw.startsWith("data:") ||
-      raw.startsWith("https://") ||
-      raw.startsWith("http://")
-    ) {
-      return raw;
-    }
+    history.forEach(turn => {
+      addBubble("user", turn.user);
 
-    return `data:${result.mimeType || result.mime_type || "image/png"};base64,${raw}`;
+      if (turn.assistantImage) {
+        addBubble(
+          "assistant",
+          turn.assistant || "Your image is ready.",
+          turn.assistantImage
+        );
+      } else if (turn.assistant) {
+        addBubble("assistant", turn.assistant);
+      }
+    });
+
+    container.scrollTop = container.scrollHeight;
+  }
+
+  function getApiHistory() {
+    const messages = [];
+
+    history.forEach(turn => {
+      messages.push({
+        role: "user",
+        content: turn.user
+      });
+
+      if (turn.assistant) {
+        messages.push({
+          role: "assistant",
+          content: turn.assistant
+        });
+      }
+    });
+
+    return messages;
   }
 
   async function send() {
@@ -89,113 +150,78 @@
     if (!input) return;
 
     const message = input.value.trim();
-
     if (!message) return;
 
     sending = true;
 
-    if (sendButton) {
-      sendButton.disabled = true;
-      sendButton.textContent = "Sending...";
-    }
+    if (sendButton) sendButton.disabled = true;
 
-    // Preserve previous conversation for the AI.
-    const previousHistory = history.map(item => ({
-      role: item.role,
-      content: item.content
-    }));
-
-    // Add the new user message.
-    history.push({
-      role: "user",
-      content: message
-    });
-
+    // Clear only the input; do not focus it again on mobile.
     input.value = "";
 
-    addBubble("user", message);
+    const turn = {
+      user: message,
+      assistant: "",
+      assistantImage: ""
+    };
+
+    history.push(turn);
+    renderHistory();
+
     setChatStatus("TinVin AI is thinking...");
 
     try {
-      let answer = "";
-      let imageUrl = "";
+      if (isImageRequest(message)) {
+        setChatStatus("TinVin AI is creating your image...");
 
-      const wantsImage =
-        typeof core.imageIntent === "function" &&
-        core.imageIntent(message);
-
-      if (wantsImage) {
         const result = await postJSON("/api/image", {
           prompt: message
         });
 
-        imageUrl = getImageSource(result);
+        const imageUrl = getImageSource(result);
 
         if (!imageUrl) {
-          answer = extractText(result);
-
-          if (!answer) {
-            throw new Error("The image could not be generated.");
-          }
+          throw new Error(
+            extractText(result) ||
+            "The image service did not return an image."
+          );
         }
+
+        turn.assistant = "Your image is ready.";
+        turn.assistantImage = imageUrl;
+
+        renderHistory();
       } else {
         const result = await postJSON("/api/ai", {
           tool: "chat",
           message,
-          previousHistory
+          history: getApiHistory().slice(0, -1)
         });
 
-        answer = extractText(result);
+        const answer = extractText(result);
 
-        if (!answer || !answer.trim()) {
+        if (!answer) {
           throw new Error("The AI returned an empty response.");
         }
 
-        answer = answer.trim();
-      }
-
-      if (imageUrl) {
-        addBubble("assistant", "Your image is ready.", imageUrl);
-
-        history.push({
-          role: "assistant",
-          content: "Image generated successfully."
-        });
-      } else {
-        addBubble("assistant", answer);
-
-        history.push({
-          role: "assistant",
-          content: answer
-        });
+        turn.assistant = answer;
+        renderHistory();
       }
 
       setChatStatus("");
 
     } catch (error) {
-      const errorMessage =
+      turn.assistant =
         "Sorry, something went wrong: " +
         (error.message || "Please try again.");
 
-      addBubble("assistant", errorMessage);
-
-      history.push({
-        role: "assistant",
-        content: errorMessage
-      });
-
+      renderHistory();
       setChatStatus("Message could not be completed.");
 
     } finally {
       sending = false;
 
-      if (sendButton) {
-        sendButton.disabled = false;
-        sendButton.textContent = "Send ↑";
-      }
-
-      // Do not focus the input here.
-      // This prevents unwanted mobile screen jumping.
+      if (sendButton) sendButton.disabled = false;
     }
   }
 
@@ -205,17 +231,10 @@
     history.length = 0;
 
     const container = $("chatHistory");
-
-    if (container) {
-      container.replaceChildren();
-      container.scrollTop = 0;
-    }
+    if (container) container.replaceChildren();
 
     const input = $("chatInput");
-
-    if (input) {
-      input.value = "";
-    }
+    if (input) input.value = "";
 
     setChatStatus("");
   }
@@ -226,7 +245,8 @@
     send,
     newChat,
     addBubble,
-    getHistory: () => history.map(item => ({ ...item }))
+    renderHistory,
+    getHistory: () => history.map(turn => ({ ...turn }))
   };
 
 })();
