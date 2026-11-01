@@ -1,24 +1,45 @@
 
-/* TinVin AI - Chat Styles */
+/* TinVin AI - ChatGPT Style Chat */
 
-#chatPage .chat-panel {
+#chatPage {
+  width: 100%;
+}
+
+#chatPage .tool-heading .tool-icon {
+  background: linear-gradient(135deg, #8b5cf6, #51b8ff);
+  color: #fff;
+}
+
+/* Main chat panel */
+
+#chatPage .chat-layout {
   display: flex;
   flex-direction: column;
   min-height: 65vh;
+  padding: 18px;
   overflow: hidden;
+  gap: 12px;
 }
+
+/* Conversation history */
 
 #chatPage .chat-history {
   display: flex;
   flex: 1;
   flex-direction: column;
-  gap: 14px;
+  gap: 16px;
   min-height: 280px;
   max-height: 55vh;
   padding: 12px 4px 18px;
   overflow-y: auto;
-  scroll-behavior: smooth;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: auto;
+  overflow-wrap: anywhere;
 }
+
+/* Message bubbles */
 
 #chatPage .chat-bubble {
   width: fit-content;
@@ -28,7 +49,7 @@
   border-radius: 18px;
   background: var(--panel-soft);
   color: var(--text);
-  line-height: 1.65;
+  line-height: 1.7;
   overflow-wrap: anywhere;
   animation: chatMessageIn .2s ease;
 }
@@ -37,7 +58,7 @@
   align-self: flex-end;
   border-color: transparent;
   border-bottom-right-radius: 5px;
-  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  background: linear-gradient(135deg, #8b5cf6, #51b8ff);
   color: #fff;
 }
 
@@ -46,12 +67,18 @@
   border-bottom-left-radius: 5px;
 }
 
+/* Message text */
+
 #chatPage .chat-message {
   white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
+
+/* Generated images */
 
 #chatPage .chat-image {
   display: block;
+  width: auto;
   max-width: 100%;
   max-height: 420px;
   margin-top: 10px;
@@ -59,39 +86,68 @@
   object-fit: contain;
 }
 
-#chatPage .chat-composer {
+/* Message input area */
+
+#chatPage .field-label {
+  margin-bottom: 0;
+  color: var(--muted);
+}
+
+#chatPage .chat-compose {
   display: flex;
   align-items: flex-end;
   gap: 10px;
-  padding-top: 14px;
-  border-top: 1px solid var(--border);
+  width: 100%;
 }
 
 #chatPage #chatInput {
   flex: 1;
+  min-width: 0;
   min-height: 48px;
   max-height: 150px;
   resize: vertical;
   border-radius: 16px;
+  padding: 13px 15px;
+  line-height: 1.5;
 }
 
 #chatPage #sendBtn {
-  flex: 0 0 auto;
-  min-width: 48px;
+  flex: 0 0 54px;
+  width: 54px;
+  min-width: 54px;
   min-height: 48px;
   border-radius: 15px;
+  background: linear-gradient(135deg, #8b5cf6, #51b8ff);
+  color: #fff;
 }
 
-#chatPage #newChatBtn {
-  margin-bottom: 14px;
+#chatPage #sendBtn:disabled {
+  opacity: .6;
+  cursor: not-allowed;
 }
+
+/* Status */
 
 #chatPage #chatStatus {
-  min-height: 20px;
-  padding: 8px 2px;
+  min-height: 18px;
+  padding: 2px;
   color: var(--muted);
   font-size: 12px;
 }
+
+/* New chat */
+
+#chatPage #newChatBtn {
+  margin: 0;
+}
+
+#chatPage .chat-layout > .actions {
+  display: flex;
+  justify-content: flex-end;
+  margin: 0;
+}
+
+/* Animation */
 
 @keyframes chatMessageIn {
   from {
@@ -105,17 +161,41 @@
   }
 }
 
+/* Mobile */
+
 @media (max-width: 600px) {
-  #chatPage .chat-panel {
-    min-height: 70vh;
-    padding: 15px;
+  #chatPage .chat-layout {
+    min-height: 65dvh;
+    padding: 12px;
+    gap: 10px;
   }
 
   #chatPage .chat-history {
-    max-height: 58vh;
+    min-height: 250px;
+    max-height: 52dvh;
+    gap: 14px;
+    padding: 10px 2px 16px;
   }
 
   #chatPage .chat-bubble {
     max-width: 94%;
+    padding: 12px 14px;
+  }
+
+  #chatPage .chat-compose {
+    gap: 7px;
+  }
+
+  #chatPage #chatInput {
+    min-height: 46px;
+    height: 46px;
+    font-size: 14px;
+  }
+
+  #chatPage #sendBtn {
+    flex-basis: 50px;
+    width: 50px;
+    min-width: 50px;
+    min-height: 46px;
   }
 }
