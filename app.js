@@ -81,9 +81,9 @@
     "Mongolian", "Burmese"
   ];
 
+  // Only the real pages from index.html.
   const pages = [
     "homePage",
-    "writerPage",
     "toolPage",
     "chatPage",
     "settingsPage"
@@ -100,7 +100,6 @@
 
   window.TinVinTools = window.TinVinTools || {};
 
-  // Keep the shared output panel hidden until a tool returns a result.
   function ensureOutputVisibilityStyle() {
     if ($("tinvinOutputVisibilityStyle")) return;
 
@@ -115,86 +114,9 @@
     document.head.appendChild(style);
   }
 
-  // Create a separate Writer page automatically.
-  function ensureWriterPage() {
-    if ($("writerPage")) return;
-
-    const app = document.querySelector(".app");
-
-    if (!app) {
-      console.error("TinVin app container was not found.");
-      return;
-    }
-
-    const page = document.createElement("section");
-    page.id = "writerPage";
-    page.className = "page";
-
-    page.innerHTML = `
-      <button class="back-btn" id="writerBackBtn" type="button">
-        ← Back to Home
-      </button>
-
-      <div class="tool-heading">
-        <div class="tool-icon">✍️</div>
-        <div>
-          <h1>AI Writer</h1>
-          <p>Create clear, polished and engaging content.</p>
-        </div>
-      </div>
-
-      <div class="panel" id="writerPanel">
-        <label class="field-label" for="writerInput">
-          What would you like me to write?
-        </label>
-
-        <textarea
-          class="textarea"
-          id="writerInput"
-          placeholder="Write a professional email, social post, story..."
-        ></textarea>
-
-        <div class="actions">
-          <button class="primary-btn" id="writerRunBtn" type="button">
-            Generate
-          </button>
-
-          <button class="secondary-btn" id="writerClearBtn" type="button">
-            Clear
-          </button>
-        </div>
-
-        <div id="writerStatus" class="status" role="status"></div>
-      </div>
-
-      <div class="panel hidden" id="writerOutputBox">
-        <div class="section-title" style="margin-top:0">
-          <h2>Result</h2>
-
-          <button
-            class="secondary-btn"
-            id="writerCopyBtn"
-            type="button"
-          >
-            Copy text
-          </button>
-        </div>
-
-        <div id="writerOutput" class="output"></div>
-      </div>
-    `;
-
-    app.appendChild(page);
-
-    $("writerBackBtn").addEventListener("click", () => {
-      showPage("homePage");
-    });
-  }
-
   function showPage(id) {
     pages.forEach(page => {
       const element = $(page);
-
       if (element) {
         element.classList.toggle("active", page === id);
       }
@@ -208,13 +130,9 @@
 
   function setStatus(id, message) {
     const element = $(id);
-
-    if (element) {
-      element.textContent = message || "";
-    }
+    if (element) element.textContent = message || "";
   }
 
-  // Seven saved themes.
   function applyTheme(theme) {
     const allowed = [
       "purple", "navy", "blue", "green",
@@ -235,16 +153,12 @@
     } catch {}
 
     const selector = $("themeSelect");
-
-    if (selector) {
-      selector.value = theme;
-    }
+    if (selector) selector.value = theme;
   }
 
   function fillLanguageMenus() {
     ["sourceLang", "targetLang"].forEach(id => {
       const select = $(id);
-
       if (!select) return;
 
       select.replaceChildren();
@@ -257,13 +171,8 @@
       });
     });
 
-    if ($("sourceLang")) {
-      $("sourceLang").value = "English";
-    }
-
-    if ($("targetLang")) {
-      $("targetLang").value = "Sorani Kurdish";
-    }
+    if ($("sourceLang")) $("sourceLang").value = "English";
+    if ($("targetLang")) $("targetLang").value = "Sorani Kurdish";
   }
 
   async function postJSON(path, data) {
@@ -324,7 +233,6 @@
 
   function makeImage(data, container) {
     const raw = data?.image || data?.base64 || data?.data;
-
     if (!raw || !container) return false;
 
     const src =
@@ -344,7 +252,6 @@
     img.className = "image-result";
     img.alt = "AI-generated image";
     img.src = src;
-
     container.appendChild(img);
 
     return true;
@@ -354,91 +261,48 @@
     return /\b(generate|create|draw|make|design|render)\b.{0,45}\b(image|picture|illustration|artwork|logo)\b|\b(image|picture|illustration|artwork|logo)\b.{0,35}\b(of|showing|with)\b/i.test(text);
   }
 
+  // All seven AI tools use the existing shared tool page.
   function openTool(key) {
     if (!definitions[key]) return;
 
-    // QR Scanner uses its existing QR module.
     if (key === "qr") {
       if (window.TinVinQR?.open) {
         window.TinVinQR.open();
       } else {
-        setStatus(
-          "toolStatus",
-          "QR Scanner is loading. Please try again."
-        );
+        setStatus("toolStatus", "QR Scanner is loading. Please try again.");
       }
-
       return;
     }
 
     activeTool = key;
 
-    // Dedicated Writer page.
+    // Reset Writer's previous session when opening it.
     if (key === "writer") {
-      ensureWriterPage();
-
-      $("writerInput").value = "";
-      $("writerOutput").textContent = "";
-      $("writerOutputBox").classList.add("hidden");
-
-      setStatus("writerStatus", "");
-      lastOutput = "";
-
-      showPage("writerPage");
-
-      const language =
-        localStorage.getItem("tinvin_language") || "English";
-
-      if (language !== "English") {
-        translateInterface(language);
-      }
-
-      $("writerInput").focus();
-      return;
+      window.TinVinTools.writer?.reset?.();
     }
 
-    // Dedicated Chat page.
     if (key === "chat") {
       showPage("chatPage");
       $("chatInput")?.focus();
       return;
     }
 
-    // Other tools use the shared tool page.
     const item = definitions[key];
 
-    if ($("toolPage")) {
-      $("toolPage").dataset.tool = key;
-    }
-
-    if ($("activeTitle")) {
-      $("activeTitle").textContent = item.title;
-    }
-
-    if ($("activeIcon")) {
-      $("activeIcon").textContent = item.icon;
-    }
-
-    if ($("activeDescription")) {
-      $("activeDescription").textContent = item.description;
-    }
-
-    if ($("inputLabel")) {
-      $("inputLabel").textContent = item.label;
-    }
+    if ($("toolPage")) $("toolPage").dataset.tool = key;
+    if ($("activeTitle")) $("activeTitle").textContent = item.title;
+    if ($("activeIcon")) $("activeIcon").textContent = item.icon;
+    if ($("activeDescription")) $("activeDescription").textContent = item.description;
+    if ($("inputLabel")) $("inputLabel").textContent = item.label;
 
     if ($("toolInput")) {
       $("toolInput").placeholder = item.placeholder;
       $("toolInput").value = "";
     }
 
-    if ($("toolOutput")) {
-      $("toolOutput").textContent = "";
-    }
+    if ($("toolOutput")) $("toolOutput").replaceChildren();
 
     clearImage($("toolImage"));
-
-    // Hide the previous result when opening another tool.
     $("outputBox")?.classList.remove("show");
 
     $("translatorOptions")?.classList.toggle(
@@ -456,15 +320,13 @@
         key === "image" ? "Generated image" : "Result";
     }
 
-    $("copyBtn")?.classList.toggle(
-      "hidden",
-      key === "image"
-    );
+    $("copyBtn")?.classList.toggle("hidden", key === "image");
 
     if ($("runBtn")) {
       $("runBtn").textContent =
         key === "image" ? "Generate image" :
-        key === "translator" ? "Translate" : "Generate";
+        key === "translator" ? "Translate" :
+        key === "writer" ? "Generate" : "Generate";
     }
 
     setStatus("toolStatus", "");
@@ -493,10 +355,7 @@
     while ((node = walker.nextNode())) {
       const parent = node.parentElement;
 
-      if (!parent || parent.closest("script,style,.brand")) {
-        continue;
-      }
-
+      if (!parent || parent.closest("script,style,.brand")) continue;
       if (!node.nodeValue.trim()) continue;
 
       if (!originalText.has(node)) {
@@ -516,16 +375,13 @@
 
   function restoreEnglishText() {
     translatedNodes.forEach(([node, original]) => {
-      if (node.isConnected) {
-        node.nodeValue = original;
-      }
+      if (node.isConnected) node.nodeValue = original;
     });
 
     translatedNodes = [];
 
     document.querySelectorAll("[placeholder]").forEach(element => {
       const original = originalPlaceholders.get(element);
-
       if (original !== undefined) {
         element.setAttribute("placeholder", original);
       }
@@ -536,7 +392,6 @@
     rememberOriginalTextNodes();
 
     const items = [];
-
     const walker = document.createTreeWalker(
       document.body,
       NodeFilter.SHOW_TEXT
@@ -550,20 +405,13 @@
       if (!parent || !node.nodeValue.trim()) continue;
       if (parent.closest("script,style,.brand")) continue;
 
-      if (
-        parent.closest(
-          "#sourceLang,#targetLang,#interfaceLang,#themeSelect"
-        )
-      ) {
-        continue;
-      }
+      if (parent.closest(
+        "#sourceLang,#targetLang,#interfaceLang,#themeSelect"
+      )) continue;
 
       const original = originalText.get(node) ?? node.nodeValue;
 
-      items.push({
-        node,
-        original
-      });
+      items.push({ node, original });
     }
 
     return items;
@@ -606,22 +454,16 @@
 
         try {
           const raw = extractText(result);
-
-          const clean = raw
-            .replace(/^```(?:json)?\s*/i, "")
-            .replace(/\s*```$/, "");
-
-          translated = JSON.parse(clean);
-        } catch {
-          throw new Error(
-            "The translation service returned invalid JSON."
+          translated = JSON.parse(
+            raw.replace(/^```(?:json)?\s*/i, "")
+               .replace(/\s*```$/, "")
           );
+        } catch {
+          throw new Error("The translation service returned invalid JSON.");
         }
 
         if (!translated || typeof translated !== "object") {
-          throw new Error(
-            "The translation service returned an invalid result."
-          );
+          throw new Error("The translation service returned an invalid result.");
         }
 
         if (runId !== translationRun) return;
@@ -630,10 +472,7 @@
           const value = translated["s" + index];
 
           if (typeof value === "string" && value.trim()) {
-            translatedNodes.push([
-              item.node,
-              item.original
-            ]);
+            translatedNodes.push([item.node, item.original]);
 
             item.node.nodeValue = item.original.replace(
               item.original.trim(),
@@ -644,9 +483,7 @@
       }
 
       const fields = [
-        ...document.querySelectorAll(
-          "input[placeholder],textarea[placeholder]"
-        )
+        ...document.querySelectorAll("input[placeholder],textarea[placeholder]")
       ];
 
       const fieldData = fields.map(element => ({
@@ -656,11 +493,7 @@
           element.getAttribute("placeholder")
       })).filter(item => item.original);
 
-      for (
-        let start = 0;
-        start < fieldData.length;
-        start += batchSize
-      ) {
+      for (let start = 0; start < fieldData.length; start += batchSize) {
         if (runId !== translationRun) return;
 
         const batch = fieldData.slice(start, start + batchSize);
@@ -679,10 +512,8 @@
         let translated = {};
 
         try {
-          const raw = extractText(result);
-
           translated = JSON.parse(
-            raw
+            extractText(result)
               .replace(/^```(?:json)?\s*/i, "")
               .replace(/\s*```$/, "")
           );
@@ -705,10 +536,7 @@
         language === "Arabic" ? "ar" :
         language === "Kurmanji Kurdish" ? "ku-Latn" : "en";
 
-      setStatus(
-        "languageStatus",
-        "Interface translated to " + language + "."
-      );
+      setStatus("languageStatus", "Interface translated to " + language + ".");
 
     } catch (error) {
       if (runId === translationRun) {
@@ -727,45 +555,30 @@
     const module = window.TinVinTools[activeTool];
 
     if (!module || typeof module.run !== "function") {
-      setStatus(
-        "toolStatus",
-        "This tool is not loaded yet. Please try again."
-      );
+      setStatus("toolStatus", "This tool is not loaded yet. Please try again.");
       return;
     }
 
     busy = true;
 
-    if ($("runBtn")) {
-      $("runBtn").disabled = true;
-    }
+    if ($("runBtn")) $("runBtn").disabled = true;
 
     try {
       await module.run();
     } catch (error) {
-      setStatus(
-        "toolStatus",
-        "Error: " + (error.message || "Request failed")
-      );
+      setStatus("toolStatus", "Error: " + (error.message || "Request failed"));
     } finally {
       busy = false;
-
-      if ($("runBtn")) {
-        $("runBtn").disabled = false;
-      }
+      if ($("runBtn")) $("runBtn").disabled = false;
     }
   }
 
-  // Add QR Scanner as the eighth tool.
   function ensureQRCard() {
     const grid = $("toolsGrid");
 
-    if (!grid || grid.querySelector('[data-tool="qr"]')) {
-      return;
-    }
+    if (!grid || grid.querySelector('[data-tool="qr"]')) return;
 
     const card = document.createElement("button");
-
     card.type = "button";
     card.className = "tool-card";
     card.dataset.tool = "qr";
@@ -779,7 +592,6 @@
     grid.appendChild(card);
   }
 
-  // Shared functions used by all tool modules.
   window.TinVinCore = {
     $,
     API_BASE,
@@ -795,7 +607,6 @@
     openTool,
 
     getActiveTool: () => activeTool,
-
     getLastOutput: () => lastOutput,
 
     setLastOutput: value => {
@@ -803,32 +614,20 @@
     },
 
     getBusy: () => busy,
-
     setBusy: value => {
       busy = Boolean(value);
     }
   };
 
-  // Home and navigation.
+  // Home tool navigation.
   $("toolsGrid")?.addEventListener("click", event => {
     const card = event.target.closest("[data-tool]");
-
-    if (card) {
-      openTool(card.dataset.tool);
-    }
+    if (card) openTool(card.dataset.tool);
   });
 
-  $("backBtn")?.addEventListener("click", () => {
-    showPage("homePage");
-  });
-
-  $("chatBackBtn")?.addEventListener("click", () => {
-    showPage("homePage");
-  });
-
-  $("settingsBackBtn")?.addEventListener("click", () => {
-    showPage("homePage");
-  });
+  $("backBtn")?.addEventListener("click", () => showPage("homePage"));
+  $("chatBackBtn")?.addEventListener("click", () => showPage("homePage"));
+  $("settingsBackBtn")?.addEventListener("click", () => showPage("homePage"));
 
   $("settingsBtn")?.addEventListener("click", () => {
     showPage("settingsPage");
@@ -844,22 +643,19 @@
   });
 
   $("clearBtn")?.addEventListener("click", () => {
-    if ($("toolInput")) {
-      $("toolInput").value = "";
-    }
-
-    if ($("toolOutput")) {
-      $("toolOutput").textContent = "";
-    }
+    if ($("toolInput")) $("toolInput").value = "";
+    if ($("toolOutput")) $("toolOutput").replaceChildren();
 
     clearImage($("toolImage"));
-
-    // Hide the result when the user clears the tool.
     $("outputBox")?.classList.remove("show");
 
     lastOutput = "";
-
     setStatus("toolStatus", "");
+
+    // Clear the Writer session as well.
+    if (activeTool === "writer") {
+      window.TinVinTools.writer?.clear?.();
+    }
   });
 
   $("copyBtn")?.addEventListener("click", async () => {
@@ -869,10 +665,7 @@
       await navigator.clipboard.writeText(lastOutput);
       setStatus("toolStatus", "Copied to clipboard.");
     } catch {
-      setStatus(
-        "toolStatus",
-        "Copy is unavailable in this browser."
-      );
+      setStatus("toolStatus", "Copy is unavailable in this browser.");
     }
   });
 
@@ -899,13 +692,11 @@
     const language = event.target.value;
 
     localStorage.setItem("tinvin_language", language);
-
     await translateInterface(language);
   });
 
   // Start application.
   ensureOutputVisibilityStyle();
-  ensureWriterPage();
   fillLanguageMenus();
   ensureQRCard();
 
