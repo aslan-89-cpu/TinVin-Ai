@@ -34,6 +34,7 @@
 
       const label = document.createElement("div");
       label.className = "writer-message-label";
+
       label.textContent =
         item.role === "user" ? "You" : "TinVin AI";
 
@@ -55,8 +56,9 @@
 
     setLastOutput(assistantMessages.join("\n\n"));
 
+    // Keep the newest message at the top.
     if (hasMessages) {
-      output.scrollTop = output.scrollHeight;
+      output.scrollTop = 0;
     }
   }
 
@@ -73,6 +75,7 @@
         "toolStatus",
         "Please enter what you want me to write."
       );
+
       input?.focus();
       return;
     }
@@ -84,14 +87,20 @@
       runBtn.textContent = "Writing...";
     }
 
-    history.push({
+    const userMessage = {
       role: "user",
       text: message
-    });
+    };
+
+    // New request goes to the top.
+    history.unshift(userMessage);
 
     renderHistory();
 
-    if (input) input.value = "";
+    // Clear input after sending.
+    if (input) {
+      input.value = "";
+    }
 
     setStatus("toolStatus", "Writing your content...");
 
@@ -107,7 +116,10 @@
         throw new Error("The AI returned an empty response.");
       }
 
-      history.push({
+      // Put the AI response directly below its request.
+      const userIndex = history.indexOf(userMessage);
+
+      history.splice(userIndex + 1, 0, {
         role: "assistant",
         text: responseText.trim()
       });
@@ -117,15 +129,7 @@
       setStatus("toolStatus", "Your content is ready.");
 
     } catch (error) {
-      history = history.filter(
-        (item, index) =>
-          !(item.role === "user" &&
-            item.text === message &&
-            index === history.length - 1)
-      );
-
-      renderHistory();
-
+      // Keep the request visible if AI fails.
       setStatus(
         "toolStatus",
         error.message || "Writer request failed. Please try again."
@@ -149,7 +153,10 @@
     history = [];
 
     const input = $("toolInput");
-    if (input) input.value = "";
+
+    if (input) {
+      input.value = "";
+    }
 
     renderHistory();
 
@@ -190,7 +197,10 @@
     history = [];
 
     const output = $("toolOutput");
-    if (output) output.replaceChildren();
+
+    if (output) {
+      output.replaceChildren();
+    }
 
     $("outputBox")?.classList.remove("show");
 
@@ -198,7 +208,6 @@
     setLastOutput("");
   }
 
-  // Register the Writer module.
   window.TinVinTools = window.TinVinTools || {};
 
   window.TinVinTools.writer = {
