@@ -187,3 +187,6 @@
     min-height: 46px;
   }
 }
+#toolPage.writer-active #toolImage {
+  display: none !important;
+}
