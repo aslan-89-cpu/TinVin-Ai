@@ -21,8 +21,8 @@
   let history = [];
 
   function renderHistory() {
-    const output = $("writerOutput");
-    const resultBox = $("writerOutputBox");
+    const output = $("toolOutput");
+    const resultBox = $("outputBox");
 
     if (!output || !resultBox) return;
 
@@ -47,14 +47,15 @@
 
     const hasMessages = history.length > 0;
 
-    resultBox.classList.toggle("hidden", !hasMessages);
+    resultBox.classList.toggle("show", hasMessages);
+
+    const assistantMessages = history
+      .filter(item => item.role === "assistant")
+      .map(item => item.text);
+
+    setLastOutput(assistantMessages.join("\n\n"));
 
     if (hasMessages) {
-      resultBox.scrollIntoView({
-        behavior: "smooth",
-        block: "nearest"
-      });
-
       output.scrollTop = output.scrollHeight;
     }
   }
@@ -62,14 +63,14 @@
   async function run() {
     if (busy) return;
 
-    const input = $("writerInput");
-    const runBtn = $("writerRunBtn");
+    const input = $("toolInput");
+    const runBtn = $("runBtn");
 
     const message = input?.value.trim();
 
     if (!message) {
       setStatus(
-        "writerStatus",
+        "toolStatus",
         "Please enter what you want me to write."
       );
       input?.focus();
@@ -90,11 +91,9 @@
 
     renderHistory();
 
-    if (input) {
-      input.value = "";
-    }
+    if (input) input.value = "";
 
-    setStatus("writerStatus", "Writing your content...");
+    setStatus("toolStatus", "Writing your content...");
 
     try {
       const result = await postJSON("/api/ai", {
@@ -113,11 +112,9 @@
         text: responseText.trim()
       });
 
-      setLastOutput(responseText.trim());
-
       renderHistory();
 
-      setStatus("writerStatus", "Your content is ready.");
+      setStatus("toolStatus", "Your content is ready.");
 
     } catch (error) {
       history = history.filter(
@@ -130,7 +127,7 @@
       renderHistory();
 
       setStatus(
-        "writerStatus",
+        "toolStatus",
         error.message || "Writer request failed. Please try again."
       );
 
@@ -139,7 +136,7 @@
 
       if (runBtn) {
         runBtn.disabled = false;
-        runBtn.textContent = "Send";
+        runBtn.textContent = "Generate";
       }
 
       input?.focus();
@@ -151,15 +148,12 @@
 
     history = [];
 
-    const input = $("writerInput");
-
-    if (input) {
-      input.value = "";
-    }
+    const input = $("toolInput");
+    if (input) input.value = "";
 
     renderHistory();
 
-    setStatus("writerStatus", "");
+    setStatus("toolStatus", "");
     setLastOutput("");
 
     input?.focus();
@@ -173,7 +167,7 @@
 
     if (!text) {
       setStatus(
-        "writerStatus",
+        "toolStatus",
         "There is no AI response to copy."
       );
       return;
@@ -182,14 +176,11 @@
     try {
       await navigator.clipboard.writeText(text);
 
-      setStatus(
-        "writerStatus",
-        "Copied to clipboard."
-      );
+      setStatus("toolStatus", "Copied to clipboard.");
 
     } catch {
       setStatus(
-        "writerStatus",
+        "toolStatus",
         "Copy is unavailable in this browser."
       );
     }
@@ -197,25 +188,17 @@
 
   function reset() {
     history = [];
-    renderHistory();
-    setStatus("writerStatus", "");
+
+    const output = $("toolOutput");
+    if (output) output.replaceChildren();
+
+    $("outputBox")?.classList.remove("show");
+
+    setStatus("toolStatus", "");
     setLastOutput("");
   }
 
-  $("writerRunBtn")?.addEventListener("click", run);
-  $("writerClearBtn")?.addEventListener("click", clear);
-  $("writerCopyBtn")?.addEventListener("click", copy);
-
-  $("writerInput")?.addEventListener("keydown", event => {
-    if (
-      event.key === "Enter" &&
-      (event.ctrlKey || event.metaKey)
-    ) {
-      event.preventDefault();
-      run();
-    }
-  });
-
+  // Register the Writer module.
   window.TinVinTools = window.TinVinTools || {};
 
   window.TinVinTools.writer = {
