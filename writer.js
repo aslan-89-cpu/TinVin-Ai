@@ -9,7 +9,13 @@
     return;
   }
 
-  const { $, postJSON, extractText, setStatus, setLastOutput } = core;
+  const {
+    $,
+    postJSON,
+    extractText,
+    setStatus,
+    setLastOutput
+  } = core;
 
   let busy = false;
   let history = [];
@@ -28,7 +34,8 @@
 
       const label = document.createElement("div");
       label.className = "writer-message-label";
-      label.textContent = item.role === "user" ? "You" : "TinVin AI";
+      label.textContent =
+        item.role === "user" ? "You" : "TinVin AI";
 
       const content = document.createElement("div");
       content.className = "writer-message-content";
@@ -38,8 +45,18 @@
       output.appendChild(message);
     });
 
-    resultBox.classList.toggle("hidden", history.length === 0);
-    output.scrollTop = output.scrollHeight;
+    const hasMessages = history.length > 0;
+
+    resultBox.classList.toggle("hidden", !hasMessages);
+
+    if (hasMessages) {
+      resultBox.scrollIntoView({
+        behavior: "smooth",
+        block: "nearest"
+      });
+
+      output.scrollTop = output.scrollHeight;
+    }
   }
 
   async function run() {
@@ -51,7 +68,11 @@
     const message = input?.value.trim();
 
     if (!message) {
-      setStatus("writerStatus", "Please enter what you want me to write.");
+      setStatus(
+        "writerStatus",
+        "Please enter what you want me to write."
+      );
+      input?.focus();
       return;
     }
 
@@ -59,13 +80,20 @@
 
     if (runBtn) {
       runBtn.disabled = true;
-      runBtn.textContent = "Sending...";
+      runBtn.textContent = "Writing...";
     }
 
-    history.push({ role: "user", text: message });
+    history.push({
+      role: "user",
+      text: message
+    });
+
     renderHistory();
 
-    input.value = "";
+    if (input) {
+      input.value = "";
+    }
+
     setStatus("writerStatus", "Writing your content...");
 
     try {
@@ -74,25 +102,38 @@
         message
       });
 
-      const text = extractText(result);
+      const responseText = extractText(result);
 
-      if (!text) {
+      if (!responseText || !responseText.trim()) {
         throw new Error("The AI returned an empty response.");
       }
 
-      history.push({ role: "assistant", text });
-      setLastOutput(text);
+      history.push({
+        role: "assistant",
+        text: responseText.trim()
+      });
+
+      setLastOutput(responseText.trim());
+
       renderHistory();
 
       setStatus("writerStatus", "Your content is ready.");
+
     } catch (error) {
-      history.pop();
+      history = history.filter(
+        (item, index) =>
+          !(item.role === "user" &&
+            item.text === message &&
+            index === history.length - 1)
+      );
+
       renderHistory();
 
       setStatus(
         "writerStatus",
         error.message || "Writer request failed. Please try again."
       );
+
     } finally {
       busy = false;
 
@@ -106,14 +147,22 @@
   }
 
   function clear() {
+    if (busy) return;
+
     history = [];
 
     const input = $("writerInput");
-    if (input) input.value = "";
+
+    if (input) {
+      input.value = "";
+    }
 
     renderHistory();
+
     setStatus("writerStatus", "");
     setLastOutput("");
+
+    input?.focus();
   }
 
   async function copy() {
@@ -123,16 +172,34 @@
       .join("\n\n");
 
     if (!text) {
-      setStatus("writerStatus", "There is no AI response to copy.");
+      setStatus(
+        "writerStatus",
+        "There is no AI response to copy."
+      );
       return;
     }
 
     try {
       await navigator.clipboard.writeText(text);
-      setStatus("writerStatus", "Copied to clipboard.");
+
+      setStatus(
+        "writerStatus",
+        "Copied to clipboard."
+      );
+
     } catch {
-      setStatus("writerStatus", "Copy is unavailable in this browser.");
+      setStatus(
+        "writerStatus",
+        "Copy is unavailable in this browser."
+      );
     }
+  }
+
+  function reset() {
+    history = [];
+    renderHistory();
+    setStatus("writerStatus", "");
+    setLastOutput("");
   }
 
   $("writerRunBtn")?.addEventListener("click", run);
@@ -140,12 +207,24 @@
   $("writerCopyBtn")?.addEventListener("click", copy);
 
   $("writerInput")?.addEventListener("keydown", event => {
-    if (event.key === "Enter" && (event.ctrlKey || event.metaKey)) {
+    if (
+      event.key === "Enter" &&
+      (event.ctrlKey || event.metaKey)
+    ) {
       event.preventDefault();
       run();
     }
   });
 
   window.TinVinTools = window.TinVinTools || {};
-  window.TinVinTools.writer = { run, clear, copy };
+
+  window.TinVinTools.writer = {
+    run,
+    clear,
+    copy,
+    reset
+  };
+
+  renderHistory();
+
 })();
