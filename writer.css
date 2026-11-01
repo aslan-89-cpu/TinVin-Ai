@@ -1,58 +1,75 @@
 
-/* TinVin AI - Writer Chat Layout */
-/* Design only: keep the existing Writer functionality unchanged */
+/* TinVin AI - ChatGPT Style Writer */
 
-#toolPage.writer-active {
+#toolPage.active.writer-active {
   display: flex;
   flex-direction: column;
   gap: 14px;
+  min-height: calc(100vh - 100px);
 }
 
-/* Writer heading */
+/* Heading */
 #toolPage.writer-active .tool-heading .tool-icon {
   background: linear-gradient(135deg, #8b5cf6, #51b8ff);
   color: #fff;
 }
 
-/* Chat history ABOVE the input */
+/* Chat history above composer */
 #toolPage.writer-active #outputBox {
   order: 1;
   display: flex;
   flex-direction: column;
-  min-height: 0;
+  flex: 1;
+  min-height: 150px;
   overflow: hidden;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 0;
 }
 
-#toolPage.writer-active #outputBox.hidden {
-  display: none !important;
+#toolPage.writer-active #outputBox:not(.show) {
+  display: none;
+}
+
+#toolPage.writer-active #outputBox .section-title {
+  display: none;
 }
 
 #toolPage.writer-active #toolOutput {
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  max-height: 55vh;
+  gap: 18px;
+  width: 100%;
+  max-height: 60vh;
   overflow-y: auto;
   overflow-wrap: anywhere;
+  padding: 10px 2px 20px;
   scroll-behavior: smooth;
 }
 
 /* Messages */
 #toolPage.writer-active .writer-message {
-  padding: 13px 15px;
-  border-radius: 14px;
-  line-height: 1.65;
+  width: fit-content;
+  max-width: 92%;
+  padding: 13px 16px;
+  border-radius: 18px;
+  line-height: 1.7;
   white-space: pre-wrap;
 }
 
 #toolPage.writer-active .writer-user {
-  background: rgba(81, 184, 255, 0.13);
+  align-self: flex-end;
+  background: rgba(81, 184, 255, 0.16);
   border: 1px solid rgba(81, 184, 255, 0.25);
+  border-bottom-right-radius: 5px;
 }
 
 #toolPage.writer-active .writer-assistant {
-  background: rgba(139, 92, 246, 0.13);
-  border: 1px solid rgba(139, 92, 246, 0.25);
+  align-self: flex-start;
+  background: rgba(139, 92, 246, 0.14);
+  border: 1px solid rgba(139, 92, 246, 0.22);
+  border-bottom-left-radius: 5px;
 }
 
 #toolPage.writer-active .writer-message-label {
@@ -67,64 +84,106 @@
   overflow-wrap: anywhere;
 }
 
-/* Input panel BELOW chat */
+/* Composer at bottom */
 #toolPage.writer-active #toolPanel {
   order: 2;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-/* Input field */
-#toolPage.writer-active #toolInput {
-  width: 100%;
-  min-height: 90px;
-  height: 90px;
-  padding: 13px 14px;
-  resize: vertical;
-  line-height: 1.5;
-}
-
-/* Send / Generate buttons */
-#toolPage.writer-active .actions {
-  display: flex;
-  flex-direction: row;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 58px;
+  align-items: end;
   gap: 8px;
+  position: sticky;
+  bottom: 0;
+  z-index: 5;
+  padding: 12px;
+  border-radius: 20px;
+  background: var(--panel, #121a30);
+  border: 1px solid rgba(139, 92, 246, 0.25);
+}
+
+/* Hide old label */
+#toolPage.writer-active #toolPanel > .field-label {
+  display: none;
+}
+
+/* Message input */
+#toolPage.writer-active #toolInput {
+  grid-column: 1;
+  grid-row: 1;
+  width: 100%;
+  min-height: 48px;
+  height: 48px;
+  max-height: 140px;
+  resize: vertical;
+  padding: 13px 15px;
+  border-radius: 16px;
+  line-height: 1.5;
   margin: 0;
 }
 
+/* Send button */
+#toolPage.writer-active .actions {
+  display: contents;
+}
+
 #toolPage.writer-active #runBtn {
-  flex: 1;
-  min-height: 46px;
+  grid-column: 2;
+  grid-row: 1;
+  width: 58px;
+  min-width: 58px;
+  height: 48px;
+  min-height: 48px;
+  padding: 0;
+  border-radius: 15px;
+  font-size: 0;
   background: linear-gradient(135deg, #8b5cf6, #51b8ff);
 }
 
+#toolPage.writer-active #runBtn::after {
+  content: "↑";
+  font-size: 25px;
+  color: white;
+}
+
+#toolPage.writer-active #runBtn:disabled {
+  opacity: .6;
+}
+
+/* Hide old Clear button */
 #toolPage.writer-active #clearBtn {
-  min-height: 46px;
+  display: none;
 }
 
-/* Status and copy */
+/* Status */
 #toolPage.writer-active #toolStatus {
-  margin-top: 0;
-}
-
-#toolPage.writer-active #copyBtn {
-  margin-top: 12px;
+  grid-column: 1 / -1;
+  margin: 0;
 }
 
 /* Mobile */
 @media (max-width: 600px) {
+  #toolPage.active.writer-active {
+    min-height: calc(100dvh - 80px);
+  }
+
   #toolPage.writer-active #toolOutput {
-    max-height: 48vh;
+    max-height: 60vh;
   }
 
   #toolPage.writer-active #toolInput {
-    min-height: 75px;
-    height: 75px;
+    min-height: 46px;
+    height: 46px;
     font-size: 14px;
   }
 
-  #toolPage.writer-active .actions button {
-    flex: 1;
+  #toolPage.writer-active #toolPanel {
+    grid-template-columns: minmax(0, 1fr) 52px;
+    padding: 9px;
+  }
+
+  #toolPage.writer-active #runBtn {
+    width: 52px;
+    min-width: 52px;
+    height: 46px;
+    min-height: 46px;
   }
 }
