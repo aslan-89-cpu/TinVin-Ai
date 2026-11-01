@@ -1,5 +1,5 @@
 
-/* TinVin AI - Writer Chat Layout */
+/* TinVin AI - Writer Chat Layout - Fixed */
 
 #writerPage {
   display: flex;
@@ -13,13 +13,28 @@
   color: #fff;
 }
 
-/* Conversation area */
+/* Input panel - stays above the result */
+#writerPage #writerPanel {
+  order: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  position: relative;
+  z-index: 5;
+  background: var(--panel, #121a30);
+}
+
+/* Conversation / output area */
 #writerPage #writerOutputBox {
   order: 2;
   flex: 1;
-  min-height: 180px;
+  min-height: 0;
   overflow: hidden;
   white-space: normal;
+}
+
+#writerPage #writerOutputBox.hidden {
+  display: none !important;
 }
 
 #writerPage #writerOutput {
@@ -61,18 +76,7 @@
   overflow-wrap: anywhere;
 }
 
-/* Input panel */
-#writerPage #writerPanel {
-  order: 3;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  position: sticky;
-  bottom: 8px;
-  z-index: 5;
-  background: var(--panel, #121a30);
-}
-
+/* Input */
 #writerPage #writerInput {
   width: 100%;
   min-height: 90px;
@@ -82,7 +86,7 @@
   line-height: 1.5;
 }
 
-/* Send and clear */
+/* Send and clear buttons */
 #writerPage .actions {
   display: flex;
   flex-direction: row;
