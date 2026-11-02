@@ -1,4 +1,3 @@
-
 (() => {
   "use strict";
 
@@ -81,12 +80,12 @@
     "Mongolian", "Burmese"
   ];
 
-  // Only the real pages from index.html.
   const pages = [
     "homePage",
     "toolPage",
     "chatPage",
-    "settingsPage"
+    "settingsPage",
+    "translatorResultPage"
   ];
 
   let activeTool = "writer";
@@ -105,18 +104,124 @@
 
     const style = document.createElement("style");
     style.id = "tinvinOutputVisibilityStyle";
+
     style.textContent = `
       #outputBox:not(.show) {
         display: none !important;
+      }
+
+      #translatorResultPage {
+        display: none;
+      }
+
+      #translatorResultPage.active {
+        display: block;
+      }
+
+      #translatorResultText {
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+        line-height: 1.8;
+        direction: auto;
+        unicode-bidi: plaintext;
+      }
+
+      #translatorResultPage .translator-result-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 18px;
       }
     `;
 
     document.head.appendChild(style);
   }
 
+  // Create translator result page without editing index.html.
+  function ensureTranslatorResultPage() {
+    if ($("translatorResultPage")) return;
+
+    const page = document.createElement("section");
+
+    page.id = "translatorResultPage";
+    page.className = "page";
+
+    page.innerHTML = `
+      <div class="tool-topbar">
+        <button type="button" class="back-btn" id="translatorBackBtn">
+          ← Back
+        </button>
+      </div>
+
+      <div class="tool-heading">
+        <div class="tool-icon">🌍</div>
+        <div>
+          <h2>Translation Result</h2>
+          <p>Your translated text is ready.</p>
+        </div>
+      </div>
+
+      <section class="panel">
+        <h3 class="section-title">Translated Text</h3>
+
+        <div
+          id="translatorResultText"
+          class="output translator-result-text"
+          dir="auto"
+        ></div>
+
+        <div class="translator-result-actions">
+          <button
+            type="button"
+            class="secondary-btn"
+            id="translatorCopyBtn"
+          >
+            Copy Text
+          </button>
+
+          <button
+            type="button"
+            class="primary-btn"
+            id="translatorResultHomeBtn"
+          >
+            Back to Home
+          </button>
+        </div>
+
+        <p
+          id="translatorResultStatus"
+          class="status"
+          role="status"
+          aria-live="polite"
+        ></p>
+      </section>
+    `;
+
+    const app = document.querySelector(".app") || document.body;
+    const toolPage = $("toolPage");
+
+    if (toolPage && toolPage.parentNode === app) {
+      app.insertBefore(page, toolPage.nextSibling);
+    } else {
+      app.appendChild(page);
+    }
+
+    $("translatorBackBtn")?.addEventListener("click", () => {
+      showPage("toolPage");
+    });
+
+    $("translatorResultHomeBtn")?.addEventListener("click", () => {
+      showPage("homePage");
+    });
+
+    $("translatorCopyBtn")?.addEventListener("click", copyTranslatorResult);
+  }
+
   function showPage(id) {
     pages.forEach(page => {
       const element = $(page);
+
       if (element) {
         element.classList.toggle("active", page === id);
       }
@@ -217,6 +322,12 @@
       return content.map(item => item.text || "").join("\n");
     }
 
+    const parts = data?.candidates?.[0]?.content?.parts;
+
+    if (Array.isArray(parts)) {
+      return parts.map(item => item.text || "").join("");
+    }
+
     return "";
   }
 
@@ -276,7 +387,6 @@
 
     activeTool = key;
 
-    // Reset Writer's previous session when opening it.
     if (key === "writer") {
       window.TinVinTools.writer?.reset?.();
     }
@@ -326,7 +436,7 @@
       $("runBtn").textContent =
         key === "image" ? "Generate image" :
         key === "translator" ? "Translate" :
-        key === "writer" ? "Generate" : "Generate";
+        "Generate";
     }
 
     setStatus("toolStatus", "");
@@ -573,6 +683,17 @@
     }
   }
 
+  async function copyTranslatorResult() {
+    if (!lastOutput) return;
+
+    try {
+      await navigator.clipboard.writeText(lastOutput);
+      setStatus("translatorResultStatus", "Copied to clipboard.");
+    } catch {
+      setStatus("translatorResultStatus", "Copy is unavailable in this browser.");
+    }
+  }
+
   function ensureQRCard() {
     const grid = $("toolsGrid");
 
@@ -619,7 +740,6 @@
     }
   };
 
-  // Home tool navigation.
   $("toolsGrid")?.addEventListener("click", event => {
     const card = event.target.closest("[data-tool]");
     if (card) openTool(card.dataset.tool);
@@ -652,7 +772,6 @@
     lastOutput = "";
     setStatus("toolStatus", "");
 
-    // Clear the Writer session as well.
     if (activeTool === "writer") {
       window.TinVinTools.writer?.clear?.();
     }
@@ -697,6 +816,7 @@
 
   // Start application.
   ensureOutputVisibilityStyle();
+  ensureTranslatorResultPage();
   fillLanguageMenus();
   ensureQRCard();
 
