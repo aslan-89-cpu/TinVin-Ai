@@ -1,5 +1,5 @@
 
-/* TinVin AI - Translator with Dedicated Result Page */
+/* TinVin AI - Dedicated Translator Page */
 
 (() => {
   "use strict";
@@ -11,41 +11,53 @@
     return;
   }
 
-  const {
-    $,
-    postJSON,
-    setStatus,
-    setLastOutput,
-    showPage
-  } = core;
+  const { $, postJSON, setStatus, setLastOutput, showPage } = core;
 
   let busy = false;
+  let lastTranslation = "";
+
+  const languages = [
+    "English",
+    "Sorani Kurdish",
+    "Kurmanji Kurdish",
+    "Arabic",
+    "Spanish",
+    "French",
+    "Portuguese",
+    "German",
+    "Turkish",
+    "Persian",
+    "Russian",
+    "Chinese Simplified",
+    "Japanese",
+    "Korean",
+    "Hindi",
+    "Urdu",
+    "Italian",
+    "Dutch",
+    "Ukrainian",
+    "Polish"
+  ];
 
   function extractTranslation(result) {
     if (!result) return "";
 
-    if (typeof result === "string") {
-      return result.trim();
-    }
+    if (typeof result === "string") return result.trim();
 
     if (Array.isArray(result)) {
-      return result.map(extractTranslation).filter(Boolean).join("\n");
+      return result.map(extractTranslation)
+        .filter(Boolean).join("\n");
     }
 
     if (typeof result === "object") {
       const fields = [
-        "translation",
-        "translatedText",
-        "text",
-        "output",
-        "response",
-        "answer",
-        "content",
-        "result"
+        "translation", "translatedText", "text",
+        "output", "response", "answer", "content", "result"
       ];
 
       for (const field of fields) {
-        if (typeof result[field] === "string" && result[field].trim()) {
+        if (typeof result[field] === "string" &&
+            result[field].trim()) {
           return result[field].trim();
         }
 
@@ -60,13 +72,15 @@
       if (typeof content === "string") return content.trim();
 
       if (Array.isArray(content)) {
-        return content.map(item => item.text || "").join("\n").trim();
+        return content.map(item => item.text || "")
+          .join("\n").trim();
       }
 
       const parts = result.candidates?.[0]?.content?.parts;
 
       if (Array.isArray(parts)) {
-        return parts.map(item => item.text || "").join("").trim();
+        return parts.map(item => item.text || "")
+          .join("").trim();
       }
 
       if (result.data) return extractTranslation(result.data);
@@ -75,10 +89,25 @@
     return "";
   }
 
+  function fillLanguages(select, selected) {
+    if (!select) return;
+
+    select.innerHTML = "";
+
+    languages.forEach(language => {
+      const option = document.createElement("option");
+      option.value = language;
+      option.textContent = language;
+      select.appendChild(option);
+    });
+
+    select.value = selected;
+  }
+
   function setBusy(value) {
     busy = value;
 
-    const button = $("runBtn");
+    const button = $("translatorRunBtn");
 
     if (button) {
       button.disabled = value;
@@ -89,26 +118,31 @@
   async function run() {
     if (busy) return;
 
-    const input = $("toolInput");
+    const input = $("translatorInput");
     const message = input?.value?.trim();
 
-    const sourceLanguage = $("sourceLang")?.value || "English";
-    const targetLanguage = $("targetLang")?.value || "Sorani Kurdish";
+    const sourceLanguage =
+      $("translatorSourceLang")?.value || "English";
+
+    const targetLanguage =
+      $("translatorTargetLang")?.value || "Sorani Kurdish";
 
     if (!message) {
-      setStatus("toolStatus", "Please enter text to translate.");
+      setStatus("translatorStatus", "Please enter text to translate.");
       input?.focus();
       return;
     }
 
     if (sourceLanguage === targetLanguage) {
-      setStatus("toolStatus", "Please choose two different languages.");
+      setStatus("translatorStatus", "Please choose two different languages.");
       return;
     }
 
     setBusy(true);
+    setStatus("translatorStatus", "Translating...");
 
-    setStatus("toolStatus", "Translating...");
+    $("translatorResultBox")?.classList.add("hidden");
+    $("translatorResultText").textContent = "";
 
     try {
       const result = await postJSON("/api/ai", {
@@ -121,43 +155,25 @@
       const translated = extractTranslation(result);
 
       if (!translated) {
-        console.error("Empty translation:", result);
         throw new Error("AI returned an empty translation.");
       }
 
-      // Save translation for the copy button.
+      lastTranslation = translated;
       setLastOutput(translated);
 
-      // Make sure the result page exists.
-      let resultText = $("translatorResultText");
+      $("translatorResultText").textContent = translated;
+      $("translatorResultText").dir = "auto";
 
-      if (!resultText) {
-        throw new Error("Translation result page was not created. Please refresh the app.");
-      }
+      $("translatorResultBox")?.classList.remove("hidden");
 
-      resultText.textContent = translated;
-      resultText.dir = "auto";
-
-      // Keep compatibility with the old output area.
-      const oldOutput = $("toolOutput");
-
-      if (oldOutput) {
-        oldOutput.textContent = translated;
-        oldOutput.dir = "auto";
-      }
-
-      $("outputBox")?.classList.remove("show");
-
-      setStatus("translatorResultStatus", "");
-
-      // Only navigate after a valid translation is received.
-      showPage("translatorResultPage");
+      setStatus("translatorStatus", "");
+      setStatus("translatorResultStatus", "Translation completed.");
 
     } catch (error) {
       console.error("Translator error:", error);
 
       setStatus(
-        "toolStatus",
+        "translatorStatus",
         "Translation failed: " + (error.message || "Please try again.")
       );
 
@@ -166,16 +182,62 @@
     }
   }
 
+  function copyTranslation() {
+    if (!lastTranslation) return;
+
+    if (navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(lastTranslation)
+        .then(() => setStatus("translatorResultStatus", "Copied!"))
+        .catch(() => fallbackCopy());
+    } else {
+      fallbackCopy();
+    }
+  }
+
+  function fallbackCopy() {
+    const text = $("translatorResultText")?.textContent || "";
+    const area = document.createElement("textarea");
+
+    area.value = text;
+    document.body.appendChild(area);
+    area.select();
+
+    try {
+      document.execCommand("copy");
+      setStatus("translatorResultStatus", "Copied!");
+    } catch (error) {
+      setStatus("translatorResultStatus", "Copy failed.");
+    }
+
+    area.remove();
+  }
+
+  function clearTranslator() {
+    $("translatorInput").value = "";
+    $("translatorResultText").textContent = "";
+
+    $("translatorResultBox")?.classList.add("hidden");
+
+    lastTranslation = "";
+    setStatus("translatorStatus", "");
+    setStatus("translatorResultStatus", "");
+  }
+
   function initialize() {
     window.TinVinTools = window.TinVinTools || {};
 
+    fillLanguages($("translatorSourceLang"), "English");
+    fillLanguages($("translatorTargetLang"), "Sorani Kurdish");
+
+    $("translatorRunBtn")?.addEventListener("click", run);
+    $("translatorCopyBtn")?.addEventListener("click", copyTranslation);
+    $("translatorClearBtn")?.addEventListener("click", clearTranslator);
+
+    $("translatorBackBtn")?.addEventListener("click", () => {
+      showPage("homePage");
+    });
+
     window.TinVinTools.translator = { run };
-
-    const source = $("sourceLang");
-    const target = $("targetLang");
-
-    if (source && !source.value) source.value = "English";
-    if (target && !target.value) target.value = "Sorani Kurdish";
 
     console.log("TinVin AI Translator loaded successfully.");
   }
