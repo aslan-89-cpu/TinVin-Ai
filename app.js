@@ -84,9 +84,9 @@
   const pages = [
     "homePage",
     "toolPage",
+    "translatorPage",
     "chatPage",
-    "settingsPage",
-    "translatorResultPage"
+    "settingsPage"
   ];
 
   let activeTool = "writer";
@@ -111,14 +111,6 @@
         display: none !important;
       }
 
-      #translatorResultPage {
-        display: none;
-      }
-
-      #translatorResultPage.active {
-        display: block;
-      }
-
       #translatorResultText {
         white-space: pre-wrap;
         overflow-wrap: anywhere;
@@ -126,105 +118,11 @@
         line-height: 1.8;
         direction: auto;
         unicode-bidi: plaintext;
-        min-height: 100px;
-      }
-
-      #translatorResultPage .translator-result-actions {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 10px;
-        margin-top: 18px;
-      }
-
-      #translatorResultPage .translator-result-actions button {
-        flex: 1 1 140px;
-        min-height: 46px;
-        cursor: pointer;
+        min-height: 50px;
       }
     `;
 
     document.head.appendChild(style);
-  }
-
-  function ensureTranslatorResultPage() {
-    let page = $("translatorResultPage");
-
-    if (!page) {
-      page = document.createElement("section");
-      page.id = "translatorResultPage";
-      page.className = "page";
-
-      page.innerHTML = `
-        <div class="tool-topbar">
-          <button type="button" class="back-btn" id="translatorBackBtn">
-            ← Back to Translator
-          </button>
-        </div>
-
-        <div class="tool-heading">
-          <div class="tool-icon">🌍</div>
-          <div>
-            <h2>Translation Result</h2>
-            <p>Your translated text is ready.</p>
-          </div>
-        </div>
-
-        <section class="panel">
-          <h3 class="section-title">Translated Text</h3>
-
-          <div
-            id="translatorResultText"
-            class="output translator-result-text"
-            dir="auto"
-            aria-live="polite"
-          ></div>
-
-          <div class="translator-result-actions">
-            <button
-              type="button"
-              class="secondary-btn"
-              id="translatorCopyBtn"
-            >
-              Copy Text
-            </button>
-
-            <button
-              type="button"
-              class="primary-btn"
-              id="translatorResultHomeBtn"
-            >
-              Back to Home
-            </button>
-          </div>
-
-          <p
-            id="translatorResultStatus"
-            class="status"
-            role="status"
-            aria-live="polite"
-          ></p>
-        </section>
-      `;
-
-      const toolPage = $("toolPage");
-      const parent = toolPage?.parentNode || document.querySelector(".app") || document.body;
-
-      if (toolPage && toolPage.parentNode === parent) {
-        parent.insertBefore(page, toolPage.nextSibling);
-      } else {
-        parent.appendChild(page);
-      }
-    }
-
-    $("translatorBackBtn")?.addEventListener("click", () => {
-      showPage("toolPage");
-    });
-
-    $("translatorResultHomeBtn")?.addEventListener("click", () => {
-      showPage("homePage");
-    });
-
-    $("translatorCopyBtn")?.addEventListener("click", copyTranslatorResult);
   }
 
   function showPage(id) {
@@ -317,14 +215,18 @@
   }
 
   function extractText(data) {
-    if (typeof data?.text === "string") return data.text;
-    if (typeof data?.output === "string") return data.output;
-    if (typeof data?.response === "string") return data.response;
-    if (typeof data?.result === "string") return data.result;
-    if (typeof data?.translation === "string") return data.translation;
-    if (typeof data?.translatedText === "string") return data.translatedText;
+    if (typeof data === "string") return data;
+    if (!data) return "";
 
-    const content = data?.choices?.[0]?.message?.content;
+    if (typeof data.text === "string") return data.text;
+    if (typeof data.output === "string") return data.output;
+    if (typeof data.response === "string") return data.response;
+    if (typeof data.result === "string") return data.result;
+    if (typeof data.translation === "string") return data.translation;
+    if (typeof data.translatedText === "string") return data.translatedText;
+    if (typeof data.answer === "string") return data.answer;
+
+    const content = data.choices?.[0]?.message?.content;
 
     if (typeof content === "string") return content;
 
@@ -332,11 +234,13 @@
       return content.map(item => item.text || "").join("\n");
     }
 
-    const parts = data?.candidates?.[0]?.content?.parts;
+    const parts = data.candidates?.[0]?.content?.parts;
 
     if (Array.isArray(parts)) {
       return parts.map(item => item.text || "").join("");
     }
+
+    if (data.data) return extractText(data.data);
 
     return "";
   }
@@ -406,6 +310,18 @@
       return;
     }
 
+    // Translator now has its own dedicated page.
+    // Its result is displayed on that same page.
+    if (key === "translator") {
+      showPage("translatorPage");
+      $("translatorInput")?.focus();
+
+      const language = localStorage.getItem("tinvin_language") || "English";
+      if (language !== "English") translateInterface(language);
+
+      return;
+    }
+
     const item = definitions[key];
 
     if ($("toolPage")) $("toolPage").dataset.tool = key;
@@ -424,7 +340,7 @@
     clearImage($("toolImage"));
     $("outputBox")?.classList.remove("show");
 
-    $("translatorOptions")?.classList.toggle("hidden", key !== "translator");
+    $("translatorOptions")?.classList.add("hidden");
     $("imageHint")?.classList.toggle("hidden", key !== "image");
 
     if ($("resultTitle")) {
@@ -436,9 +352,7 @@
 
     if ($("runBtn")) {
       $("runBtn").textContent =
-        key === "image" ? "Generate image" :
-        key === "translator" ? "Translate" :
-        "Generate";
+        key === "image" ? "Generate image" : "Generate";
     }
 
     setStatus("toolStatus", "");
@@ -482,7 +396,9 @@
 
     document.querySelectorAll("[placeholder]").forEach(element => {
       const original = originalPlaceholders.get(element);
-      if (original !== undefined) element.setAttribute("placeholder", original);
+      if (original !== undefined) {
+        element.setAttribute("placeholder", original);
+      }
     });
   }
 
@@ -499,7 +415,9 @@
       if (!parent || !node.nodeValue.trim()) continue;
       if (parent.closest("script,style,.brand")) continue;
 
-      if (parent.closest("#sourceLang,#targetLang,#interfaceLang,#themeSelect")) continue;
+      if (parent.closest(
+        "#sourceLang,#targetLang,#translatorSourceLang,#translatorTargetLang,#interfaceLang,#themeSelect"
+      )) continue;
 
       const original = originalText.get(node) ?? node.nodeValue;
       items.push({ node, original });
@@ -544,7 +462,9 @@
 
         try {
           const raw = extractText(result);
-          translated = JSON.parse(raw.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, ""));
+          translated = JSON.parse(
+            raw.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "")
+          );
         } catch {
           throw new Error("The translation service returned invalid JSON.");
         }
@@ -560,16 +480,22 @@
 
           if (typeof value === "string" && value.trim()) {
             translatedNodes.push([item.node, item.original]);
-            item.node.nodeValue = item.original.replace(item.original.trim(), value.trim());
+            item.node.nodeValue = item.original.replace(
+              item.original.trim(),
+              value.trim()
+            );
           }
         });
       }
 
-      const fields = [...document.querySelectorAll("input[placeholder],textarea[placeholder]")];
+      const fields = [
+        ...document.querySelectorAll("input[placeholder],textarea[placeholder]")
+      ];
 
       const fieldData = fields.map(element => ({
         element,
-        original: originalPlaceholders.get(element) ?? element.getAttribute("placeholder")
+        original: originalPlaceholders.get(element) ??
+          element.getAttribute("placeholder")
       })).filter(item => item.original);
 
       for (let start = 0; start < fieldData.length; start += batchSize) {
@@ -592,14 +518,19 @@
 
         try {
           translated = JSON.parse(
-            extractText(result).replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "")
+            extractText(result)
+              .replace(/^```(?:json)?\s*/i, "")
+              .replace(/\s*```$/, "")
           );
         } catch {}
 
         if (runId === translationRun) {
           batch.forEach((item, index) => {
             if (typeof translated["p" + index] === "string") {
-              item.element.setAttribute("placeholder", translated["p" + index]);
+              item.element.setAttribute(
+                "placeholder",
+                translated["p" + index]
+              );
             }
           });
         }
@@ -614,7 +545,11 @@
 
     } catch (error) {
       if (runId === translationRun) {
-        setStatus("languageStatus", "Could not translate the full interface: " + (error.message || "Please try again."));
+        setStatus(
+          "languageStatus",
+          "Could not translate the full interface: " +
+          (error.message || "Please try again.")
+        );
       }
     }
   }
@@ -639,37 +574,6 @@
     } finally {
       busy = false;
       if ($("runBtn")) $("runBtn").disabled = false;
-    }
-  }
-
-  async function copyTranslatorResult() {
-    if (!lastOutput) {
-      setStatus("translatorResultStatus", "There is no translation to copy.");
-      return;
-    }
-
-    try {
-      await navigator.clipboard.writeText(lastOutput);
-      setStatus("translatorResultStatus", "Copied to clipboard.");
-    } catch {
-      try {
-        const area = document.createElement("textarea");
-        area.value = lastOutput;
-        area.style.position = "fixed";
-        area.style.opacity = "0";
-        document.body.appendChild(area);
-        area.select();
-
-        const copied = document.execCommand("copy");
-        area.remove();
-
-        setStatus(
-          "translatorResultStatus",
-          copied ? "Copied to clipboard." : "Copy is unavailable in this browser."
-        );
-      } catch {
-        setStatus("translatorResultStatus", "Copy is unavailable in this browser.");
-      }
     }
   }
 
@@ -784,24 +688,30 @@
 
   $("interfaceLang")?.addEventListener("change", async event => {
     const language = event.target.value;
-    localStorage.setItem("tinvin_language", language);
+
+    try {
+      localStorage.setItem("tinvin_language", language);
+    } catch {}
+
     await translateInterface(language);
   });
 
   ensureOutputVisibilityStyle();
-  ensureTranslatorResultPage();
   fillLanguageMenus();
   ensureQRCard();
 
   applyTheme(localStorage.getItem("tinvin_theme") || "purple");
 
   if ($("interfaceLang")) {
-    $("interfaceLang").value = localStorage.getItem("tinvin_language") || "English";
+    $("interfaceLang").value =
+      localStorage.getItem("tinvin_language") || "English";
   }
 
   rememberOriginalTextNodes();
 
   const savedLanguage = localStorage.getItem("tinvin_language") || "English";
-  if (savedLanguage !== "English") translateInterface(savedLanguage);
+  if (savedLanguage !== "English") {
+    translateInterface(savedLanguage);
+  }
 
 })();
