@@ -1,5 +1,4 @@
-
-/* TinVin AI - Fixed Translator */
+/* TinVin AI - Translator with dedicated result page */
 
 (() => {
   "use strict";
@@ -15,7 +14,8 @@
     $,
     postJSON,
     setStatus,
-    setLastOutput
+    setLastOutput,
+    showPage
   } = core;
 
   let busy = false;
@@ -55,24 +55,33 @@
 
         if (result[field] && typeof result[field] === "object") {
           const value = extractTranslation(result[field]);
+
           if (value) return value;
         }
       }
 
-      const content = result.choices?.[0]?.message?.content;
+      const content =
+        result.choices?.[0]?.message?.content;
 
       if (typeof content === "string") {
         return content.trim();
       }
 
       if (Array.isArray(content)) {
-        return content.map(x => x.text || "").join("\n").trim();
+        return content
+          .map(item => item.text || "")
+          .join("\n")
+          .trim();
       }
 
-      const parts = result.candidates?.[0]?.content?.parts;
+      const parts =
+        result.candidates?.[0]?.content?.parts;
 
       if (Array.isArray(parts)) {
-        return parts.map(x => x.text || "").join("").trim();
+        return parts
+          .map(item => item.text || "")
+          .join("")
+          .trim();
       }
 
       if (result.data) {
@@ -90,7 +99,9 @@
 
     if (button) {
       button.disabled = value;
-      button.textContent = value ? "Translating..." : "Translate";
+      button.textContent = value
+        ? "Translating..."
+        : "Translate";
     }
   }
 
@@ -98,8 +109,6 @@
     if (busy) return;
 
     const input = $("toolInput");
-    const output = $("toolOutput");
-    const resultBox = $("outputBox");
 
     const message = input?.value?.trim();
 
@@ -110,29 +119,30 @@
       $("targetLang")?.value || "Sorani Kurdish";
 
     if (!message) {
-      setStatus("toolStatus", "Please enter text to translate.");
+      setStatus(
+        "toolStatus",
+        "Please enter text to translate."
+      );
+
       input?.focus();
       return;
     }
 
     if (sourceLanguage === targetLanguage) {
-      setStatus("toolStatus", "Please choose two different languages.");
+      setStatus(
+        "toolStatus",
+        "Please choose two different languages."
+      );
+
       return;
     }
 
     setBusy(true);
 
-    if (output) {
-      output.textContent = "";
-      output.dir = "auto";
-    }
-
-    if (resultBox) {
-      resultBox.classList.add("show");
-      resultBox.dir = "auto";
-    }
-
-    setStatus("toolStatus", "Translating...");
+    setStatus(
+      "toolStatus",
+      "Translating..."
+    );
 
     try {
       const result = await postJSON("/api/ai", {
@@ -145,25 +155,62 @@
       const translated = extractTranslation(result);
 
       if (!translated) {
-        console.error("Empty translation:", result);
-        throw new Error("AI returned an empty translation.");
+        console.error(
+          "Empty translation:",
+          result
+        );
+
+        throw new Error(
+          "AI returned an empty translation."
+        );
       }
 
-      if (output) {
-        output.textContent = translated;
-        output.dir = "auto";
-      }
-
+      // Save the complete translation.
       setLastOutput(translated);
 
-      setStatus("toolStatus", "Translation completed successfully.");
+      // Put the complete translation on the result page.
+      const resultText = $("translatorResultText");
 
-    } catch (error) {
-      console.error("Translator error:", error);
+      if (resultText) {
+        resultText.textContent = translated;
+        resultText.dir = "auto";
+      }
+
+      // Keep the old output available for compatibility.
+      const oldOutput = $("toolOutput");
+
+      if (oldOutput) {
+        oldOutput.textContent = translated;
+        oldOutput.dir = "auto";
+      }
+
+      $("outputBox")?.classList.remove("show");
+
+      setStatus(
+        "translatorResultStatus",
+        ""
+      );
 
       setStatus(
         "toolStatus",
-        "Translation failed: " + (error.message || "Please try again.")
+        "Translation completed successfully."
+      );
+
+      // Open the dedicated translation result page.
+      if (typeof showPage === "function") {
+        showPage("translatorResultPage");
+      }
+
+    } catch (error) {
+      console.error(
+        "Translator error:",
+        error
+      );
+
+      setStatus(
+        "toolStatus",
+        "Translation failed: " +
+        (error.message || "Please try again.")
       );
 
     } finally {
@@ -172,23 +219,24 @@
   }
 
   function initialize() {
-    // Register Translator only.
-    // Interface language is controlled by app.js.
-
     window.TinVinTools = window.TinVinTools || {};
 
     window.TinVinTools.translator = {
       run
     };
 
-    // Fill language dropdowns only if empty.
+    // Fill language menus only if they are empty.
     ["sourceLang", "targetLang"].forEach(id => {
       const select = $(id);
 
-      if (!select || select.options.length) return;
+      if (!select || select.options.length) {
+        return;
+      }
 
       languages.forEach(language => {
-        select.add(new Option(language, language));
+        select.add(
+          new Option(language, language)
+        );
       });
     });
 
@@ -203,13 +251,17 @@
       target.value = "Sorani Kurdish";
     }
 
-    console.log("TinVin AI Translator loaded successfully.");
+    console.log(
+      "TinVin AI Translator loaded successfully."
+    );
   }
 
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", initialize, {
-      once: true
-    });
+    document.addEventListener(
+      "DOMContentLoaded",
+      initialize,
+      { once: true }
+    );
   } else {
     initialize();
   }
