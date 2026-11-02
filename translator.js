@@ -1,4 +1,5 @@
-/* TinVin AI - Translator with dedicated result page */
+
+/* TinVin AI - Translator with Dedicated Result Page */
 
 (() => {
   "use strict";
@@ -20,8 +21,6 @@
 
   let busy = false;
 
-  const languages = core.languages || [];
-
   function extractTranslation(result) {
     if (!result) return "";
 
@@ -30,10 +29,7 @@
     }
 
     if (Array.isArray(result)) {
-      return result
-        .map(extractTranslation)
-        .filter(Boolean)
-        .join("\n");
+      return result.map(extractTranslation).filter(Boolean).join("\n");
     }
 
     if (typeof result === "object") {
@@ -49,44 +45,31 @@
       ];
 
       for (const field of fields) {
-        if (typeof result[field] === "string") {
+        if (typeof result[field] === "string" && result[field].trim()) {
           return result[field].trim();
         }
 
         if (result[field] && typeof result[field] === "object") {
           const value = extractTranslation(result[field]);
-
           if (value) return value;
         }
       }
 
-      const content =
-        result.choices?.[0]?.message?.content;
+      const content = result.choices?.[0]?.message?.content;
 
-      if (typeof content === "string") {
-        return content.trim();
-      }
+      if (typeof content === "string") return content.trim();
 
       if (Array.isArray(content)) {
-        return content
-          .map(item => item.text || "")
-          .join("\n")
-          .trim();
+        return content.map(item => item.text || "").join("\n").trim();
       }
 
-      const parts =
-        result.candidates?.[0]?.content?.parts;
+      const parts = result.candidates?.[0]?.content?.parts;
 
       if (Array.isArray(parts)) {
-        return parts
-          .map(item => item.text || "")
-          .join("")
-          .trim();
+        return parts.map(item => item.text || "").join("").trim();
       }
 
-      if (result.data) {
-        return extractTranslation(result.data);
-      }
+      if (result.data) return extractTranslation(result.data);
     }
 
     return "";
@@ -99,9 +82,7 @@
 
     if (button) {
       button.disabled = value;
-      button.textContent = value
-        ? "Translating..."
-        : "Translate";
+      button.textContent = value ? "Translating..." : "Translate";
     }
   }
 
@@ -109,40 +90,25 @@
     if (busy) return;
 
     const input = $("toolInput");
-
     const message = input?.value?.trim();
 
-    const sourceLanguage =
-      $("sourceLang")?.value || "English";
-
-    const targetLanguage =
-      $("targetLang")?.value || "Sorani Kurdish";
+    const sourceLanguage = $("sourceLang")?.value || "English";
+    const targetLanguage = $("targetLang")?.value || "Sorani Kurdish";
 
     if (!message) {
-      setStatus(
-        "toolStatus",
-        "Please enter text to translate."
-      );
-
+      setStatus("toolStatus", "Please enter text to translate.");
       input?.focus();
       return;
     }
 
     if (sourceLanguage === targetLanguage) {
-      setStatus(
-        "toolStatus",
-        "Please choose two different languages."
-      );
-
+      setStatus("toolStatus", "Please choose two different languages.");
       return;
     }
 
     setBusy(true);
 
-    setStatus(
-      "toolStatus",
-      "Translating..."
-    );
+    setStatus("toolStatus", "Translating...");
 
     try {
       const result = await postJSON("/api/ai", {
@@ -155,28 +121,24 @@
       const translated = extractTranslation(result);
 
       if (!translated) {
-        console.error(
-          "Empty translation:",
-          result
-        );
-
-        throw new Error(
-          "AI returned an empty translation."
-        );
+        console.error("Empty translation:", result);
+        throw new Error("AI returned an empty translation.");
       }
 
-      // Save the complete translation.
+      // Save translation for the copy button.
       setLastOutput(translated);
 
-      // Put the complete translation on the result page.
-      const resultText = $("translatorResultText");
+      // Make sure the result page exists.
+      let resultText = $("translatorResultText");
 
-      if (resultText) {
-        resultText.textContent = translated;
-        resultText.dir = "auto";
+      if (!resultText) {
+        throw new Error("Translation result page was not created. Please refresh the app.");
       }
 
-      // Keep the old output available for compatibility.
+      resultText.textContent = translated;
+      resultText.dir = "auto";
+
+      // Keep compatibility with the old output area.
       const oldOutput = $("toolOutput");
 
       if (oldOutput) {
@@ -186,31 +148,17 @@
 
       $("outputBox")?.classList.remove("show");
 
-      setStatus(
-        "translatorResultStatus",
-        ""
-      );
+      setStatus("translatorResultStatus", "");
 
-      setStatus(
-        "toolStatus",
-        "Translation completed successfully."
-      );
-
-      // Open the dedicated translation result page.
-      if (typeof showPage === "function") {
-        showPage("translatorResultPage");
-      }
+      // Only navigate after a valid translation is received.
+      showPage("translatorResultPage");
 
     } catch (error) {
-      console.error(
-        "Translator error:",
-        error
-      );
+      console.error("Translator error:", error);
 
       setStatus(
         "toolStatus",
-        "Translation failed: " +
-        (error.message || "Please try again.")
+        "Translation failed: " + (error.message || "Please try again.")
       );
 
     } finally {
@@ -221,47 +169,19 @@
   function initialize() {
     window.TinVinTools = window.TinVinTools || {};
 
-    window.TinVinTools.translator = {
-      run
-    };
-
-    // Fill language menus only if they are empty.
-    ["sourceLang", "targetLang"].forEach(id => {
-      const select = $(id);
-
-      if (!select || select.options.length) {
-        return;
-      }
-
-      languages.forEach(language => {
-        select.add(
-          new Option(language, language)
-        );
-      });
-    });
+    window.TinVinTools.translator = { run };
 
     const source = $("sourceLang");
     const target = $("targetLang");
 
-    if (source && !source.value) {
-      source.value = "English";
-    }
+    if (source && !source.value) source.value = "English";
+    if (target && !target.value) target.value = "Sorani Kurdish";
 
-    if (target && !target.value) {
-      target.value = "Sorani Kurdish";
-    }
-
-    console.log(
-      "TinVin AI Translator loaded successfully."
-    );
+    console.log("TinVin AI Translator loaded successfully.");
   }
 
   if (document.readyState === "loading") {
-    document.addEventListener(
-      "DOMContentLoaded",
-      initialize,
-      { once: true }
-    );
+    document.addEventListener("DOMContentLoaded", initialize, { once: true });
   } else {
     initialize();
   }
