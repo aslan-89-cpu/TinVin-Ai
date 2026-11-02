@@ -1,27 +1,24 @@
 
-/* TinVin AI - Translator Styles */
+/* TinVin AI - Dedicated Translator Page */
 
-#toolPage[data-tool="translator"] .tool-title .tool-icon {
+#translatorPage .tool-icon {
   color: #fff;
   background: linear-gradient(135deg, #0ea5e9, #6366f1);
 }
 
-#toolPage[data-tool="translator"] .field textarea {
+#translatorPage .translator-input {
   min-height: 180px;
+  width: 100%;
 }
 
-#toolPage[data-tool="translator"] #translatorOptions {
+#translatorPage .translator-options {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
   margin: 18px 0;
 }
 
-#toolPage[data-tool="translator"] #translatorOptions.hidden {
-  display: none;
-}
-
-#toolPage[data-tool="translator"] #translatorOptions label {
+#translatorPage .translator-options label {
   display: block;
   margin-bottom: 8px;
   color: var(--text);
@@ -29,34 +26,54 @@
   font-weight: 750;
 }
 
-#toolPage[data-tool="translator"] #sourceLang,
-#toolPage[data-tool="translator"] #targetLang {
+#translatorPage .translator-options select {
   min-width: 0;
   width: 100%;
   border-radius: 13px;
   background: var(--panel-soft);
+  color: var(--text);
 }
 
-#toolPage[data-tool="translator"] #runBtn {
+#translatorPage #translatorRunBtn {
   background: linear-gradient(135deg, #0ea5e9, #6366f1);
 }
 
-#toolPage[data-tool="translator"] #outputBox {
-  white-space: pre-wrap;
-  overflow-wrap: anywhere;
-  line-height: 1.9;
+#translatorPage #translatorResultBox {
+  margin-top: 20px;
 }
 
-#toolPage[data-tool="translator"] #toolOutput {
+#translatorPage #translatorResultText {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  line-height: 1.9;
   unicode-bidi: plaintext;
+  direction: auto;
+  min-height: 50px;
+}
+
+#translatorPage .translator-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+#translatorPage .translator-actions button {
+  flex: 1 1 140px;
+  min-height: 46px;
+}
+
+#translatorPage .hidden {
+  display: none !important;
 }
 
 @media (max-width: 480px) {
-  #toolPage[data-tool="translator"] #translatorOptions {
+  #translatorPage .translator-options {
     grid-template-columns: 1fr;
   }
 
-  #toolPage[data-tool="translator"] .action-row button {
+  #translatorPage .translator-actions button {
     flex: 1;
   }
 }
