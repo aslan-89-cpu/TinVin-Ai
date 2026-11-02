@@ -11,33 +11,16 @@
     return;
   }
 
-  const { $, postJSON, setStatus, setLastOutput, showPage } = core;
+  const {
+    $,
+    postJSON,
+    setStatus,
+    setLastOutput,
+    languages
+  } = core;
 
   let busy = false;
   let lastTranslation = "";
-
-  const languages = [
-    "English",
-    "Sorani Kurdish",
-    "Kurmanji Kurdish",
-    "Arabic",
-    "Spanish",
-    "French",
-    "Portuguese",
-    "German",
-    "Turkish",
-    "Persian",
-    "Russian",
-    "Chinese Simplified",
-    "Japanese",
-    "Korean",
-    "Hindi",
-    "Urdu",
-    "Italian",
-    "Dutch",
-    "Ukrainian",
-    "Polish"
-  ];
 
   function extractTranslation(result) {
     if (!result) return "";
@@ -46,13 +29,20 @@
 
     if (Array.isArray(result)) {
       return result.map(extractTranslation)
-        .filter(Boolean).join("\n");
+        .filter(Boolean)
+        .join("\n");
     }
 
     if (typeof result === "object") {
       const fields = [
-        "translation", "translatedText", "text",
-        "output", "response", "answer", "content", "result"
+        "translation",
+        "translatedText",
+        "text",
+        "output",
+        "response",
+        "answer",
+        "content",
+        "result"
       ];
 
       for (const field of fields) {
@@ -73,14 +63,16 @@
 
       if (Array.isArray(content)) {
         return content.map(item => item.text || "")
-          .join("\n").trim();
+          .join("\n")
+          .trim();
       }
 
       const parts = result.candidates?.[0]?.content?.parts;
 
       if (Array.isArray(parts)) {
         return parts.map(item => item.text || "")
-          .join("").trim();
+          .join("")
+          .trim();
       }
 
       if (result.data) return extractTranslation(result.data);
@@ -92,9 +84,9 @@
   function fillLanguages(select, selected) {
     if (!select) return;
 
-    select.innerHTML = "";
+    select.replaceChildren();
 
-    languages.forEach(language => {
+    (languages || []).forEach(language => {
       const option = document.createElement("option");
       option.value = language;
       option.textContent = language;
@@ -119,6 +111,9 @@
     if (busy) return;
 
     const input = $("translatorInput");
+    const resultBox = $("translatorResultBox");
+    const resultText = $("translatorResultText");
+
     const message = input?.value?.trim();
 
     const sourceLanguage =
@@ -134,15 +129,20 @@
     }
 
     if (sourceLanguage === targetLanguage) {
-      setStatus("translatorStatus", "Please choose two different languages.");
+      setStatus(
+        "translatorStatus",
+        "Please choose two different languages."
+      );
       return;
     }
 
     setBusy(true);
     setStatus("translatorStatus", "Translating...");
+    setStatus("translatorResultStatus", "");
 
-    $("translatorResultBox")?.classList.add("hidden");
-    $("translatorResultText").textContent = "";
+    resultBox?.classList.add("hidden");
+
+    if (resultText) resultText.textContent = "";
 
     try {
       const result = await postJSON("/api/ai", {
@@ -159,22 +159,29 @@
       }
 
       lastTranslation = translated;
+
       setLastOutput(translated);
 
-      $("translatorResultText").textContent = translated;
-      $("translatorResultText").dir = "auto";
+      if (resultText) {
+        resultText.textContent = translated;
+        resultText.dir = "auto";
+      }
 
-      $("translatorResultBox")?.classList.remove("hidden");
+      resultBox?.classList.remove("hidden");
 
       setStatus("translatorStatus", "");
-      setStatus("translatorResultStatus", "Translation completed.");
+      setStatus(
+        "translatorResultStatus",
+        "Translation completed."
+      );
 
     } catch (error) {
       console.error("Translator error:", error);
 
       setStatus(
         "translatorStatus",
-        "Translation failed: " + (error.message || "Please try again.")
+        "Translation failed: " +
+        (error.message || "Please try again.")
       );
 
     } finally {
@@ -182,45 +189,77 @@
     }
   }
 
-  function copyTranslation() {
-    if (!lastTranslation) return;
+  async function copyTranslation() {
+    if (!lastTranslation) {
+      setStatus(
+        "translatorResultStatus",
+        "There is no translation to copy."
+      );
+      return;
+    }
 
-    if (navigator.clipboard?.writeText) {
-      navigator.clipboard.writeText(lastTranslation)
-        .then(() => setStatus("translatorResultStatus", "Copied!"))
-        .catch(() => fallbackCopy());
-    } else {
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(lastTranslation);
+      } else {
+        throw new Error("Clipboard unavailable");
+      }
+
+      setStatus("translatorResultStatus", "Copied to clipboard.");
+
+    } catch {
       fallbackCopy();
     }
   }
 
   function fallbackCopy() {
     const text = $("translatorResultText")?.textContent || "";
-    const area = document.createElement("textarea");
 
+    if (!text) {
+      setStatus("translatorResultStatus", "There is no text to copy.");
+      return;
+    }
+
+    const area = document.createElement("textarea");
     area.value = text;
+    area.style.position = "fixed";
+    area.style.opacity = "0";
+
     document.body.appendChild(area);
     area.select();
 
+    let copied = false;
+
     try {
-      document.execCommand("copy");
-      setStatus("translatorResultStatus", "Copied!");
-    } catch (error) {
-      setStatus("translatorResultStatus", "Copy failed.");
+      copied = document.execCommand("copy");
+    } catch {
+      copied = false;
     }
 
     area.remove();
+
+    setStatus(
+      "translatorResultStatus",
+      copied ? "Copied to clipboard." : "Copy failed."
+    );
   }
 
   function clearTranslator() {
-    $("translatorInput").value = "";
-    $("translatorResultText").textContent = "";
+    const input = $("translatorInput");
+    const resultText = $("translatorResultText");
+
+    if (input) input.value = "";
+    if (resultText) resultText.textContent = "";
 
     $("translatorResultBox")?.classList.add("hidden");
 
     lastTranslation = "";
+    setLastOutput("");
+
     setStatus("translatorStatus", "");
     setStatus("translatorResultStatus", "");
+
+    input?.focus();
   }
 
   function initialize() {
@@ -230,20 +269,37 @@
     fillLanguages($("translatorTargetLang"), "Sorani Kurdish");
 
     $("translatorRunBtn")?.addEventListener("click", run);
-    $("translatorCopyBtn")?.addEventListener("click", copyTranslation);
-    $("translatorClearBtn")?.addEventListener("click", clearTranslator);
+
+    $("translatorCopyBtn")?.addEventListener(
+      "click",
+      copyTranslation
+    );
+
+    $("translatorClearBtn")?.addEventListener(
+      "click",
+      clearTranslator
+    );
 
     $("translatorBackBtn")?.addEventListener("click", () => {
-      showPage("homePage");
+      core.showPage("homePage");
     });
 
-    window.TinVinTools.translator = { run };
+    $("translatorInput")?.addEventListener("keydown", event => {
+      if (event.key === "Enter" && (event.ctrlKey || event.metaKey)) {
+        event.preventDefault();
+        run();
+      }
+    });
+
+    window.TinVinTools.translator = { run, clear: clearTranslator };
 
     console.log("TinVin AI Translator loaded successfully.");
   }
 
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", initialize, { once: true });
+    document.addEventListener("DOMContentLoaded", initialize, {
+      once: true
+    });
   } else {
     initialize();
   }
