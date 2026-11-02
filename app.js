@@ -1,3 +1,4 @@
+
 (() => {
   "use strict";
 
@@ -125,6 +126,7 @@
         line-height: 1.8;
         direction: auto;
         unicode-bidi: plaintext;
+        min-height: 100px;
       }
 
       #translatorResultPage .translator-result-actions {
@@ -133,78 +135,85 @@
         gap: 10px;
         margin-top: 18px;
       }
+
+      #translatorResultPage .translator-result-actions button {
+        flex: 1 1 140px;
+        min-height: 46px;
+        cursor: pointer;
+      }
     `;
 
     document.head.appendChild(style);
   }
 
-  // Create translator result page without editing index.html.
   function ensureTranslatorResultPage() {
-    if ($("translatorResultPage")) return;
+    let page = $("translatorResultPage");
 
-    const page = document.createElement("section");
+    if (!page) {
+      page = document.createElement("section");
+      page.id = "translatorResultPage";
+      page.className = "page";
 
-    page.id = "translatorResultPage";
-    page.className = "page";
-
-    page.innerHTML = `
-      <div class="tool-topbar">
-        <button type="button" class="back-btn" id="translatorBackBtn">
-          ← Back
-        </button>
-      </div>
-
-      <div class="tool-heading">
-        <div class="tool-icon">🌍</div>
-        <div>
-          <h2>Translation Result</h2>
-          <p>Your translated text is ready.</p>
-        </div>
-      </div>
-
-      <section class="panel">
-        <h3 class="section-title">Translated Text</h3>
-
-        <div
-          id="translatorResultText"
-          class="output translator-result-text"
-          dir="auto"
-        ></div>
-
-        <div class="translator-result-actions">
-          <button
-            type="button"
-            class="secondary-btn"
-            id="translatorCopyBtn"
-          >
-            Copy Text
-          </button>
-
-          <button
-            type="button"
-            class="primary-btn"
-            id="translatorResultHomeBtn"
-          >
-            Back to Home
+      page.innerHTML = `
+        <div class="tool-topbar">
+          <button type="button" class="back-btn" id="translatorBackBtn">
+            ← Back to Translator
           </button>
         </div>
 
-        <p
-          id="translatorResultStatus"
-          class="status"
-          role="status"
-          aria-live="polite"
-        ></p>
-      </section>
-    `;
+        <div class="tool-heading">
+          <div class="tool-icon">🌍</div>
+          <div>
+            <h2>Translation Result</h2>
+            <p>Your translated text is ready.</p>
+          </div>
+        </div>
 
-    const app = document.querySelector(".app") || document.body;
-    const toolPage = $("toolPage");
+        <section class="panel">
+          <h3 class="section-title">Translated Text</h3>
 
-    if (toolPage && toolPage.parentNode === app) {
-      app.insertBefore(page, toolPage.nextSibling);
-    } else {
-      app.appendChild(page);
+          <div
+            id="translatorResultText"
+            class="output translator-result-text"
+            dir="auto"
+            aria-live="polite"
+          ></div>
+
+          <div class="translator-result-actions">
+            <button
+              type="button"
+              class="secondary-btn"
+              id="translatorCopyBtn"
+            >
+              Copy Text
+            </button>
+
+            <button
+              type="button"
+              class="primary-btn"
+              id="translatorResultHomeBtn"
+            >
+              Back to Home
+            </button>
+          </div>
+
+          <p
+            id="translatorResultStatus"
+            class="status"
+            role="status"
+            aria-live="polite"
+          ></p>
+        </section>
+      `;
+
+      const toolPage = $("toolPage");
+      const parent = toolPage?.parentNode || document.querySelector(".app") || document.body;
+
+      if (toolPage && toolPage.parentNode === parent) {
+        parent.insertBefore(page, toolPage.nextSibling);
+      } else {
+        parent.appendChild(page);
+      }
     }
 
     $("translatorBackBtn")?.addEventListener("click", () => {
@@ -219,11 +228,10 @@
   }
 
   function showPage(id) {
-    pages.forEach(page => {
-      const element = $(page);
-
+    pages.forEach(pageId => {
+      const element = $(pageId);
       if (element) {
-        element.classList.toggle("active", page === id);
+        element.classList.toggle("active", pageId === id);
       }
     });
 
@@ -313,6 +321,8 @@
     if (typeof data?.output === "string") return data.output;
     if (typeof data?.response === "string") return data.response;
     if (typeof data?.result === "string") return data.result;
+    if (typeof data?.translation === "string") return data.translation;
+    if (typeof data?.translatedText === "string") return data.translatedText;
 
     const content = data?.choices?.[0]?.message?.content;
 
@@ -372,7 +382,6 @@
     return /\b(generate|create|draw|make|design|render)\b.{0,45}\b(image|picture|illustration|artwork|logo)\b|\b(image|picture|illustration|artwork|logo)\b.{0,35}\b(of|showing|with)\b/i.test(text);
   }
 
-  // All seven AI tools use the existing shared tool page.
   function openTool(key) {
     if (!definitions[key]) return;
 
@@ -415,15 +424,8 @@
     clearImage($("toolImage"));
     $("outputBox")?.classList.remove("show");
 
-    $("translatorOptions")?.classList.toggle(
-      "hidden",
-      key !== "translator"
-    );
-
-    $("imageHint")?.classList.toggle(
-      "hidden",
-      key !== "image"
-    );
+    $("translatorOptions")?.classList.toggle("hidden", key !== "translator");
+    $("imageHint")?.classList.toggle("hidden", key !== "image");
 
     if ($("resultTitle")) {
       $("resultTitle").textContent =
@@ -444,27 +446,18 @@
 
     showPage("toolPage");
 
-    const language =
-      localStorage.getItem("tinvin_language") || "English";
-
-    if (language !== "English") {
-      translateInterface(language);
-    }
+    const language = localStorage.getItem("tinvin_language") || "English";
+    if (language !== "English") translateInterface(language);
 
     $("toolInput")?.focus();
   }
 
   function rememberOriginalTextNodes() {
-    const walker = document.createTreeWalker(
-      document.body,
-      NodeFilter.SHOW_TEXT
-    );
-
+    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
     let node;
 
     while ((node = walker.nextNode())) {
       const parent = node.parentElement;
-
       if (!parent || parent.closest("script,style,.brand")) continue;
       if (!node.nodeValue.trim()) continue;
 
@@ -475,10 +468,7 @@
 
     document.querySelectorAll("[placeholder]").forEach(element => {
       if (!originalPlaceholders.has(element)) {
-        originalPlaceholders.set(
-          element,
-          element.getAttribute("placeholder")
-        );
+        originalPlaceholders.set(element, element.getAttribute("placeholder"));
       }
     });
   }
@@ -492,9 +482,7 @@
 
     document.querySelectorAll("[placeholder]").forEach(element => {
       const original = originalPlaceholders.get(element);
-      if (original !== undefined) {
-        element.setAttribute("placeholder", original);
-      }
+      if (original !== undefined) element.setAttribute("placeholder", original);
     });
   }
 
@@ -502,11 +490,7 @@
     rememberOriginalTextNodes();
 
     const items = [];
-    const walker = document.createTreeWalker(
-      document.body,
-      NodeFilter.SHOW_TEXT
-    );
-
+    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
     let node;
 
     while ((node = walker.nextNode())) {
@@ -515,12 +499,9 @@
       if (!parent || !node.nodeValue.trim()) continue;
       if (parent.closest("script,style,.brand")) continue;
 
-      if (parent.closest(
-        "#sourceLang,#targetLang,#interfaceLang,#themeSelect"
-      )) continue;
+      if (parent.closest("#sourceLang,#targetLang,#interfaceLang,#themeSelect")) continue;
 
       const original = originalText.get(node) ?? node.nodeValue;
-
       items.push({ node, original });
     }
 
@@ -529,7 +510,6 @@
 
   async function translateInterface(language) {
     const runId = ++translationRun;
-
     restoreEnglishText();
 
     if (!language || language === "English") {
@@ -564,10 +544,7 @@
 
         try {
           const raw = extractText(result);
-          translated = JSON.parse(
-            raw.replace(/^```(?:json)?\s*/i, "")
-               .replace(/\s*```$/, "")
-          );
+          translated = JSON.parse(raw.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, ""));
         } catch {
           throw new Error("The translation service returned invalid JSON.");
         }
@@ -583,24 +560,16 @@
 
           if (typeof value === "string" && value.trim()) {
             translatedNodes.push([item.node, item.original]);
-
-            item.node.nodeValue = item.original.replace(
-              item.original.trim(),
-              value.trim()
-            );
+            item.node.nodeValue = item.original.replace(item.original.trim(), value.trim());
           }
         });
       }
 
-      const fields = [
-        ...document.querySelectorAll("input[placeholder],textarea[placeholder]")
-      ];
+      const fields = [...document.querySelectorAll("input[placeholder],textarea[placeholder]")];
 
       const fieldData = fields.map(element => ({
         element,
-        original:
-          originalPlaceholders.get(element) ??
-          element.getAttribute("placeholder")
+        original: originalPlaceholders.get(element) ?? element.getAttribute("placeholder")
       })).filter(item => item.original);
 
       for (let start = 0; start < fieldData.length; start += batchSize) {
@@ -623,19 +592,14 @@
 
         try {
           translated = JSON.parse(
-            extractText(result)
-              .replace(/^```(?:json)?\s*/i, "")
-              .replace(/\s*```$/, "")
+            extractText(result).replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "")
           );
         } catch {}
 
         if (runId === translationRun) {
           batch.forEach((item, index) => {
             if (typeof translated["p" + index] === "string") {
-              item.element.setAttribute(
-                "placeholder",
-                translated["p" + index]
-              );
+              item.element.setAttribute("placeholder", translated["p" + index]);
             }
           });
         }
@@ -650,11 +614,7 @@
 
     } catch (error) {
       if (runId === translationRun) {
-        setStatus(
-          "languageStatus",
-          "Could not translate the full interface: " +
-          (error.message || "Please try again.")
-        );
+        setStatus("languageStatus", "Could not translate the full interface: " + (error.message || "Please try again."));
       }
     }
   }
@@ -670,7 +630,6 @@
     }
 
     busy = true;
-
     if ($("runBtn")) $("runBtn").disabled = true;
 
     try {
@@ -684,19 +643,38 @@
   }
 
   async function copyTranslatorResult() {
-    if (!lastOutput) return;
+    if (!lastOutput) {
+      setStatus("translatorResultStatus", "There is no translation to copy.");
+      return;
+    }
 
     try {
       await navigator.clipboard.writeText(lastOutput);
       setStatus("translatorResultStatus", "Copied to clipboard.");
     } catch {
-      setStatus("translatorResultStatus", "Copy is unavailable in this browser.");
+      try {
+        const area = document.createElement("textarea");
+        area.value = lastOutput;
+        area.style.position = "fixed";
+        area.style.opacity = "0";
+        document.body.appendChild(area);
+        area.select();
+
+        const copied = document.execCommand("copy");
+        area.remove();
+
+        setStatus(
+          "translatorResultStatus",
+          copied ? "Copied to clipboard." : "Copy is unavailable in this browser."
+        );
+      } catch {
+        setStatus("translatorResultStatus", "Copy is unavailable in this browser.");
+      }
     }
   }
 
   function ensureQRCard() {
     const grid = $("toolsGrid");
-
     if (!grid || grid.querySelector('[data-tool="qr"]')) return;
 
     const card = document.createElement("button");
@@ -749,10 +727,7 @@
   $("chatBackBtn")?.addEventListener("click", () => showPage("homePage"));
   $("settingsBackBtn")?.addEventListener("click", () => showPage("homePage"));
 
-  $("settingsBtn")?.addEventListener("click", () => {
-    showPage("settingsPage");
-  });
-
+  $("settingsBtn")?.addEventListener("click", () => showPage("settingsPage"));
   $("runBtn")?.addEventListener("click", runActiveTool);
 
   $("toolInput")?.addEventListener("keydown", event => {
@@ -809,33 +784,24 @@
 
   $("interfaceLang")?.addEventListener("change", async event => {
     const language = event.target.value;
-
     localStorage.setItem("tinvin_language", language);
     await translateInterface(language);
   });
 
-  // Start application.
   ensureOutputVisibilityStyle();
   ensureTranslatorResultPage();
   fillLanguageMenus();
   ensureQRCard();
 
-  applyTheme(
-    localStorage.getItem("tinvin_theme") || "purple"
-  );
+  applyTheme(localStorage.getItem("tinvin_theme") || "purple");
 
   if ($("interfaceLang")) {
-    $("interfaceLang").value =
-      localStorage.getItem("tinvin_language") || "English";
+    $("interfaceLang").value = localStorage.getItem("tinvin_language") || "English";
   }
 
   rememberOriginalTextNodes();
 
-  const savedLanguage =
-    localStorage.getItem("tinvin_language") || "English";
-
-  if (savedLanguage !== "English") {
-    translateInterface(savedLanguage);
-  }
+  const savedLanguage = localStorage.getItem("tinvin_language") || "English";
+  if (savedLanguage !== "English") translateInterface(savedLanguage);
 
 })();
