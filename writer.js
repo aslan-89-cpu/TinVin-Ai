@@ -1,5 +1,5 @@
 
-/* TinVin AI - ChatGPT Style Writer */
+/* TinVin AI - Fixed ChatGPT Style Writer */
 
 (() => {
   "use strict";
@@ -26,18 +26,26 @@
     const title = $("activeTitle");
     const page = $("toolPage");
 
-    if (!title || !page) return;
+    if (!page) return;
 
-    const isWriter = title.textContent.toLowerCase().includes("writer");
+    const isWriter = title?.textContent
+      ?.toLowerCase()
+      .includes("writer");
 
-    page.classList.toggle("writer-active", isWriter);
+    page.classList.toggle("writer-active", !!isWriter);
 
-    const runBtn = $("runBtn");
     const input = $("toolInput");
+    const runBtn = $("runBtn");
+    const writerRunBtn = $("writerRunBtn");
+
+    if (isWriter && input) {
+      input.placeholder = "Message TinVin AI...";
+    }
 
     if (isWriter) {
-      if (runBtn && !busy) runBtn.textContent = "Send ↑";
-      if (input) input.placeholder = "Message TinVin AI...";
+      [runBtn, writerRunBtn].forEach(btn => {
+        if (btn && !busy) btn.textContent = "Send ↑";
+      });
     }
   }
 
@@ -77,13 +85,22 @@
     output.scrollTop = 0;
   }
 
+  function setButtons(disabled, text) {
+    ["runBtn", "writerRunBtn"].forEach(id => {
+      const btn = $(id);
+
+      if (btn) {
+        btn.disabled = disabled;
+        btn.textContent = text;
+      }
+    });
+  }
+
   async function run() {
     if (busy) return;
 
     const input = $("toolInput");
-    const runBtn = $("runBtn");
-
-    const message = input?.value.trim();
+    const message = input?.value?.trim();
 
     if (!message) {
       setStatus("toolStatus", "Please enter a message.");
@@ -93,10 +110,7 @@
 
     busy = true;
 
-    if (runBtn) {
-      runBtn.disabled = true;
-      runBtn.textContent = "Sending...";
-    }
+    setButtons(true, "Sending...");
 
     history.unshift({
       role: "user",
@@ -110,15 +124,25 @@
     setStatus("toolStatus", "TinVin AI is thinking...");
 
     try {
+      console.log("TinVin Writer: Sending request...");
+
       const result = await postJSON("/api/ai", {
         tool: "writer",
-        message
+        message: message
       });
+
+      console.log("TinVin Writer: API response:", result);
 
       const responseText = extractText(result);
 
-      if (!responseText || !responseText.trim()) {
-        throw new Error("The AI returned an empty response.");
+      if (
+        !responseText ||
+        typeof responseText !== "string" ||
+        !responseText.trim()
+      ) {
+        throw new Error(
+          "TinVin AI returned an empty response."
+        );
       }
 
       history.splice(1, 0, {
@@ -131,9 +155,12 @@
       setStatus("toolStatus", "");
 
     } catch (error) {
+      console.error("TinVin Writer Error:", error);
+
       history.splice(1, 0, {
         role: "assistant",
-        text: "Sorry, something went wrong. Please try again."
+        text:
+          "Sorry, TinVin AI could not respond. Please try again."
       });
 
       renderHistory();
@@ -146,10 +173,7 @@
     } finally {
       busy = false;
 
-      if (runBtn) {
-        runBtn.disabled = false;
-        runBtn.textContent = "Send ↑";
-      }
+      setButtons(false, "Send ↑");
 
       input?.focus();
     }
@@ -168,7 +192,6 @@
 
     setStatus("toolStatus", "");
     setLastOutput("");
-
   }
 
   async function copy() {
@@ -185,12 +208,14 @@
     try {
       await navigator.clipboard.writeText(text);
       setStatus("toolStatus", "Copied to clipboard.");
-    } catch {
+    } catch (error) {
       setStatus("toolStatus", "Copy is unavailable in this browser.");
     }
   }
 
   function reset() {
+    if (busy) return;
+
     history = [];
 
     const output = $("toolOutput");
@@ -199,10 +224,15 @@
 
     $("outputBox")?.classList.remove("show");
 
+    const input = $("toolInput");
+
+    if (input) input.value = "";
+
     setStatus("toolStatus", "");
     setLastOutput("");
   }
 
+  // Register Writer
   window.TinVinTools = window.TinVinTools || {};
 
   window.TinVinTools.writer = {
@@ -212,10 +242,54 @@
     reset
   };
 
+  // Connect Send buttons directly
+  ["runBtn", "writerRunBtn"].forEach(id => {
+    const btn = $(id);
+
+    if (btn && !btn.dataset.writerConnected) {
+      btn.dataset.writerConnected = "true";
+
+      btn.addEventListener("click", event => {
+        event.preventDefault();
+
+        const title = $("activeTitle");
+
+        if (
+          title?.textContent
+            ?.toLowerCase()
+            .includes("writer") ||
+          id === "writerRunBtn"
+        ) {
+          run();
+        }
+      });
+    }
+  });
+
+  // Enter to Send
+  const input = $("toolInput");
+
+  if (input && !input.dataset.writerEnterConnected) {
+    input.dataset.writerEnterConnected = "true";
+
+    input.addEventListener("keydown", event => {
+      if (
+        event.key === "Enter" &&
+        !event.shiftKey
+      ) {
+        event.preventDefault();
+        run();
+      }
+    });
+  }
+
+  // Watch Writer page
   const titleElement = $("activeTitle");
 
   if (titleElement && window.MutationObserver) {
-    const observer = new MutationObserver(activateWriterLayout);
+    const observer = new MutationObserver(
+      activateWriterLayout
+    );
 
     observer.observe(titleElement, {
       childList: true,
@@ -226,5 +300,7 @@
 
   activateWriterLayout();
   renderHistory();
+
+  console.log("TinVin AI Writer loaded successfully.");
 
 })();
