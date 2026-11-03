@@ -1,5 +1,4 @@
-
-/* TinVin AI - AI Chat with Camera and File Attachments */
+/* TinVin AI - Chat, Vision and Image Generation */
 
 (() => {
   "use strict";
@@ -18,8 +17,9 @@
   let selectedFiles = [];
 
   const MAX_FILE_SIZE = 8 * 1024 * 1024;
+  const MAX_FILES = 4;
 
-  function setChatStatus(message) {
+  function setStatus(message) {
     const status = $("chatStatus");
     if (status) status.textContent = message || "";
   }
@@ -68,7 +68,7 @@
       return value;
     }
 
-    return `data:${result.mimeType || "image/png"};base64,${value}`;
+    return `data:${result.mimeType || "image/jpeg"};base64,${value}`;
   }
 
   function addBubble(role, content, imageUrl = "", attachments = []) {
@@ -88,7 +88,9 @@
     if (imageUrl) {
       const image = document.createElement("img");
       image.src = imageUrl;
-      image.alt = "AI-generated image";
+      image.alt = role === "assistant"
+        ? "TinVin AI generated image"
+        : "Attached image";
       image.className = "chat-image";
       image.loading = "lazy";
       bubble.appendChild(image);
@@ -104,6 +106,7 @@
           image.src = file.data;
           image.alt = file.name || "Attached image";
           image.className = "chat-image chat-user-attachment";
+          image.loading = "lazy";
           attachmentList.appendChild(image);
         } else {
           const item = document.createElement("div");
@@ -132,11 +135,7 @@
       addBubble("user", turn.user, "", turn.userAttachments || []);
 
       if (turn.assistantImage) {
-        addBubble(
-          "assistant",
-          turn.assistant || "",
-          turn.assistantImage
-        );
+        addBubble("assistant", turn.assistant || "", turn.assistantImage);
       } else if (turn.assistant) {
         addBubble("assistant", turn.assistant);
       }
@@ -196,7 +195,7 @@
 
     const fileInput = document.createElement("input");
     fileInput.type = "file";
-    fileInput.accept = "image/*,.pdf,.txt,.doc,.docx";
+    fileInput.accept = "image/png,image/jpeg,image/webp,image/gif,.pdf,.txt,.doc,.docx";
     fileInput.multiple = true;
     fileInput.hidden = true;
 
@@ -251,8 +250,32 @@
     const files = Array.from(fileList || []);
 
     for (const file of files) {
+      if (selectedFiles.length >= MAX_FILES) {
+        setStatus("You can attach up to 4 files.");
+        break;
+      }
+
       if (file.size > MAX_FILE_SIZE) {
-        setChatStatus(file.name + " is larger than 8 MB.");
+        setStatus(file.name + " is larger than 8 MB.");
+        continue;
+      }
+
+      const supportedImage = [
+        "image/jpeg",
+        "image/png",
+        "image/webp",
+        "image/gif"
+      ].includes(file.type);
+
+      const supportedOther = [
+        "application/pdf",
+        "text/plain",
+        "application/msword",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+      ].includes(file.type);
+
+      if (!supportedImage && !supportedOther) {
+        setStatus("This file type is not supported.");
         continue;
       }
 
@@ -260,7 +283,7 @@
         const attachment = await readFile(file);
         selectedFiles.push(attachment);
       } catch (error) {
-        setChatStatus(error.message);
+        setStatus(error.message);
       }
     }
 
@@ -295,6 +318,50 @@
     });
   }
 
+  async function generateImage(message) {
+    const result = await postJSON("/api/image", {
+      prompt: message
+    });
+
+    const imageUrl = getImageSource(result);
+
+    if (!imageUrl) {
+      throw new Error(
+        extractText(result) ||
+        result?.error ||
+        "The image service did not return an image."
+      );
+    }
+
+    return imageUrl;
+  }
+
+  async function askAI(message, attachments) {
+    const previousHistory = getApiHistory().slice(0, -1);
+
+    const result = await postJSON("/api/ai", {
+      tool: "chat",
+      message,
+      history: previousHistory,
+      attachments: attachments.map(file => ({
+        name: file.name,
+        type: file.type,
+        data: file.data
+      }))
+    });
+
+    const answer = extractText(result);
+
+    if (!answer) {
+      throw new Error(
+        result?.error ||
+        "The AI returned an empty response."
+      );
+    }
+
+    return answer;
+  }
+
   async function send() {
     if (sending) return;
 
@@ -317,8 +384,11 @@
 
     input.value = "";
 
+    const userMessage = message ||
+      "Please describe and analyze the attached image.";
+
     const turn = {
-      user: message || "Please check the attached file.",
+      user: userMessage,
       userAttachments: attachments,
       assistant: "",
       assistantImage: ""
@@ -327,64 +397,45 @@
     history.push(turn);
     renderHistory();
 
-    setChatStatus("TinVin AI is thinking...");
-
     try {
       if (isImageRequest(message) && attachments.length === 0) {
-        setChatStatus("TinVin AI is creating your image...");
+        setStatus("TinVin AI is creating your image...");
 
-        const result = await postJSON("/api/image", {
-          prompt: message
-        });
-
-        const imageUrl = getImageSource(result);
-
-        if (!imageUrl) {
-          throw new Error(
-            extractText(result) ||
-            "The image service did not return an image."
-          );
-        }
-
+        turn.assistantImage = await generateImage(message);
         turn.assistant = "Your image is ready.";
-        turn.assistantImage = imageUrl;
 
       } else {
-        const result = await postJSON("/api/ai", {
-          tool: "chat",
-          message: turn.user,
-          history: getApiHistory().slice(0, -1),
-          attachments: attachments.map(file => ({
-            name: file.name,
-            type: file.type,
-            data: file.data
-          }))
-        });
+        const imageCount = attachments.filter(file =>
+          file.type && file.type.startsWith("image/")
+        ).length;
 
-        const answer = extractText(result);
-
-        if (!answer) {
-          throw new Error("The AI returned an empty response.");
+        if (imageCount > 0) {
+          setStatus("TinVin AI is looking at your image...");
+        } else {
+          setStatus("TinVin AI is thinking...");
         }
 
-        turn.assistant = answer;
+        turn.assistant = await askAI(userMessage, attachments);
       }
 
       renderHistory();
-      setChatStatus("");
+      setStatus("");
 
     } catch (error) {
+      console.error("TinVin Chat error:", error);
+
       turn.assistant =
         "Sorry, something went wrong: " +
         (error.message || "Please try again.");
 
       renderHistory();
-      setChatStatus("Message could not be completed.");
+      setStatus("Message could not be completed.");
 
     } finally {
       sending = false;
 
       if (sendButton) sendButton.disabled = false;
+      if (input) input.focus();
     }
   }
 
@@ -401,7 +452,7 @@
     if (input) input.value = "";
 
     renderAttachmentPreview();
-    setChatStatus("");
+    setStatus("");
   }
 
   function initialize() {
@@ -411,11 +462,14 @@
     const input = $("chatInput");
     const newChatButton = $("newChatBtn");
 
-    if (sendButton) {
+    if (sendButton && sendButton.dataset.chatReady !== "true") {
+      sendButton.dataset.chatReady = "true";
       sendButton.addEventListener("click", send);
     }
 
-    if (input) {
+    if (input && input.dataset.chatReady !== "true") {
+      input.dataset.chatReady = "true";
+
       input.addEventListener("keydown", event => {
         if (
           event.key === "Enter" &&
@@ -428,7 +482,8 @@
       });
     }
 
-    if (newChatButton) {
+    if (newChatButton && newChatButton.dataset.chatReady !== "true") {
+      newChatButton.dataset.chatReady = "true";
       newChatButton.addEventListener("click", newChat);
     }
   }
