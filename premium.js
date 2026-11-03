@@ -5,25 +5,9 @@
   if (window.TinVinPremium) return;
 
   const plans = [
-    {
-      id: "monthly",
-      name: "Monthly",
-      duration: "1 Month",
-      price: 13
-    },
-    {
-      id: "six-months",
-      name: "6 Months",
-      duration: "6 Months",
-      price: 60,
-      popular: true
-    },
-    {
-      id: "yearly",
-      name: "Yearly",
-      duration: "1 Year",
-      price: 100
-    }
+    { id: "monthly", name: "Monthly", duration: "1 Month", price: 13 },
+    { id: "six-months", name: "6 Months", duration: "6 Months", price: 60, popular: true },
+    { id: "yearly", name: "Yearly", duration: "1 Year", price: 100 }
   ];
 
   let selectedPlan = "six-months";
@@ -99,9 +83,7 @@
       border:1.5px solid var(--border);border-radius:15px;
       padding:15px 8px;font-weight:800;cursor:pointer;
     }
-    #tv-premium .method.selected {
-      border:2px solid var(--primary);
-    }
+    #tv-premium .method.selected {border:2px solid var(--primary)}
     #tv-premium .method span {display:block;font-size:24px;margin-bottom:7px}
     #tv-premium .pay {
       width:100%;border:0;border-radius:15px;
@@ -125,7 +107,6 @@
 
   const overlay = document.createElement("div");
   overlay.id = "tv-premium";
-
   overlay.innerHTML = `
     <div class="wrap">
       <button class="back" id="tv-premium-back">← Back</button>
@@ -133,9 +114,7 @@
       <div class="hero">
         <div class="crown">👑</div>
         <h1>TinVin Premium</h1>
-        <p class="muted">
-          Unlock more possibilities with Premium access.
-        </p>
+        <p class="muted">Unlock more possibilities with Premium access.</p>
       </div>
 
       <div class="benefits">
@@ -158,10 +137,7 @@
         </button>
       </div>
 
-      <button class="pay" id="tv-premium-pay">
-        Continue to payment
-      </button>
-
+      <button class="pay" id="tv-premium-pay">Continue to payment</button>
       <div class="notice" id="tv-premium-notice"></div>
 
       <div class="footer">
@@ -195,7 +171,6 @@
   plansBox.addEventListener("click", event => {
     const item = event.target.closest("[data-plan]");
     if (!item) return;
-
     selectedPlan = item.dataset.plan;
     renderPlans();
     notice.classList.remove("show");
@@ -263,7 +238,6 @@
     card.type = "button";
     card.className = "tool-card";
     card.dataset.premiumCard = "true";
-
     card.innerHTML = `
       <div class="tool-icon">👑</div>
       <h3>Premium</h3>
