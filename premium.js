@@ -5,9 +5,25 @@
   if (window.TinVinPremium) return;
 
   const plans = [
-    { id: "monthly", name: "Monthly", duration: "1 Month", price: 6 },
-    { id: "six-months", name: "6 Months", duration: "6 Months", price: 30, popular: true },
-    { id: "yearly", name: "Yearly", duration: "12 Months", price: 50 }
+    {
+      id: "monthly",
+      name: "Monthly",
+      duration: "1 Month",
+      price: 13
+    },
+    {
+      id: "six-months",
+      name: "6 Months",
+      duration: "6 Months",
+      price: 60,
+      popular: true
+    },
+    {
+      id: "yearly",
+      name: "Yearly",
+      duration: "1 Year",
+      price: 100
+    }
   ];
 
   let selectedPlan = "six-months";
@@ -104,18 +120,22 @@
       color:var(--muted);margin-top:18px;line-height:1.7;
     }
   `;
+
   document.head.appendChild(style);
 
   const overlay = document.createElement("div");
   overlay.id = "tv-premium";
+
   overlay.innerHTML = `
     <div class="wrap">
       <button class="back" id="tv-premium-back">← Back</button>
 
       <div class="hero">
         <div class="crown">👑</div>
-        <h1> TinVin Premium </h1>
-        <p class="muted">Unlock more possibilities with Premium access.</p>
+        <h1>TinVin Premium</h1>
+        <p class="muted">
+          Unlock more possibilities with Premium access.
+        </p>
       </div>
 
       <div class="benefits">
@@ -138,15 +158,19 @@
         </button>
       </div>
 
-      <button class="pay" id="tv-premium-pay">Continue to payment</button>
+      <button class="pay" id="tv-premium-pay">
+        Continue to payment
+      </button>
+
       <div class="notice" id="tv-premium-notice"></div>
 
       <div class="footer">
         Secure payment integration will be enabled after payment provider setup.
-        Your Premium status will only activate after verified payment.
+        Premium status activates only after verified payment.
       </div>
     </div>
   `;
+
   document.body.appendChild(overlay);
 
   const plansBox = overlay.querySelector("#tv-premium-plans");
@@ -171,6 +195,7 @@
   plansBox.addEventListener("click", event => {
     const item = event.target.closest("[data-plan]");
     if (!item) return;
+
     selectedPlan = item.dataset.plan;
     renderPlans();
     notice.classList.remove("show");
@@ -203,7 +228,7 @@
       showNotice(
         `Selected plan: ${plan.name} — $${plan.price}. ` +
         "TON payment is not connected yet. A verified receiving wallet " +
-        "and payment confirmation system must be configured before you can pay."
+        "and payment confirmation system must be configured before payment."
       );
     } else {
       showNotice(
@@ -230,7 +255,6 @@
 
   window.TinVinPremium = { open, close };
 
-  // Add Premium card to the existing home tools grid.
   function addPremiumCard() {
     const grid = document.getElementById("toolsGrid");
     if (!grid || grid.querySelector("[data-premium-card]")) return;
@@ -239,11 +263,13 @@
     card.type = "button";
     card.className = "tool-card";
     card.dataset.premiumCard = "true";
+
     card.innerHTML = `
       <div class="tool-icon">👑</div>
       <h3>Premium</h3>
       <p>Unlock the Premium experience and plans.</p>
     `;
+
     card.addEventListener("click", open);
     grid.appendChild(card);
   }
