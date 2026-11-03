@@ -1,9 +1,7 @@
 
-/* =========================================
-   TinVin AI - QR Scanner & Generator
-   Standalone frontend module
-   Floating QR button removed
-========================================= */
+/* TinVin AI - QR Scanner & Generator
+   Integrated inside the Scanner workspace tab
+*/
 
 (() => {
   "use strict";
@@ -11,19 +9,25 @@
   if (window.TinVinQRLoaded) return;
   window.TinVinQRLoaded = true;
 
-  const QR_SCAN_CDN =
+  const SCAN_CDN =
     "https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js";
 
-  const QR_GENERATE_CDN =
+  const GENERATE_CDN =
     "https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js";
+
+  const $ = id => document.getElementById(id);
 
   let scanner = null;
   let scannerRunning = false;
   let currentMode = "scan";
+  let generated = false;
 
-  const loadScript = (src, test) => {
+  function loadScript(src, test) {
     return new Promise((resolve, reject) => {
-      if (test()) return resolve();
+      if (test()) {
+        resolve();
+        return;
+      }
 
       const existing = document.querySelector(
         `script[src="${src}"]`
@@ -31,11 +35,9 @@
 
       if (existing) {
         existing.addEventListener("load", resolve, { once: true });
-        existing.addEventListener(
-          "error",
-          () => reject(new Error("Could not load QR library.")),
-          { once: true }
-        );
+        existing.addEventListener("error", () => {
+          reject(new Error("QR library could not load."));
+        }, { once: true });
         return;
       }
 
@@ -43,383 +45,301 @@
       script.src = src;
       script.async = true;
       script.onload = resolve;
-      script.onerror = () =>
-        reject(new Error("Could not load QR library. Check internet."));
+      script.onerror = () => {
+        reject(new Error("Could not load QR library. Check your internet."));
+      };
+
       document.head.appendChild(script);
     });
-  };
+  }
 
-  const style = document.createElement("style");
+  function setStatus(message, isError = false) {
+    const status = $("tvqr-status");
+    if (!status) return;
 
-  style.textContent = `
-    #tinvin-qr-overlay {
-      position: fixed;
-      inset: 0;
-      z-index: 99999;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 16px;
-      background: rgba(4,8,20,.82);
-      backdrop-filter: blur(9px);
-    }
+    status.textContent = message || "";
+    status.classList.toggle("error", isError);
+  }
 
-    #tinvin-qr-overlay.open {
-      display: flex;
-    }
+  function mount() {
+    const panel = $("scannerPanel");
 
-    #tinvin-qr-panel {
-      width: 100%;
-      max-width: 410px;
-      max-height: 88vh;
-      overflow-y: auto;
-      padding: 22px;
-      border: 1px solid rgba(233,189,99,.35);
-      border-radius: 22px;
-      background: #111a2d;
-      color: #fff;
-      font-family: inherit;
-      box-shadow: 0 20px 70px rgba(0,0,0,.4);
-    }
+    if (!panel || $("tinvinQRWorkspace")) return;
 
-    #tinvin-qr-panel * {
-      box-sizing: border-box;
-    }
+    const launcher = $("openScannerBtn");
+    if (launcher) launcher.style.display = "none";
 
-    .tvqr-heading {
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-      margin-bottom:18px;
-    }
+    const root = document.createElement("div");
+    root.id = "tinvinQRWorkspace";
+    root.innerHTML = `
+      <div id="qrPage">
+        <div class="qr-container">
 
-    .tvqr-heading h2 {
-      margin:0;
-      font-size:21px;
-      color:#f0c66e;
-    }
+          <div class="qr-heading">
+            <div>
+              <h2>QR Scanner & Generator</h2>
+              <p class="qr-description">
+                Scan QR codes or create your own QR code.
+              </p>
+            </div>
+          </div>
 
-    .tvqr-close {
-      width:35px;
-      height:35px;
-      border:0;
-      border-radius:50%;
-      background:#26334b;
-      color:white;
-      font-size:22px;
-      cursor:pointer;
-    }
+          <div class="qr-tabs">
+            <button type="button" class="qr-tab active"
+              id="tvqr-scan-tab">
+              Scan QR
+            </button>
 
-    .tvqr-tabs {
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:8px;
-      margin-bottom:17px;
-    }
+            <button type="button" class="qr-tab"
+              id="tvqr-create-tab">
+              Create QR
+            </button>
+          </div>
 
-    .tvqr-tab {
-      border:1px solid #34425b;
-      border-radius:12px;
-      padding:12px 6px;
-      background:#1b2940;
-      color:#cbd5e1;
-      font-weight:700;
-      cursor:pointer;
-    }
+          <section id="tvqr-scan-section">
 
-    .tvqr-tab.active {
-      color:#111827;
-      background:#e9bd63;
-      border-color:#e9bd63;
-    }
+            <div id="tvqr-reader" class="qr-preview"></div>
 
-    .tvqr-label {
-      display:block;
-      margin:12px 0 7px;
-      color:#dbe4f2;
-      font-size:13px;
-      font-weight:700;
-    }
+            <div class="qr-actions">
+              <button type="button" id="tvqr-start">
+                Start Camera
+              </button>
 
-    .tvqr-input {
-      width:100%;
-      min-height:45px;
-      padding:12px;
-      border:1px solid #34425b;
-      border-radius:11px;
-      outline:none;
-      background:#0b1323;
-      color:white;
-      font:inherit;
-    }
+              <button type="button" id="tvqr-stop"
+                class="qr-secondary" hidden>
+                Stop Camera
+              </button>
+            </div>
 
-    .tvqr-input:focus {
-      border-color:#e9bd63;
-    }
+            <label class="qr-label" for="tvqr-file">
+              Or scan a QR code from an image
+            </label>
 
-    .tvqr-main {
-      width:100%;
-      margin-top:13px;
-      padding:13px;
-      border:0;
-      border-radius:12px;
-      background:#e9bd63;
-      color:#101827;
-      font-weight:800;
-      font-size:14px;
-      cursor:pointer;
-    }
+            <input
+              type="file"
+              id="tvqr-file"
+              class="qr-input"
+              accept="image/*"
+            />
 
-    .tvqr-secondary {
-      width:100%;
-      margin-top:9px;
-      padding:12px;
-      border:1px solid #43516a;
-      border-radius:12px;
-      background:#1b2940;
-      color:white;
-      font-weight:700;
-      cursor:pointer;
-    }
+            <div id="tvqr-result" class="qr-result" hidden>
+              <strong>Scan result</strong>
+              <p id="tvqr-result-text"></p>
 
-    #tinvin-qr-reader {
-      width:100%;
-      margin-top:12px;
-      overflow:hidden;
-      border-radius:13px;
-      background:#080f1c;
-    }
+              <div class="qr-actions">
+                <button type="button" id="tvqr-copy">
+                  Copy Result
+                </button>
 
-    #tinvin-qr-reader video {
-      border-radius:12px;
-    }
+                <button type="button" id="tvqr-open"
+                  class="qr-secondary" hidden>
+                  Open Link
+                </button>
+              </div>
+            </div>
 
-    #tinvin-qr-result {
-      display:none;
-      margin-top:14px;
-      padding:13px;
-      border:1px solid #3b8069;
-      border-radius:12px;
-      background:#102b29;
-      color:#d8fff0;
-      overflow-wrap:anywhere;
-      font-size:13px;
-    }
+          </section>
 
-    #tinvin-qr-image {
-      display:none;
-      margin:18px auto 0;
-      padding:12px;
-      width:max-content;
-      max-width:100%;
-      min-height:20px;
-      border-radius:12px;
-      background:white;
-    }
+          <section id="tvqr-create-section" hidden>
 
-    #tinvin-qr-image img,
-    #tinvin-qr-image canvas {
-      display:block;
-      max-width:100%;
-      height:auto;
-    }
+            <label class="qr-label" for="tvqr-text">
+              Enter text or website URL
+            </label>
 
-    .tvqr-note {
-      margin-top:12px;
-      color:#9baac1;
-      font-size:11px;
-      line-height:1.6;
-      text-align:center;
-    }
-  `;
+            <textarea
+              id="tvqr-text"
+              class="qr-input"
+              rows="4"
+              maxlength="2500"
+              placeholder="Enter text or paste a URL..."
+            ></textarea>
 
-  document.head.appendChild(style);
+            <button type="button" id="tvqr-generate">
+              Generate QR Code
+            </button>
 
-  const overlay = document.createElement("div");
-  overlay.id = "tinvin-qr-overlay";
+            <div id="tvqr-image" class="qr-generated" hidden></div>
 
-  overlay.innerHTML = `
-    <section id="tinvin-qr-panel">
-      <div class="tvqr-heading">
-        <h2>QR Tools</h2>
-        <button class="tvqr-close" id="tvqr-close"
-          aria-label="Close">&times;</button>
+            <button type="button" id="tvqr-download"
+              class="qr-secondary" hidden>
+              Download QR Image
+            </button>
+
+          </section>
+
+          <p id="tvqr-status" class="qr-status" aria-live="polite">
+            Ready.
+          </p>
+
+          <p class="qr-note">
+            Camera access requires permission and a secure HTTPS connection.
+          </p>
+
+        </div>
       </div>
+    `;
 
-      <div class="tvqr-tabs">
-        <button class="tvqr-tab active" id="tvqr-scan-tab">
-          Scan QR
-        </button>
-        <button class="tvqr-tab" id="tvqr-generate-tab">
-          Create QR
-        </button>
-      </div>
+    panel.appendChild(root);
 
-      <div id="tvqr-scan-section">
-        <p style="color:#cbd5e1;font-size:13px">
-          Scan a QR code using your camera.
-        </p>
-
-        <div id="tinvin-qr-reader"></div>
-
-        <button class="tvqr-main" id="tvqr-start">
-          Start Camera
-        </button>
-
-        <button class="tvqr-secondary" id="tvqr-stop"
-          style="display:none">
-          Stop Camera
-        </button>
-
-        <div id="tinvin-qr-result"></div>
-        <button class="tvqr-secondary" id="tvqr-copy"
-          style="display:none">
-          Copy Result
-        </button>
-
-        <label class="tvqr-label" for="tvqr-file">
-          Or scan an image
-        </label>
-        <input class="tvqr-input" id="tvqr-file"
-          type="file" accept="image/*">
-      </div>
-
-      <div id="tvqr-generate-section" style="display:none">
-        <label class="tvqr-label" for="tvqr-text">
-          Enter text or website URL
-        </label>
-        <textarea class="tvqr-input" id="tvqr-text"
-          rows="3" placeholder="Enter text or paste a URL"></textarea>
-
-        <button class="tvqr-main" id="tvqr-create">
-          Generate QR Code
-        </button>
-
-        <div id="tinvin-qr-image"></div>
-
-        <button class="tvqr-secondary" id="tvqr-download"
-          style="display:none">
-          Download QR Image
-        </button>
-      </div>
-
-      <p class="tvqr-note">
-        Camera access requires permission and a secure HTTPS connection.
-      </p>
-    </section>
-  `;
-
-  document.body.appendChild(overlay);
-
-  const $ = id => document.getElementById(id);
+    bindEvents();
+  }
 
   function showMode(mode) {
     currentMode = mode;
 
-    $("tvqr-scan-section").style.display =
-      mode === "scan" ? "block" : "none";
-
-    $("tvqr-generate-section").style.display =
-      mode === "generate" ? "block" : "none";
+    $("tvqr-scan-section").hidden = mode !== "scan";
+    $("tvqr-create-section").hidden = mode !== "create";
 
     $("tvqr-scan-tab").classList.toggle(
-      "active", mode === "scan"
+      "active",
+      mode === "scan"
     );
 
-    $("tvqr-generate-tab").classList.toggle(
-      "active", mode === "generate"
+    $("tvqr-create-tab").classList.toggle(
+      "active",
+      mode === "create"
     );
 
-    if (mode !== "scan") stopScanner();
+    if (mode !== "scan") {
+      stopScanner();
+    }
+
+    setStatus(
+      mode === "scan" ? "Ready to scan a QR code." :
+      "Enter text to create a QR code."
+    );
   }
 
   async function stopScanner() {
-    if (!scanner || !scannerRunning) return;
+    if (!scanner) return;
 
     try {
-      await scanner.stop();
+      if (scannerRunning) {
+        await scanner.stop();
+      }
+
       scanner.clear();
     } catch (error) {
       console.warn("QR scanner stop:", error);
     }
 
+    scanner = null;
     scannerRunning = false;
-    $("tvqr-start").style.display = "block";
-    $("tvqr-stop").style.display = "none";
+
+    const start = $("tvqr-start");
+    const stop = $("tvqr-stop");
+
+    if (start) start.hidden = false;
+    if (stop) stop.hidden = true;
   }
 
   function showResult(value) {
-    $("tinvin-qr-result").style.display = "block";
-    $("tinvin-qr-result").textContent = value;
-    $("tvqr-copy").style.display = "block";
+    if (!value) return;
+
+    $("tvqr-result").hidden = false;
+    $("tvqr-result-text").textContent = value;
+
+    const openButton = $("tvqr-open");
+
+    try {
+      const url = new URL(value);
+
+      if (url.protocol === "http:" || url.protocol === "https:") {
+        openButton.hidden = false;
+        openButton.dataset.url = url.href;
+      } else {
+        openButton.hidden = true;
+        delete openButton.dataset.url;
+      }
+    } catch {
+      openButton.hidden = true;
+      delete openButton.dataset.url;
+    }
+
+    setStatus("QR code scanned successfully.");
     stopScanner();
   }
 
   async function startScanner() {
-    $("tvqr-start").disabled = true;
-    $("tvqr-start").textContent = "Loading camera...";
+    if (scannerRunning) return;
+
+    const startButton = $("tvqr-start");
+    startButton.disabled = true;
+    startButton.textContent = "Starting camera...";
+
+    $("tvqr-result").hidden = true;
 
     try {
       await loadScript(
-        QR_SCAN_CDN,
+        SCAN_CDN,
         () => typeof window.Html5Qrcode !== "undefined"
       );
 
-      const cameras = await Html5Qrcode.getCameras();
-
-      if (!cameras.length) {
-        throw new Error("No camera was found on this device.");
-      }
-
-      const preferred =
-        cameras.find(camera =>
-          /back|rear|environment/i.test(camera.label)
-        ) || cameras[0];
-
-      scanner = new Html5Qrcode("tinvin-qr-reader");
+      scanner = new Html5Qrcode("tvqr-reader");
 
       await scanner.start(
-        preferred.id,
+        { facingMode: "environment" },
         {
           fps: 10,
-          qrbox: { width: 230, height: 230 }
+          qrbox: { width: 230, height: 230 },
+          aspectRatio: 1
         },
         decodedText => showResult(decodedText),
         () => {}
       );
 
       scannerRunning = true;
-      $("tvqr-start").style.display = "none";
-      $("tvqr-stop").style.display = "block";
+      startButton.hidden = true;
+      $("tvqr-stop").hidden = false;
+
+      setStatus("Camera is active. Point it at a QR code.");
 
     } catch (error) {
-      alert(
-        error.message ||
-        "Could not start camera. Please allow camera permission."
+      scanner = null;
+      scannerRunning = false;
+
+      setStatus(
+        error.message || "Could not start camera. Check camera permission.",
+        true
       );
+
     } finally {
-      $("tvqr-start").disabled = false;
-      $("tvqr-start").textContent = "Start Camera";
+      startButton.disabled = false;
+      startButton.textContent = "Start Camera";
     }
   }
 
   async function scanImage(file) {
     if (!file) return;
 
+    if (!file.type.startsWith("image/")) {
+      setStatus("Please select an image file.", true);
+      return;
+    }
+
+    setStatus("Reading QR code from image...");
+
     try {
       await loadScript(
-        QR_SCAN_CDN,
+        SCAN_CDN,
         () => typeof window.Html5Qrcode !== "undefined"
       );
 
-      const reader = new Html5Qrcode("tinvin-qr-reader");
-      const result = await reader.scanFile(file, true);
-      showResult(result);
-      reader.clear();
+      await stopScanner();
+
+      const reader = new Html5Qrcode("tvqr-reader");
+
+      try {
+        const result = await reader.scanFile(file, true);
+        showResult(result);
+      } finally {
+        try {
+          reader.clear();
+        } catch (_) {}
+      }
 
     } catch (error) {
-      alert("No readable QR code found in this image.");
+      setStatus("No readable QR code found in this image.", true);
     }
   }
 
@@ -427,24 +347,21 @@
     const value = $("tvqr-text").value.trim();
 
     if (!value) {
-      alert("Please enter text or a URL first.");
+      setStatus("Please enter text or a URL first.", true);
       return;
     }
 
-    if (value.length > 2500) {
-      alert("Please use a shorter text (maximum 2500 characters).");
-      return;
-    }
+    setStatus("Creating QR code...");
 
     try {
       await loadScript(
-        QR_GENERATE_CDN,
+        GENERATE_CDN,
         () => typeof window.QRCode !== "undefined"
       );
 
-      const target = $("tinvin-qr-image");
-      target.innerHTML = "";
-      target.style.display = "block";
+      const target = $("tvqr-image");
+      target.replaceChildren();
+      target.hidden = false;
 
       new QRCode(target, {
         text: value,
@@ -455,98 +372,116 @@
         correctLevel: QRCode.CorrectLevel.H
       });
 
-      $("tvqr-download").style.display = "block";
+      generated = true;
+      $("tvqr-download").hidden = false;
+
+      setStatus("Your QR code is ready.");
 
     } catch (error) {
-      alert("QR generator could not load. Check your internet.");
+      setStatus(
+        error.message || "Could not create QR code.",
+        true
+      );
     }
   }
 
   function downloadQR() {
-    const target = $("tinvin-qr-image");
+    if (!generated) {
+      setStatus("Create a QR code first.", true);
+      return;
+    }
+
+    const target = $("tvqr-image");
     const canvas = target.querySelector("canvas");
-    const img = target.querySelector("img");
+    const image = target.querySelector("img");
 
     let dataURL = "";
 
     if (canvas) {
       dataURL = canvas.toDataURL("image/png");
-    } else if (img) {
-      dataURL = img.src;
+    } else if (image) {
+      dataURL = image.src;
     }
 
     if (!dataURL) {
-      alert("Generate a QR code first.");
+      setStatus("QR image is not ready yet.", true);
       return;
     }
 
     const link = document.createElement("a");
     link.href = dataURL;
-    link.download = "TinVin-QR.png";
+    link.download = "TinVin-AI-QR.png";
     link.click();
+
+    setStatus("QR image downloaded.");
   }
 
-  $("tvqr-close").addEventListener("click", async () => {
-    await stopScanner();
-    overlay.classList.remove("open");
-  });
-
-  overlay.addEventListener("click", event => {
-    if (event.target === overlay) {
-      stopScanner();
-      overlay.classList.remove("open");
-    }
-  });
-
-  $("tvqr-scan-tab").addEventListener("click", () => {
-    showMode("scan");
-  });
-
-  $("tvqr-generate-tab").addEventListener("click", () => {
-    showMode("generate");
-  });
-
-  $("tvqr-start").addEventListener("click", startScanner);
-  $("tvqr-stop").addEventListener("click", stopScanner);
-
-  $("tvqr-file").addEventListener("change", event => {
-    scanImage(event.target.files[0]);
-    event.target.value = "";
-  });
-
-  $("tvqr-copy").addEventListener("click", async () => {
-    const result = $("tinvin-qr-result").textContent;
-
-    try {
-      await navigator.clipboard.writeText(result);
-      $("tvqr-copy").textContent = "Copied!";
-      setTimeout(() => {
-        $("tvqr-copy").textContent = "Copy Result";
-      }, 1500);
-    } catch {
-      alert("Could not copy automatically. Select and copy the result.");
-    }
-  });
-
-  $("tvqr-create").addEventListener("click", generateQR);
-  $("tvqr-download").addEventListener("click", downloadQR);
-
-  window.TinVinQR = {
-    open() {
-      overlay.classList.add("open");
-    },
-    close() {
-      stopScanner();
-      overlay.classList.remove("open");
-    },
-    openScanner() {
-      overlay.classList.add("open");
+  function bindEvents() {
+    $("tvqr-scan-tab").addEventListener("click", () => {
       showMode("scan");
-    },
-    openGenerator() {
-      overlay.classList.add("open");
-      showMode("generate");
-    }
-  };
+    });
+
+    $("tvqr-create-tab").addEventListener("click", () => {
+      showMode("create");
+    });
+
+    $("tvqr-start").addEventListener("click", startScanner);
+    $("tvqr-stop").addEventListener("click", stopScanner);
+
+    $("tvqr-file").addEventListener("change", event => {
+      const file = event.target.files[0];
+      scanImage(file);
+      event.target.value = "";
+    });
+
+    $("tvqr-generate").addEventListener("click", generateQR);
+    $("tvqr-download").addEventListener("click", downloadQR);
+
+    $("tvqr-copy").addEventListener("click", async () => {
+      const value = $("tvqr-result-text").textContent;
+
+      try {
+        await navigator.clipboard.writeText(value);
+        setStatus("QR result copied.");
+      } catch {
+        setStatus("Could not copy automatically.", true);
+      }
+    });
+
+    $("tvqr-open").addEventListener("click", () => {
+      const url = $("tvqr-open").dataset.url;
+      if (url) window.open(url, "_blank", "noopener,noreferrer");
+    });
+  }
+
+  function initialize() {
+    mount();
+
+    window.TinVinQR = {
+      open() {
+        const panel = $("scannerPanel");
+        if (panel) panel.hidden = false;
+        showMode("scan");
+      },
+      close() {
+        stopScanner();
+      },
+      openScanner() {
+        this.open();
+        showMode("scan");
+      },
+      openGenerator() {
+        this.open();
+        showMode("create");
+      },
+      stop: stopScanner
+    };
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initialize);
+  } else {
+    initialize();
+  }
 
 })();
