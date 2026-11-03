@@ -143,7 +143,10 @@
         language
       });
 
-      const text = extractText(result);
+      // Remove the unwanted standalone image label.
+      const text = extractText(result)
+        .replace(/^\s*AI-generated image\s*$/gim, "")
+        .trim();
 
       if (!text) {
         throw new Error("No business content was returned.");
