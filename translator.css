@@ -1,6 +1,7 @@
 
-/* TinVin AI - Chat Style Translator */
+/* TinVin AI - ChatGPT Style Translator */
 
+/* Icon */
 #translatorPage .tool-icon {
   color: #fff;
   background: linear-gradient(135deg, #0ea5e9, #6366f1);
@@ -10,17 +11,21 @@
 #translatorPage .translator-chat-layout {
   display: flex;
   flex-direction: column;
-  min-height: 650px;
+  height: min(760px, calc(100dvh - 190px));
+  min-height: 420px;
   padding: 20px;
-  gap: 18px;
+  gap: 14px;
+  overflow: hidden;
+  box-sizing: border-box;
 }
 
-/* Language selection */
+/* Language selectors */
 #translatorPage .translator-languages {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
-  flex-shrink: 0;
+  flex: 0 0 auto;
+  min-width: 0;
 }
 
 #translatorPage .translator-languages > div {
@@ -40,19 +45,21 @@
   color: var(--text);
 }
 
-/* Translation history */
+/* History: only this area scrolls */
 #translatorPage .translator-history {
   display: flex;
   flex-direction: column;
   gap: 20px;
-  flex: 1;
-  min-height: 300px;
-  max-height: 650px;
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: none;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 12px 4px;
+  padding: 12px 5px;
   scroll-behavior: smooth;
   overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
 }
 
 /* Conversation */
@@ -61,6 +68,7 @@
   flex-direction: column;
   gap: 13px;
   width: 100%;
+  min-width: 0;
 }
 
 /* Messages */
@@ -73,6 +81,7 @@
   line-height: 1.8;
   white-space: pre-wrap;
   unicode-bidi: plaintext;
+  box-sizing: border-box;
 }
 
 #translatorPage .translator-user-message {
@@ -111,7 +120,7 @@
   unicode-bidi: plaintext;
 }
 
-/* Copy button */
+/* Copy */
 #translatorPage .translator-result-actions {
   display: flex;
   align-items: center;
@@ -131,58 +140,75 @@
   font-size: 12px;
 }
 
-/* Bottom compose area */
+/* Fixed bottom compose area */
 #translatorPage .translator-compose {
   position: relative;
-  flex-shrink: 0;
+  flex: 0 0 auto;
+  width: 100%;
+  min-width: 0;
   border-top: 1px solid rgba(233, 189, 99, 0.2);
-  padding-top: 16px;
+  padding-top: 12px;
   background: var(--panel);
+  box-sizing: border-box;
+  z-index: 2;
 }
 
 #translatorPage .translator-compose .field-label {
   display: block;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 
+/* Input and Send row */
 #translatorPage .translator-input-row {
   display: flex;
   align-items: flex-end;
   gap: 10px;
+  width: 100%;
+  min-width: 0;
 }
 
-/* Input */
+/* Text input */
 #translatorPage #translatorInput {
-  flex: 1;
+  display: block;
+  flex: 1 1 auto;
   min-width: 0;
   width: 100%;
-  min-height: 72px;
-  max-height: 180px;
-  resize: vertical;
+  height: 54px;
+  min-height: 54px;
+  max-height: 140px;
+  resize: none;
+  overflow-y: auto;
   border: 2px solid #e9bd63;
   border-radius: 20px;
   background: #0d1019;
   color: var(--text);
-  padding: 15px;
-  font-size: 15px;
-  line-height: 1.7;
+  padding: 13px 15px;
+  font-size: 16px;
+  line-height: 1.6;
   outline: none;
+  box-sizing: border-box;
+  -webkit-appearance: none;
+  appearance: none;
 }
 
 #translatorPage #translatorInput:focus {
   box-shadow: 0 0 0 4px rgba(233, 189, 99, 0.13);
 }
 
-/* Send button */
+/* Send button always visible */
 #translatorPage #translatorRunBtn {
-  flex-shrink: 0;
-  min-height: 64px;
-  min-width: 105px;
-  padding: 12px 18px;
+  display: inline-flex;
+  flex: 0 0 100px;
+  align-items: center;
+  justify-content: center;
+  min-width: 100px;
+  min-height: 54px;
+  padding: 10px 12px;
   border-radius: 18px;
   background: linear-gradient(135deg, #e9bd63, #f3d58f);
   color: #111;
   font-weight: 800;
+  white-space: nowrap;
   box-shadow: 0 8px 22px rgba(233, 189, 99, 0.15);
 }
 
@@ -193,23 +219,24 @@
 
 /* Status */
 #translatorPage #translatorStatus {
-  min-height: 20px;
-  margin-top: 9px;
+  min-height: 18px;
+  margin-top: 6px;
+  overflow-wrap: anywhere;
 }
 
-/* Clear button */
-#translatorPage .translator-actions {
+/* Bottom actions */
+#translatorPage .translator-compose .actions {
   display: flex;
   justify-content: flex-start;
-  margin-top: 10px;
+  margin-top: 7px;
 }
 
 #translatorPage #translatorClearBtn {
-  min-height: 46px;
-  min-width: 110px;
+  min-height: 40px;
+  min-width: 90px;
 }
 
-/* Hidden elements */
+/* Hidden */
 #translatorPage .hidden {
   display: none !important;
 }
@@ -217,18 +244,25 @@
 /* Mobile */
 @media (max-width: 600px) {
   #translatorPage .translator-chat-layout {
-    min-height: 650px;
-    padding: 15px;
-    gap: 14px;
+    height: calc(100dvh - 175px);
+    min-height: 400px;
+    padding: 12px;
+    gap: 10px;
   }
 
   #translatorPage .translator-languages {
-    gap: 9px;
+    gap: 8px;
+  }
+
+  #translatorPage .translator-languages .field-label {
+    margin-bottom: 6px;
+    font-size: 12px;
   }
 
   #translatorPage .translator-history {
-    min-height: 320px;
-    max-height: 60vh;
+    min-height: 0;
+    padding: 8px 3px;
+    gap: 15px;
   }
 
   #translatorPage .translator-message {
@@ -236,26 +270,72 @@
     padding: 13px;
   }
 
+  #translatorPage .translator-message-content {
+    font-size: 14px;
+  }
+
+  #translatorPage .translator-compose {
+    padding-top: 10px;
+  }
+
+  #translatorPage .translator-compose .field-label {
+    margin-bottom: 6px;
+    font-size: 12px;
+  }
+
   #translatorPage .translator-input-row {
-    gap: 8px;
+    gap: 7px;
   }
 
   #translatorPage #translatorInput {
-    min-height: 68px;
-    font-size: 14px;
-    padding: 12px;
+    height: 52px;
+    min-height: 52px;
+    max-height: 120px;
+    padding: 11px;
+    font-size: 16px;
+    border-radius: 16px;
   }
 
   #translatorPage #translatorRunBtn {
+    flex-basis: 82px;
     min-width: 82px;
-    min-height: 62px;
-    padding: 10px;
-    font-size: 14px;
+    min-height: 52px;
+    padding: 9px 7px;
+    font-size: 13px;
+    border-radius: 15px;
+  }
+
+  #translatorPage #translatorStatus {
+    margin-top: 4px;
+    min-height: 16px;
+    font-size: 12px;
+  }
+
+  #translatorPage #translatorClearBtn {
+    min-height: 36px;
   }
 }
 
+/* Very small screens */
 @media (max-width: 380px) {
   #translatorPage .translator-languages {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  #translatorPage .translator-chat-layout {
+    padding: 9px;
+  }
+
+  #translatorPage #translatorRunBtn {
+    flex-basis: 74px;
+    min-width: 74px;
+  }
+}
+
+/* Zoom and short screens */
+@media (max-height: 650px) {
+  #translatorPage .translator-chat-layout {
+    height: calc(100dvh - 145px);
+    min-height: 340px;
   }
 }
