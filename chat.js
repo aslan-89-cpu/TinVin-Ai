@@ -25,99 +25,101 @@
     if (status) status.textContent = message || "";
   }
 
-  // Detect image generation requests.
+  // Detect image-generation requests in several languages.
   function isImageRequest(text) {
     const message = String(text || "").trim();
-
     if (!message) return false;
 
-    if (/^\/image\s+/i.test(message)) return true;
+    if (/^\/image(?:\s|$)/i.test(message)) {
+      return true;
+    }
 
     const lower = message.toLowerCase();
 
-    // Do not mistake text-generation requests for images.
+    // Requests that clearly ask for written content.
     const textIntent =
-      /\b(story|poem|essay|article|email|message|business plan|plan|report|code|script|prompt|summary|explanation|description|translation|translate|definition|website|web app|application|spreadsheet|presentation|proposal|resume|cv|list|table|paragraph|letter)\b/i;
+      /\b(story|poem|essay|article|email|message|business plan|plan|report|code|script|summary|explanation|translation|translate|definition|website|web app|application|spreadsheet|presentation|proposal|resume|cv|paragraph|letter)\b/i;
 
     if (textIntent.test(lower)) return false;
 
-    // Explicit English image requests.
-    const explicitEnglish =
-      /\b(image|picture|photo|illustration|artwork|wallpaper|portrait|drawing|painting)\b/i;
+    // English image vocabulary.
+    const imageWords =
+      /\b(image|picture|photo|illustration|artwork|wallpaper|portrait|drawing|painting|logo|icon|avatar|sticker|poster|banner|thumbnail)\b/i;
 
-    const englishAction =
-      /^\s*(please\s+)?(generate|create|draw|make|design|render|produce|paint|illustrate)\b/i;
+    const imageActions =
+      /\b(generate|create|creat|draw|make|design|render|produce|paint|illustrate|show)\b/i;
 
-    const englishLogo =
-      /\b(create|generate|design|draw|make|render)\b.{0,100}\b(logo|icon|avatar|sticker|poster|banner|thumbnail)\b/i;
+    // Explicit image request.
+    if (imageWords.test(lower) && imageActions.test(lower)) {
+      return true;
+    }
 
-    // Broad prompts such as "Create gold tiger".
-    const simpleEnglish =
-      englishAction.test(message) &&
-      !textIntent.test(lower) &&
-      lower.split(/\s+/).length >= 2;
+    // Prompts such as:
+    // Create gold tiger
+    // Creat a gold tiger
+    // Draw a beautiful dragon
+    // Generate a futuristic city
+    const simpleImagePrompt =
+      /^\s*(please\s+)?(generate|create|creat|draw|make|design|render|produce|paint|illustrate)\b/i;
 
-    const english =
-      explicitEnglish.test(lower) &&
-      (
-        englishAction.test(message) ||
-        /\b(of|showing|with|for)\b/i.test(lower)
-      ) ||
-      englishLogo.test(lower) ||
-      simpleEnglish;
+    if (
+      simpleImagePrompt.test(message) &&
+      lower.split(/\s+/).length >= 2
+    ) {
+      return true;
+    }
 
     // Sorani Kurdish.
     const soraniImage =
-      /(وێنە|وێنەی|وێنەیەک|وێنەیەکی|وێنەکان|ڕەسم|شێوە)/.test(message);
+      /(وێنە|وێنەی|وێنەیەک|وێنەیەکی|ڕەسم|شێوە|لۆگۆ|وێنەکان)/;
 
     const soraniAction =
-      /(دروست|بکە|بکێشە|کێشە|نیشان بدە|بۆم بکە|بۆم بکێشە|وێنە بکە|بۆم دروست|وێنەکەم)/.test(message);
+      /(دروست|بکە|بکێشە|کێشە|نیشان بدە|بۆم بکە|بۆم بکێشە|وێنە بکە|بۆم دروست)/;
 
-    const sorani =
-      soraniImage && soraniAction;
+    if (soraniImage.test(message) && soraniAction.test(message)) {
+      return true;
+    }
 
-    // Also recognize Sorani prompts without the word image.
-    const soraniSimple =
-      /^(تکایە\s*)?(بۆم\s*)?(دروستی بکە|بکێشە|دروست بکە)/.test(message);
+    if (
+      /^(تکایە\s*)?(بۆم\s*)?(دروستی بکە|بکێشە|دروست بکە)/.test(message)
+    ) {
+      return true;
+    }
 
     // Kurmanji Kurdish.
     const kurmanjiImage =
-      /(wêne|wêneyek|resim|dîmen)/i.test(message);
+      /(wêne|wêneyek|resim|dîmen|wêneya|logo)/i;
 
     const kurmanjiAction =
-      /(çêke|biafirîne|xêz|nîşan bide|ji min re çêke)/i.test(message);
+      /(çêke|biafirîne|xêz|nîşan bide|ji min re çêke)/i;
 
-    const kurmanji =
-      kurmanjiImage && kurmanjiAction;
+    if (kurmanjiImage.test(message) && kurmanjiAction.test(message)) {
+      return true;
+    }
 
     // Arabic.
     const arabicImage =
-      /(صورة|صور|رسم|شعار|خلفية)/.test(message);
+      /(صورة|صور|رسم|شعار|خلفية)/;
 
     const arabicAction =
-      /(ارسم|أنشئ|انشئ|اصنع|صمم|صوّر|صمم لي)/.test(message);
+      /(ارسم|أنشئ|انشئ|اصنع|صمم|صوّر|صمم لي)/;
 
-    const arabic =
-      arabicImage && arabicAction;
+    if (arabicImage.test(message) && arabicAction.test(message)) {
+      return true;
+    }
 
     // Persian.
     const persianImage =
-      /(تصویر|عکس|نقاشی|لوگو|پوستر)/.test(message);
+      /(تصویر|عکس|نقاشی|لوگو|پوستر)/;
 
     const persianAction =
-      /(بساز|ایجاد کن|بکش|طراحی کن|درست کن)/.test(message);
+      /(بساز|ایجاد کن|بکش|طراحی کن|درست کن)/;
 
-    const persian =
-      persianImage && persianAction;
+    if (persianImage.test(message) && persianAction.test(message)) {
+      return true;
+    }
 
-    return (
-      english ||
-      sorani ||
-      soraniSimple ||
-      kurmanji ||
-      arabic ||
-      persian
-    );
+    return false;
   }
 
   function getImageSource(result) {
@@ -131,7 +133,9 @@
       result.base64 ||
       result.data;
 
-    if (typeof raw !== "string" || !raw.trim()) return "";
+    if (typeof raw !== "string" || !raw.trim()) {
+      return "";
+    }
 
     const value = raw.trim();
 
@@ -143,7 +147,7 @@
       return value;
     }
 
-    return `data:${result.mimeType || "image/jpeg"};base64,${value}`;
+    return `data:${result.mimeType || result.mime_type || "image/jpeg"};base64,${value}`;
   }
 
   function addBubble(role, content, imageUrl = "", attachments = []) {
@@ -270,7 +274,8 @@
 
     const fileInput = document.createElement("input");
     fileInput.type = "file";
-    fileInput.accept = "image/png,image/jpeg,image/webp,image/gif,.pdf,.txt,.doc,.docx";
+    fileInput.accept =
+      "image/png,image/jpeg,image/webp,image/gif,.pdf,.txt,.doc,.docx";
     fileInput.multiple = true;
     fileInput.hidden = true;
 
@@ -393,14 +398,16 @@
     });
   }
 
-  // Send image prompts directly to FLUX.
+  // Send image prompts directly to the Worker image endpoint.
   async function generateImage(message) {
     const result = await postJSON("/api/image", {
       prompt: message
     });
 
-    if (result?.ok === false) {
-      throw new Error(result.error || "The image service failed.");
+    if (!result || result.ok === false) {
+      throw new Error(
+        result?.error || "The image service failed."
+      );
     }
 
     const imageUrl = getImageSource(result);
@@ -409,7 +416,7 @@
       throw new Error(
         result?.error ||
         extractText(result) ||
-        "The image service did not return an image."
+        "The image service did not return image data. Check the Worker response."
       );
     }
 
@@ -430,8 +437,10 @@
       }))
     });
 
-    if (result?.ok === false) {
-      throw new Error(result.error || "The AI service failed.");
+    if (!result || result.ok === false) {
+      throw new Error(
+        result?.error || "The AI service failed."
+      );
     }
 
     const answer = extractText(result);
@@ -581,6 +590,7 @@
     newChat,
     addBubble,
     renderHistory,
+    isImageRequest,
     getHistory: () => history.map(turn => ({ ...turn }))
   };
 
