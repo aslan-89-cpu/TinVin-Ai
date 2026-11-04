@@ -1,3 +1,4 @@
+
 /* TinVin AI - Chat, Vision and Image Generation */
 
 (() => {
@@ -24,25 +25,46 @@
     if (status) status.textContent = message || "";
   }
 
+  // Detect image-generation requests in multiple languages.
   function isImageRequest(text) {
-    const message = String(text || "").toLowerCase();
+    const message = String(text || "").toLowerCase().trim();
 
+    if (!message) return false;
+
+    // Explicit image command.
+    if (/^\/image\s+/i.test(message)) return true;
+
+    // English
     const english =
-      /\b(generate|create|draw|make|design|render|produce)\b.{0,100}\b(image|picture|photo|illustration|artwork|logo|wallpaper)\b|\b(image|picture|photo|illustration|artwork|logo|wallpaper)\b.{0,60}\b(of|showing|with)\b/i;
+      /\b(generate|create|draw|make|design|render|produce|paint)\b.{0,120}\b(image|picture|photo|illustration|artwork|logo|wallpaper|portrait)\b/i.test(message) ||
+      /\b(image|picture|photo|illustration|artwork|logo|wallpaper|portrait)\b.{0,100}\b(of|showing|with|for)\b/i.test(message);
+
+    // Sorani Kurdish
+    const soraniImage =
+      /(وێنە|وێنەی|وێنەیەک|وێنەیەکی|وێنەکان|ڕەسم)/.test(message);
+
+    const soraniAction =
+      /(دروست|بکە|بکێشە|کێشە|ڕەسم بکە|نیشان بدە|بۆم بکە|بۆم بکێشە|وێنە بکە|وێنە دروست|بۆم دروست)/.test(message);
 
     const sorani =
-      /(وێنە|وێنەی|وێنەیەک|وێنەیەکی|وێنەکان).{0,100}(دروست|بکە|کێشە|نیشان|ڕەسم|بۆم)|(?:دروست|بکە|کێشە|ڕەسم).{0,80}(وێنە|وێنەی)/;
+      soraniImage && soraniAction;
 
+    // Kurmanji Kurdish
     const kurmanji =
-      /(wêne|wêneyek|resim).{0,100}(çêke|biafirîne|nîşan|xêz)|(?:çêke|biafirîne|xêz).{0,80}(wêne|resim)/i;
+      /(wêne|wêneyek|resim)/i.test(message) &&
+      /(çêke|biafirîne|xêz|nîşan bide|ji min re çêke)/i.test(message);
 
+    // Arabic
     const arabic =
-      /(صورة|صور|ارسم|أنشئ|انشئ|اصنع|صمم).{0,100}(صورة|رسم|شعار)|(?:أنشئ|انشئ|ارسم|اصنع|صمم).{0,80}(صورة|شعار)/;
+      /(صورة|صور|رسم|شعار)/.test(message) &&
+      /(ارسم|أنشئ|انشئ|اصنع|صمم|أنشئ لي|اصنع لي)/.test(message);
 
-    return english.test(message) ||
-      sorani.test(message) ||
-      kurmanji.test(message) ||
-      arabic.test(message);
+    // Also recognize common requests written in Persian.
+    const persian =
+      /(تصویر|عکس|نقاشی)/.test(message) &&
+      /(بساز|ایجاد کن|بکش|طراحی کن)/.test(message);
+
+    return english || sorani || kurmanji || arabic || persian;
   }
 
   function getImageSource(result) {
@@ -318,17 +340,24 @@
     });
   }
 
+  // Send image prompts directly to the FLUX endpoint.
   async function generateImage(message) {
     const result = await postJSON("/api/image", {
       prompt: message
     });
 
+    if (result?.ok === false) {
+      throw new Error(
+        result.error || "The image service failed."
+      );
+    }
+
     const imageUrl = getImageSource(result);
 
     if (!imageUrl) {
       throw new Error(
-        extractText(result) ||
         result?.error ||
+        extractText(result) ||
         "The image service did not return an image."
       );
     }
@@ -398,7 +427,10 @@
     renderHistory();
 
     try {
-      if (isImageRequest(message) && attachments.length === 0) {
+      const wantsImage =
+        isImageRequest(message) && attachments.length === 0;
+
+      if (wantsImage) {
         setStatus("TinVin AI is creating your image...");
 
         turn.assistantImage = await generateImage(message);
