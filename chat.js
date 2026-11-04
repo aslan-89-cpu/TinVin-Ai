@@ -1,5 +1,5 @@
 
-/* TinVin AI - Chat, Vision and Image Generation */
+/* TinVin AI - Chat, Vision, Image Generation and Editing */
 
 (() => {
   "use strict";
@@ -25,9 +25,10 @@
     if (status) status.textContent = message || "";
   }
 
-  // Detect image-generation requests in several languages.
+  // Detect requests to generate a new image.
   function isImageRequest(text) {
     const message = String(text || "").trim();
+
     if (!message) return false;
 
     if (/^\/image(?:\s|$)/i.test(message)) {
@@ -36,31 +37,23 @@
 
     const lower = message.toLowerCase();
 
-    // Requests that clearly ask for written content.
     const textIntent =
       /\b(story|poem|essay|article|email|message|business plan|plan|report|code|script|summary|explanation|translation|translate|definition|website|web app|application|spreadsheet|presentation|proposal|resume|cv|paragraph|letter)\b/i;
 
     if (textIntent.test(lower)) return false;
 
-    // English image vocabulary.
     const imageWords =
       /\b(image|picture|photo|illustration|artwork|wallpaper|portrait|drawing|painting|logo|icon|avatar|sticker|poster|banner|thumbnail)\b/i;
 
     const imageActions =
-      /\b(generate|create|creat|draw|make|design|render|produce|paint|illustrate|show)\b/i;
+      /\b(generate|create|creat|draw|make|design|render|produce|paint|illustrate|show|give me|i want|make me|show me)\b/i;
 
-    // Explicit image request.
     if (imageWords.test(lower) && imageActions.test(lower)) {
       return true;
     }
 
-    // Prompts such as:
-    // Create gold tiger
-    // Creat a gold tiger
-    // Draw a beautiful dragon
-    // Generate a futuristic city
     const simpleImagePrompt =
-      /^\s*(please\s+)?(generate|create|creat|draw|make|design|render|produce|paint|illustrate)\b/i;
+      /^\s*(please\s+)?(generate|create|creat|draw|make|design|render|produce|paint|illustrate|give me|show me|i want)\b/i;
 
     if (
       simpleImagePrompt.test(message) &&
@@ -69,12 +62,12 @@
       return true;
     }
 
-    // Sorani Kurdish.
+    // Sorani Kurdish
     const soraniImage =
-      /(وێنە|وێنەی|وێنەیەک|وێنەیەکی|ڕەسم|شێوە|لۆگۆ|وێنەکان)/;
+      /(وێنە|وێنەی|وێنەیەک|ڕەسم|شێوە|لۆگۆ|وێنەکان)/;
 
     const soraniAction =
-      /(دروست|بکە|بکێشە|کێشە|نیشان بدە|بۆم بکە|بۆم بکێشە|وێنە بکە|بۆم دروست)/;
+      /(دروست|بکە|بکێشە|کێشە|نیشان بدە|بۆم بکە|بۆم بکێشە|بۆم دروست|وێنە بکە)/;
 
     if (soraniImage.test(message) && soraniAction.test(message)) {
       return true;
@@ -86,7 +79,7 @@
       return true;
     }
 
-    // Kurmanji Kurdish.
+    // Kurmanji Kurdish
     const kurmanjiImage =
       /(wêne|wêneyek|resim|dîmen|wêneya|logo)/i;
 
@@ -97,7 +90,7 @@
       return true;
     }
 
-    // Arabic.
+    // Arabic
     const arabicImage =
       /(صورة|صور|رسم|شعار|خلفية)/;
 
@@ -108,7 +101,7 @@
       return true;
     }
 
-    // Persian.
+    // Persian
     const persianImage =
       /(تصویر|عکس|نقاشی|لوگو|پوستر)/;
 
@@ -118,6 +111,46 @@
     if (persianImage.test(message) && persianAction.test(message)) {
       return true;
     }
+
+    return false;
+  }
+
+  // Detect image editing requests when an image is attached.
+  function isImageEditRequest(text) {
+    const message = String(text || "").trim();
+
+    if (!message) return false;
+
+    const lower = message.toLowerCase();
+
+    const englishEdit =
+      /\b(edit|change|replace|remove|erase|delete|add|insert|put|modify|alter|transform|redesign|retouch|enhance|improve|change the background|remove the background|replace the background|make the background|change its color|change the color|make it look|turn it into|convert it into)\b/i;
+
+    if (englishEdit.test(lower)) return true;
+
+    // Sorani Kurdish editing requests
+    const soraniEdit =
+      /(دەستکاری|بگۆڕە|گۆڕینی|بگۆڕێ|لابەرە|بسڕەوە|بسڕە|زیادی بکە|زیاد بکە|زیادکردن|بیگۆڕە|باگراوند|پاشبنەما|ڕەنگەکە|جلەکە|لە ناو وێنە)/;
+
+    if (soraniEdit.test(message)) return true;
+
+    // Kurmanji editing requests
+    const kurmanjiEdit =
+      /(biguhêre|biguherîne|jê bibe|jê rake|zêde bike|sererast bike|paşxane|rengê wê|wê biguherîne)/i;
+
+    if (kurmanjiEdit.test(message)) return true;
+
+    // Arabic editing requests
+    const arabicEdit =
+      /(عدّل|عدل|غيّر|غير|استبدل|احذف|أزل|اضف|أضف|غيّر الخلفية|غير الخلفية|الخلفية|لون|داخل الصورة)/;
+
+    if (arabicEdit.test(message)) return true;
+
+    // Persian editing requests
+    const persianEdit =
+      /(ویرایش|تغییر بده|عوض کن|حذف کن|اضافه کن|پس‌زمینه|رنگش را|داخل تصویر)/;
+
+    if (persianEdit.test(message)) return true;
 
     return false;
   }
@@ -147,7 +180,7 @@
       return value;
     }
 
-    return `data:${result.mimeType || result.mime_type || "image/jpeg"};base64,${value}`;
+    return `data:${result.mimeType || result.mime_type || "image/png"};base64,${value}`;
   }
 
   function addBubble(role, content, imageUrl = "", attachments = []) {
@@ -168,7 +201,7 @@
       const image = document.createElement("img");
       image.src = imageUrl;
       image.alt = role === "assistant"
-        ? "TinVin AI generated image"
+        ? "TinVin AI image"
         : "Attached image";
       image.className = "chat-image";
       image.loading = "lazy";
@@ -211,10 +244,19 @@
     container.replaceChildren();
 
     history.forEach(turn => {
-      addBubble("user", turn.user, "", turn.userAttachments || []);
+      addBubble(
+        "user",
+        turn.user,
+        "",
+        turn.userAttachments || []
+      );
 
       if (turn.assistantImage) {
-        addBubble("assistant", turn.assistant || "", turn.assistantImage);
+        addBubble(
+          "assistant",
+          turn.assistant || "",
+          turn.assistantImage
+        );
       } else if (turn.assistant) {
         addBubble("assistant", turn.assistant);
       }
@@ -398,10 +440,19 @@
     });
   }
 
-  // Send image prompts directly to the Worker image endpoint.
-  async function generateImage(message) {
+  // Generate a new image OR edit attached images.
+  async function generateImage(message, attachments = []) {
+    const images = attachments.filter(file =>
+      file.type && file.type.startsWith("image/")
+    );
+
     const result = await postJSON("/api/image", {
-      prompt: message
+      prompt: message,
+      attachments: images.map(file => ({
+        name: file.name,
+        type: file.type,
+        data: file.data
+      }))
     });
 
     if (!result || result.ok === false) {
@@ -416,7 +467,7 @@
       throw new Error(
         result?.error ||
         extractText(result) ||
-        "The image service did not return image data. Check the Worker response."
+        "The image service did not return image data."
       );
     }
 
@@ -479,6 +530,10 @@
     const userMessage = message ||
       "Please describe and analyze the attached image.";
 
+    const imageAttachments = attachments.filter(file =>
+      file.type && file.type.startsWith("image/")
+    );
+
     const turn = {
       user: userMessage,
       userAttachments: attachments,
@@ -490,19 +545,33 @@
     renderHistory();
 
     try {
-      const wantsImage =
-        isImageRequest(message) && attachments.length === 0;
+      const wantsImageEdit =
+        imageAttachments.length > 0 &&
+        isImageEditRequest(message);
 
-      if (wantsImage) {
+      const wantsNewImage =
+        imageAttachments.length === 0 &&
+        isImageRequest(message);
+
+      if (wantsImageEdit) {
+        setStatus("TinVin AI is editing your image...");
+
+        turn.assistantImage = await generateImage(
+          message,
+          imageAttachments
+        );
+
+        turn.assistant = "";
+
+      } else if (wantsNewImage) {
         setStatus("TinVin AI is creating your image...");
 
-        turn.assistantImage = await generateImage(message);
-        turn.assistant = "Your image is ready.";
+        turn.assistantImage = await generateImage(message, []);
+
+        turn.assistant = "";
 
       } else {
-        const imageCount = attachments.filter(file =>
-          file.type && file.type.startsWith("image/")
-        ).length;
+        const imageCount = imageAttachments.length;
 
         setStatus(
           imageCount > 0
@@ -510,7 +579,10 @@
             : "TinVin AI is thinking..."
         );
 
-        turn.assistant = await askAI(userMessage, attachments);
+        turn.assistant = await askAI(
+          userMessage,
+          attachments
+        );
       }
 
       renderHistory();
@@ -591,6 +663,7 @@
     addBubble,
     renderHistory,
     isImageRequest,
+    isImageEditRequest,
     getHistory: () => history.map(turn => ({ ...turn }))
   };
 
