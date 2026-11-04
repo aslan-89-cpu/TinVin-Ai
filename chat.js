@@ -25,46 +25,99 @@
     if (status) status.textContent = message || "";
   }
 
-  // Detect image-generation requests in multiple languages.
+  // Detect image generation requests.
   function isImageRequest(text) {
-    const message = String(text || "").toLowerCase().trim();
+    const message = String(text || "").trim();
 
     if (!message) return false;
 
-    // Explicit image command.
     if (/^\/image\s+/i.test(message)) return true;
 
-    // English
-    const english =
-      /\b(generate|create|draw|make|design|render|produce|paint)\b.{0,120}\b(image|picture|photo|illustration|artwork|logo|wallpaper|portrait)\b/i.test(message) ||
-      /\b(image|picture|photo|illustration|artwork|logo|wallpaper|portrait)\b.{0,100}\b(of|showing|with|for)\b/i.test(message);
+    const lower = message.toLowerCase();
 
-    // Sorani Kurdish
+    // Do not mistake text-generation requests for images.
+    const textIntent =
+      /\b(story|poem|essay|article|email|message|business plan|plan|report|code|script|prompt|summary|explanation|description|translation|translate|definition|website|web app|application|spreadsheet|presentation|proposal|resume|cv|list|table|paragraph|letter)\b/i;
+
+    if (textIntent.test(lower)) return false;
+
+    // Explicit English image requests.
+    const explicitEnglish =
+      /\b(image|picture|photo|illustration|artwork|wallpaper|portrait|drawing|painting)\b/i;
+
+    const englishAction =
+      /^\s*(please\s+)?(generate|create|draw|make|design|render|produce|paint|illustrate)\b/i;
+
+    const englishLogo =
+      /\b(create|generate|design|draw|make|render)\b.{0,100}\b(logo|icon|avatar|sticker|poster|banner|thumbnail)\b/i;
+
+    // Broad prompts such as "Create gold tiger".
+    const simpleEnglish =
+      englishAction.test(message) &&
+      !textIntent.test(lower) &&
+      lower.split(/\s+/).length >= 2;
+
+    const english =
+      explicitEnglish.test(lower) &&
+      (
+        englishAction.test(message) ||
+        /\b(of|showing|with|for)\b/i.test(lower)
+      ) ||
+      englishLogo.test(lower) ||
+      simpleEnglish;
+
+    // Sorani Kurdish.
     const soraniImage =
-      /(وێنە|وێنەی|وێنەیەک|وێنەیەکی|وێنەکان|ڕەسم)/.test(message);
+      /(وێنە|وێنەی|وێنەیەک|وێنەیەکی|وێنەکان|ڕەسم|شێوە)/.test(message);
 
     const soraniAction =
-      /(دروست|بکە|بکێشە|کێشە|ڕەسم بکە|نیشان بدە|بۆم بکە|بۆم بکێشە|وێنە بکە|وێنە دروست|بۆم دروست)/.test(message);
+      /(دروست|بکە|بکێشە|کێشە|نیشان بدە|بۆم بکە|بۆم بکێشە|وێنە بکە|بۆم دروست|وێنەکەم)/.test(message);
 
     const sorani =
       soraniImage && soraniAction;
 
-    // Kurmanji Kurdish
-    const kurmanji =
-      /(wêne|wêneyek|resim)/i.test(message) &&
+    // Also recognize Sorani prompts without the word image.
+    const soraniSimple =
+      /^(تکایە\s*)?(بۆم\s*)?(دروستی بکە|بکێشە|دروست بکە)/.test(message);
+
+    // Kurmanji Kurdish.
+    const kurmanjiImage =
+      /(wêne|wêneyek|resim|dîmen)/i.test(message);
+
+    const kurmanjiAction =
       /(çêke|biafirîne|xêz|nîşan bide|ji min re çêke)/i.test(message);
 
-    // Arabic
+    const kurmanji =
+      kurmanjiImage && kurmanjiAction;
+
+    // Arabic.
+    const arabicImage =
+      /(صورة|صور|رسم|شعار|خلفية)/.test(message);
+
+    const arabicAction =
+      /(ارسم|أنشئ|انشئ|اصنع|صمم|صوّر|صمم لي)/.test(message);
+
     const arabic =
-      /(صورة|صور|رسم|شعار)/.test(message) &&
-      /(ارسم|أنشئ|انشئ|اصنع|صمم|أنشئ لي|اصنع لي)/.test(message);
+      arabicImage && arabicAction;
 
-    // Also recognize common requests written in Persian.
+    // Persian.
+    const persianImage =
+      /(تصویر|عکس|نقاشی|لوگو|پوستر)/.test(message);
+
+    const persianAction =
+      /(بساز|ایجاد کن|بکش|طراحی کن|درست کن)/.test(message);
+
     const persian =
-      /(تصویر|عکس|نقاشی)/.test(message) &&
-      /(بساز|ایجاد کن|بکش|طراحی کن)/.test(message);
+      persianImage && persianAction;
 
-    return english || sorani || kurmanji || arabic || persian;
+    return (
+      english ||
+      sorani ||
+      soraniSimple ||
+      kurmanji ||
+      arabic ||
+      persian
+    );
   }
 
   function getImageSource(result) {
@@ -340,16 +393,14 @@
     });
   }
 
-  // Send image prompts directly to the FLUX endpoint.
+  // Send image prompts directly to FLUX.
   async function generateImage(message) {
     const result = await postJSON("/api/image", {
       prompt: message
     });
 
     if (result?.ok === false) {
-      throw new Error(
-        result.error || "The image service failed."
-      );
+      throw new Error(result.error || "The image service failed.");
     }
 
     const imageUrl = getImageSource(result);
@@ -379,12 +430,15 @@
       }))
     });
 
+    if (result?.ok === false) {
+      throw new Error(result.error || "The AI service failed.");
+    }
+
     const answer = extractText(result);
 
     if (!answer) {
       throw new Error(
-        result?.error ||
-        "The AI returned an empty response."
+        result?.error || "The AI returned an empty response."
       );
     }
 
@@ -441,11 +495,11 @@
           file.type && file.type.startsWith("image/")
         ).length;
 
-        if (imageCount > 0) {
-          setStatus("TinVin AI is looking at your image...");
-        } else {
-          setStatus("TinVin AI is thinking...");
-        }
+        setStatus(
+          imageCount > 0
+            ? "TinVin AI is looking at your image..."
+            : "TinVin AI is thinking..."
+        );
 
         turn.assistant = await askAI(userMessage, attachments);
       }
