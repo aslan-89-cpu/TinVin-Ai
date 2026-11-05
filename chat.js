@@ -1,4 +1,3 @@
-
 /* TinVin AI - Chat, Vision, Image Generation and Editing */
 
 (() => {
@@ -25,136 +24,6 @@
     if (status) status.textContent = message || "";
   }
 
-  // Detect requests to generate a new image.
-  function isImageRequest(text) {
-    const message = String(text || "").trim();
-
-    if (!message) return false;
-
-    if (/^\/image(?:\s|$)/i.test(message)) {
-      return true;
-    }
-
-    const lower = message.toLowerCase();
-
-    const textIntent =
-      /\b(story|poem|essay|article|email|message|business plan|plan|report|code|script|summary|explanation|translation|translate|definition|website|web app|application|spreadsheet|presentation|proposal|resume|cv|paragraph|letter)\b/i;
-
-    if (textIntent.test(lower)) return false;
-
-    const imageWords =
-      /\b(image|picture|photo|illustration|artwork|wallpaper|portrait|drawing|painting|logo|icon|avatar|sticker|poster|banner|thumbnail)\b/i;
-
-    const imageActions =
-      /\b(generate|create|creat|draw|make|design|render|produce|paint|illustrate|show|give me|i want|make me|show me)\b/i;
-
-    if (imageWords.test(lower) && imageActions.test(lower)) {
-      return true;
-    }
-
-    const simpleImagePrompt =
-      /^\s*(please\s+)?(generate|create|creat|draw|make|design|render|produce|paint|illustrate|give me|show me|i want)\b/i;
-
-    if (
-      simpleImagePrompt.test(message) &&
-      lower.split(/\s+/).length >= 2
-    ) {
-      return true;
-    }
-
-    // Sorani Kurdish
-    const soraniImage =
-      /(وێنە|وێنەی|وێنەیەک|ڕەسم|شێوە|لۆگۆ|وێنەکان)/;
-
-    const soraniAction =
-      /(دروست|بکە|بکێشە|کێشە|نیشان بدە|بۆم بکە|بۆم بکێشە|بۆم دروست|وێنە بکە)/;
-
-    if (soraniImage.test(message) && soraniAction.test(message)) {
-      return true;
-    }
-
-    if (
-      /^(تکایە\s*)?(بۆم\s*)?(دروستی بکە|بکێشە|دروست بکە)/.test(message)
-    ) {
-      return true;
-    }
-
-    // Kurmanji Kurdish
-    const kurmanjiImage =
-      /(wêne|wêneyek|resim|dîmen|wêneya|logo)/i;
-
-    const kurmanjiAction =
-      /(çêke|biafirîne|xêz|nîşan bide|ji min re çêke)/i;
-
-    if (kurmanjiImage.test(message) && kurmanjiAction.test(message)) {
-      return true;
-    }
-
-    // Arabic
-    const arabicImage =
-      /(صورة|صور|رسم|شعار|خلفية)/;
-
-    const arabicAction =
-      /(ارسم|أنشئ|انشئ|اصنع|صمم|صوّر|صمم لي)/;
-
-    if (arabicImage.test(message) && arabicAction.test(message)) {
-      return true;
-    }
-
-    // Persian
-    const persianImage =
-      /(تصویر|عکس|نقاشی|لوگو|پوستر)/;
-
-    const persianAction =
-      /(بساز|ایجاد کن|بکش|طراحی کن|درست کن)/;
-
-    if (persianImage.test(message) && persianAction.test(message)) {
-      return true;
-    }
-
-    return false;
-  }
-
-  // Detect image editing requests when an image is attached.
-  function isImageEditRequest(text) {
-    const message = String(text || "").trim();
-
-    if (!message) return false;
-
-    const lower = message.toLowerCase();
-
-    const englishEdit =
-      /\b(edit|change|replace|remove|erase|delete|add|insert|put|modify|alter|transform|redesign|retouch|enhance|improve|change the background|remove the background|replace the background|make the background|change its color|change the color|make it look|turn it into|convert it into)\b/i;
-
-    if (englishEdit.test(lower)) return true;
-
-    // Sorani Kurdish editing requests
-    const soraniEdit =
-      /(دەستکاری|بگۆڕە|گۆڕینی|بگۆڕێ|لابەرە|بسڕەوە|بسڕە|زیادی بکە|زیاد بکە|زیادکردن|بیگۆڕە|باگراوند|پاشبنەما|ڕەنگەکە|جلەکە|لە ناو وێنە)/;
-
-    if (soraniEdit.test(message)) return true;
-
-    // Kurmanji editing requests
-    const kurmanjiEdit =
-      /(biguhêre|biguherîne|jê bibe|jê rake|zêde bike|sererast bike|paşxane|rengê wê|wê biguherîne)/i;
-
-    if (kurmanjiEdit.test(message)) return true;
-
-    // Arabic editing requests
-    const arabicEdit =
-      /(عدّل|عدل|غيّر|غير|استبدل|احذف|أزل|اضف|أضف|غيّر الخلفية|غير الخلفية|الخلفية|لون|داخل الصورة)/;
-
-    if (arabicEdit.test(message)) return true;
-
-    // Persian editing requests
-    const persianEdit =
-      /(ویرایش|تغییر بده|عوض کن|حذف کن|اضافه کن|پس‌زمینه|رنگش را|داخل تصویر)/;
-
-    if (persianEdit.test(message)) return true;
-
-    return false;
-  }
-
   function getImageSource(result) {
     if (!result) return "";
 
@@ -166,9 +35,7 @@
       result.base64 ||
       result.data;
 
-    if (typeof raw !== "string" || !raw.trim()) {
-      return "";
-    }
+    if (typeof raw !== "string" || !raw.trim()) return "";
 
     const value = raw.trim();
 
@@ -201,7 +68,7 @@
       const image = document.createElement("img");
       image.src = imageUrl;
       image.alt = role === "assistant"
-        ? "TinVin AI image"
+        ? "TinVin AI generated image"
         : "Attached image";
       image.className = "chat-image";
       image.loading = "lazy";
@@ -233,7 +100,6 @@
 
     container.appendChild(bubble);
     container.scrollTop = container.scrollHeight;
-
     return bubble;
   }
 
@@ -244,19 +110,10 @@
     container.replaceChildren();
 
     history.forEach(turn => {
-      addBubble(
-        "user",
-        turn.user,
-        "",
-        turn.userAttachments || []
-      );
+      addBubble("user", turn.user, "", turn.userAttachments || []);
 
       if (turn.assistantImage) {
-        addBubble(
-          "assistant",
-          turn.assistant || "",
-          turn.assistantImage
-        );
+        addBubble("assistant", turn.assistant || "", turn.assistantImage);
       } else if (turn.assistant) {
         addBubble("assistant", turn.assistant);
       }
@@ -268,17 +125,11 @@
   function getApiHistory() {
     const messages = [];
 
-    history.forEach(turn => {
-      messages.push({
-        role: "user",
-        content: turn.user
-      });
+    history.slice(0, -1).forEach(turn => {
+      messages.push({ role: "user", content: turn.user });
 
       if (turn.assistant) {
-        messages.push({
-          role: "assistant",
-          content: turn.assistant
-        });
+        messages.push({ role: "assistant", content: turn.assistant });
       }
     });
 
@@ -289,17 +140,15 @@
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
 
-      reader.onload = () => {
-        resolve({
-          name: file.name,
-          type: file.type || "application/octet-stream",
-          data: reader.result
-        });
-      };
+      reader.onload = () => resolve({
+        name: file.name,
+        type: file.type || "application/octet-stream",
+        data: reader.result
+      });
 
-      reader.onerror = () => {
-        reject(new Error("Could not read " + file.name));
-      };
+      reader.onerror = () => reject(
+        new Error("Could not read " + file.name)
+      );
 
       reader.readAsDataURL(file);
     });
@@ -308,16 +157,12 @@
   function createAttachmentControls() {
     const composer = document.querySelector("#chatPage .chat-compose");
 
-    if (!composer || composer.dataset.attachmentsReady === "true") {
-      return;
-    }
-
+    if (!composer || composer.dataset.attachmentsReady === "true") return;
     composer.dataset.attachmentsReady = "true";
 
     const fileInput = document.createElement("input");
     fileInput.type = "file";
-    fileInput.accept =
-      "image/png,image/jpeg,image/webp,image/gif,.pdf,.txt,.doc,.docx";
+    fileInput.accept = "image/png,image/jpeg,image/webp,image/gif,.pdf,.txt,.doc,.docx";
     fileInput.multiple = true;
     fileInput.hidden = true;
 
@@ -402,8 +247,7 @@
       }
 
       try {
-        const attachment = await readFile(file);
-        selectedFiles.push(attachment);
+        selectedFiles.push(await readFile(file));
       } catch (error) {
         setStatus(error.message);
       }
@@ -440,48 +284,90 @@
     });
   }
 
-  // Generate a new image OR edit attached images.
-  async function generateImage(message, attachments = []) {
-    const images = attachments.filter(file =>
-      file.type && file.type.startsWith("image/")
-    );
+  // FLUX.2 Klein reference images must be smaller than 512x512.
+  // Convert images to PNG and resize the API copy only.
+  async function resizeImageForFlux(file) {
+    if (!file.type || !file.type.startsWith("image/")) return file;
 
-    const result = await postJSON("/api/image", {
-      prompt: message,
-      attachments: images.map(file => ({
-        name: file.name,
-        type: file.type,
-        data: file.data
-      }))
+    return new Promise((resolve, reject) => {
+      const image = new Image();
+      const objectUrl = URL.createObjectURL(
+        new Blob(
+          [
+            Uint8Array.from(
+              atob(file.data.split(",")[1]),
+              c => c.charCodeAt(0)
+            )
+          ],
+          { type: file.type }
+        )
+      );
+
+      image.onload = () => {
+        try {
+          const maxSide = 511;
+          const scale = Math.min(
+            1,
+            maxSide / Math.max(image.width, image.height)
+          );
+
+          const width = Math.max(1, Math.round(image.width * scale));
+          const height = Math.max(1, Math.round(image.height * scale));
+
+          const canvas = document.createElement("canvas");
+          canvas.width = width;
+          canvas.height = height;
+
+          const context = canvas.getContext("2d");
+          if (!context) {
+            throw new Error("Could not prepare the attached image.");
+          }
+
+          context.drawImage(image, 0, 0, width, height);
+
+          resolve({
+            name: file.name.replace(/\.[^.]+$/, "") + ".png",
+            type: "image/png",
+            data: canvas.toDataURL("image/png")
+          });
+        } catch (error) {
+          reject(error);
+        } finally {
+          URL.revokeObjectURL(objectUrl);
+        }
+      };
+
+      image.onerror = () => {
+        URL.revokeObjectURL(objectUrl);
+        reject(new Error("Could not process image: " + file.name));
+      };
+
+      image.src = objectUrl;
     });
+  }
 
-    if (!result || result.ok === false) {
-      throw new Error(
-        result?.error || "The image service failed."
-      );
+  async function prepareAttachmentsForAPI(attachments) {
+    const prepared = [];
+
+    for (const file of attachments) {
+      if (file.type && file.type.startsWith("image/")) {
+        prepared.push(await resizeImageForFlux(file));
+      } else {
+        prepared.push(file);
+      }
     }
 
-    const imageUrl = getImageSource(result);
-
-    if (!imageUrl) {
-      throw new Error(
-        result?.error ||
-        extractText(result) ||
-        "The image service did not return image data."
-      );
-    }
-
-    return imageUrl;
+    return prepared;
   }
 
   async function askAI(message, attachments) {
-    const previousHistory = getApiHistory().slice(0, -1);
+    const apiAttachments = await prepareAttachmentsForAPI(attachments);
 
     const result = await postJSON("/api/ai", {
       tool: "chat",
       message,
-      history: previousHistory,
-      attachments: attachments.map(file => ({
+      history: getApiHistory(),
+      attachments: apiAttachments.map(file => ({
         name: file.name,
         type: file.type,
         data: file.data
@@ -489,20 +375,34 @@
     });
 
     if (!result || result.ok === false) {
-      throw new Error(
-        result?.error || "The AI service failed."
-      );
+      throw new Error(result?.error || "The AI service failed.");
     }
 
-    const answer = extractText(result);
+    if (
+      result.type === "image" ||
+      result.image ||
+      result.imageUrl ||
+      result.image_url
+    ) {
+      const image = getImageSource(result);
+      if (!image) {
+        throw new Error("The image service returned no image data.");
+      }
+
+      return { type: "image", image };
+    }
+
+    const answer =
+      extractText(result) ||
+      result.text ||
+      result.output ||
+      "";
 
     if (!answer) {
-      throw new Error(
-        result?.error || "The AI returned an empty response."
-      );
+      throw new Error(result?.error || "The AI returned an empty response.");
     }
 
-    return answer;
+    return { type: "text", text: answer };
   }
 
   async function send() {
@@ -523,16 +423,12 @@
 
     const attachments = selectedFiles.slice();
     selectedFiles = [];
-    renderAttachmentPreview();
 
+    renderAttachmentPreview();
     input.value = "";
 
     const userMessage = message ||
       "Please describe and analyze the attached image.";
-
-    const imageAttachments = attachments.filter(file =>
-      file.type && file.type.startsWith("image/")
-    );
 
     const turn = {
       user: userMessage,
@@ -545,49 +441,28 @@
     renderHistory();
 
     try {
-      const wantsImageEdit =
-        imageAttachments.length > 0 &&
-        isImageEditRequest(message);
+      const hasImage = attachments.some(file =>
+        file.type && file.type.startsWith("image/")
+      );
 
-      const wantsNewImage =
-        imageAttachments.length === 0 &&
-        isImageRequest(message);
+      setStatus(
+        hasImage
+          ? "TinVin AI is checking your image..."
+          : "TinVin AI is thinking..."
+      );
 
-      if (wantsImageEdit) {
-        setStatus("TinVin AI is editing your image...");
+      const result = await askAI(userMessage, attachments);
 
-        turn.assistantImage = await generateImage(
-          message,
-          imageAttachments
-        );
-
+      if (result.type === "image") {
+        turn.assistantImage = result.image;
         turn.assistant = "";
-
-      } else if (wantsNewImage) {
-        setStatus("TinVin AI is creating your image...");
-
-        turn.assistantImage = await generateImage(message, []);
-
-        turn.assistant = "";
-
       } else {
-        const imageCount = imageAttachments.length;
-
-        setStatus(
-          imageCount > 0
-            ? "TinVin AI is looking at your image..."
-            : "TinVin AI is thinking..."
-        );
-
-        turn.assistant = await askAI(
-          userMessage,
-          attachments
-        );
+        turn.assistant = result.text;
+        turn.assistantImage = "";
       }
 
       renderHistory();
       setStatus("");
-
     } catch (error) {
       console.error("TinVin Chat error:", error);
 
@@ -597,7 +472,6 @@
 
       renderHistory();
       setStatus("Message could not be completed.");
-
     } finally {
       sending = false;
 
@@ -662,8 +536,6 @@
     newChat,
     addBubble,
     renderHistory,
-    isImageRequest,
-    isImageEditRequest,
     getHistory: () => history.map(turn => ({ ...turn }))
   };
 
@@ -672,5 +544,4 @@
   } else {
     initialize();
   }
-
 })();
