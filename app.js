@@ -1,3 +1,4 @@
+
 (() => {
   "use strict";
 
@@ -23,6 +24,87 @@
     "Mongolian", "Burmese"
   ];
 
+  const languageCodes = {
+    "English": "en",
+    "Sorani Kurdish": "ckb",
+    "Kurmanji Kurdish": "kmr",
+    "Arabic": "ar",
+    "Persian": "fa",
+    "Turkish": "tr",
+    "Spanish": "es",
+    "French": "fr",
+    "German": "de",
+    "Italian": "it",
+    "Portuguese": "pt",
+    "Brazilian Portuguese": "pt-BR",
+    "Russian": "ru",
+    "Ukrainian": "uk",
+    "Polish": "pl",
+    "Dutch": "nl",
+    "Swedish": "sv",
+    "Norwegian": "no",
+    "Danish": "da",
+    "Finnish": "fi",
+    "Greek": "el",
+    "Romanian": "ro",
+    "Hungarian": "hu",
+    "Czech": "cs",
+    "Slovak": "sk",
+    "Bulgarian": "bg",
+    "Serbian": "sr",
+    "Croatian": "hr",
+    "Bosnian": "bs",
+    "Albanian": "sq",
+    "Macedonian": "mk",
+    "Armenian": "hy",
+    "Georgian": "ka",
+    "Azerbaijani": "az",
+    "Kazakh": "kk",
+    "Uzbek": "uz",
+    "Turkmen": "tk",
+    "Pashto": "ps",
+    "Urdu": "ur",
+    "Hindi": "hi",
+    "Bengali": "bn",
+    "Punjabi": "pa",
+    "Gujarati": "gu",
+    "Marathi": "mr",
+    "Tamil": "ta",
+    "Telugu": "te",
+    "Malayalam": "ml",
+    "Kannada": "kn",
+    "Thai": "th",
+    "Vietnamese": "vi",
+    "Indonesian": "id",
+    "Malay": "ms",
+    "Filipino": "fil",
+    "Chinese Simplified": "zh-CN",
+    "Chinese Traditional": "zh-TW",
+    "Japanese": "ja",
+    "Korean": "ko",
+    "Swahili": "sw",
+    "Amharic": "am",
+    "Somali": "so",
+    "Hausa": "ha",
+    "Yoruba": "yo",
+    "Zulu": "zu",
+    "Afrikaans": "af",
+    "Nepali": "ne",
+    "Sinhala": "si",
+    "Khmer": "km",
+    "Lao": "lo",
+    "Mongolian": "mn",
+    "Burmese": "my"
+  };
+
+  const rtlLanguages = [
+    "Sorani Kurdish",
+    "Arabic",
+    "Persian",
+    "Urdu",
+    "Pashto"
+  ];
+
   let activeTab = "chatPage";
   let lastOutput = "";
   let busy = false;
@@ -36,6 +118,7 @@
 
   function showPage(id) {
     const settings = id === "settingsPage";
+
     $("workspacePage")?.classList.toggle("active", !settings);
     $("settingsPage")?.classList.toggle("active", settings);
 
@@ -183,6 +266,36 @@
     return "";
   }
 
+  function parseTranslationJSON(raw) {
+    if (typeof raw !== "string") return null;
+
+    let cleaned = raw.trim()
+      .replace(/^```(?:json)?\s*/i, "")
+      .replace(/\s*```$/i, "")
+      .trim();
+
+    try {
+      const parsed = JSON.parse(cleaned);
+      if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+        return parsed;
+      }
+    } catch {}
+
+    const first = cleaned.indexOf("{");
+    const last = cleaned.lastIndexOf("}");
+
+    if (first === -1 || last <= first) return null;
+
+    try {
+      const parsed = JSON.parse(cleaned.slice(first, last + 1));
+      if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+        return parsed;
+      }
+    } catch {}
+
+    return null;
+  }
+
   function rememberOriginalTextNodes() {
     const walker = document.createTreeWalker(
       document.body,
@@ -214,7 +327,9 @@
 
   function restoreEnglishText() {
     translatedNodes.forEach(([node, original]) => {
-      if (node.isConnected) node.nodeValue = original;
+      if (node.isConnected) {
+        node.nodeValue = original;
+      }
     });
 
     translatedNodes = [];
@@ -250,10 +365,85 @@
       )) continue;
 
       const original = originalText.get(node) ?? node.nodeValue;
+
       items.push({ node, original });
     }
 
     return items;
+  }
+
+  async function requestTranslationBatch(entries, language, runId) {
+    if (!entries.length) return;
+
+    if (runId !== translationRun) return;
+
+    const payload = {};
+
+    entries.forEach((item, index) => {
+      payload[item.key] = item.text;
+    });
+
+    const result = await postJSON("/api/ai", {
+      tool: "ui-translate",
+      message: JSON.stringify(payload),
+      targetLanguage: language
+    });
+
+    if (runId !== translationRun) return;
+
+    const translated = parseTranslationJSON(extractText(result));
+
+    const missing = entries.filter(item =>
+      !translated ||
+      typeof translated[item.key] !== "string" ||
+      !translated[item.key].trim()
+    );
+
+    if (missing.length) {
+      if (entries.length > 1) {
+        const middle = Math.ceil(entries.length / 2);
+
+        await requestTranslationBatch(
+          entries.slice(0, middle),
+          language,
+          runId
+        );
+
+        await requestTranslationBatch(
+          entries.slice(middle),
+          language,
+          runId
+        );
+
+        return;
+      }
+
+      throw new Error(
+        "The translation service did not return all required text."
+      );
+    }
+
+    entries.forEach(item => {
+      if (runId !== translationRun) return;
+
+      const value = translated[item.key].trim();
+
+      if (value) {
+        item.apply(value);
+      }
+    });
+  }
+
+  function setLanguageDirection(language) {
+    const html = document.documentElement;
+
+    html.lang = languageCodes[language] || "en";
+
+    if (rtlLanguages.includes(language)) {
+      html.dir = "rtl";
+    } else {
+      html.dir = "ltr";
+    }
   }
 
   async function translateInterface(language) {
@@ -262,63 +452,47 @@
     restoreEnglishText();
 
     if (!language || language === "English") {
-      document.documentElement.lang = "en";
+      setLanguageDirection("English");
       setStatus("languageStatus", "Interface language: English");
       return;
     }
 
+    if (!languages.includes(language)) {
+      setStatus("languageStatus", "Please select a supported language.");
+      return;
+    }
+
+    setLanguageDirection(language);
+
     setStatus("languageStatus", "Translating interface...");
 
     const items = getTranslatableNodes();
-    const batchSize = 20;
+    const batchSize = 10;
 
     try {
       for (let start = 0; start < items.length; start += batchSize) {
         if (runId !== translationRun) return;
 
         const batch = items.slice(start, start + batchSize);
-        const payload = {};
 
-        batch.forEach((item, index) => {
-          payload["s" + index] = item.original.trim();
-        });
+        const entries = batch.map((item, index) => ({
+          key: "s" + index,
+          text: item.original.trim(),
+          apply: value => {
+            if (!item.node.isConnected) return;
 
-        const result = await postJSON("/api/ai", {
-          tool: "ui-translate",
-          message: JSON.stringify(payload),
-          targetLanguage: language
-        });
-
-        let translated;
-
-        try {
-          translated = JSON.parse(
-            extractText(result)
-              .replace(/^```(?:json)?\s*/i, "")
-              .replace(/\s*```$/, "")
-          );
-        } catch {
-          throw new Error("The translation service returned invalid JSON.");
-        }
-
-        if (!translated || typeof translated !== "object") {
-          throw new Error("The translation service returned an invalid result.");
-        }
-
-        if (runId !== translationRun) return;
-
-        batch.forEach((item, index) => {
-          const value = translated["s" + index];
-
-          if (typeof value === "string" && value.trim()) {
-            translatedNodes.push([item.node, item.original]);
+            if (!translatedNodes.some(entry => entry[0] === item.node)) {
+              translatedNodes.push([item.node, item.original]);
+            }
 
             item.node.nodeValue = item.original.replace(
               item.original.trim(),
-              value.trim()
+              value
             );
           }
-        });
+        }));
+
+        await requestTranslationBatch(entries, language, runId);
       }
 
       const fields = [
@@ -337,44 +511,21 @@
         if (runId !== translationRun) return;
 
         const batch = fieldData.slice(start, start + batchSize);
-        const payload = {};
 
-        batch.forEach((item, index) => {
-          payload["p" + index] = item.original;
-        });
+        const entries = batch.map((item, index) => ({
+          key: "p" + index,
+          text: item.original,
+          apply: value => {
+            item.element.setAttribute("placeholder", value);
+          }
+        }));
 
-        const result = await postJSON("/api/ai", {
-          tool: "ui-translate",
-          message: JSON.stringify(payload),
-          targetLanguage: language
-        });
-
-        let translated = {};
-
-        try {
-          translated = JSON.parse(
-            extractText(result)
-              .replace(/^```(?:json)?\s*/i, "")
-              .replace(/\s*```$/, "")
-          );
-        } catch {}
-
-        if (runId === translationRun) {
-          batch.forEach((item, index) => {
-            if (typeof translated["p" + index] === "string") {
-              item.element.setAttribute(
-                "placeholder",
-                translated["p" + index]
-              );
-            }
-          });
-        }
+        await requestTranslationBatch(entries, language, runId);
       }
 
-      document.documentElement.lang =
-        language === "Sorani Kurdish" ? "ckb" :
-        language === "Arabic" ? "ar" :
-        language === "Kurmanji Kurdish" ? "ku-Latn" : "en";
+      if (runId !== translationRun) return;
+
+      setLanguageDirection(language);
 
       setStatus(
         "languageStatus",
@@ -448,6 +599,7 @@
     applyTheme(event.target.value);
   });
 
+  // Interface language only
   $("interfaceLang")?.addEventListener("change", async event => {
     const language = event.target.value;
 
@@ -476,20 +628,26 @@
 
   // Initial setup
   fillLanguages();
-  applyTheme(localStorage.getItem("tinvin_theme") || "purple");
 
-  if ($("interfaceLang")) {
-    $("interfaceLang").value =
-      localStorage.getItem("tinvin_language") || "English";
-  }
+  applyTheme(
+    localStorage.getItem("tinvin_theme") || "purple"
+  );
 
   rememberOriginalTextNodes();
 
   const savedLanguage =
     localStorage.getItem("tinvin_language") || "English";
 
-  if (savedLanguage !== "English") {
+  if ($("interfaceLang")) {
+    $("interfaceLang").value = languages.includes(savedLanguage)
+      ? savedLanguage
+      : "English";
+  }
+
+  if (savedLanguage !== "English" && languages.includes(savedLanguage)) {
     translateInterface(savedLanguage);
+  } else {
+    setLanguageDirection("English");
   }
 
   showWorkspaceTab("chatPage");
