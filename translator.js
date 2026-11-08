@@ -1,5 +1,6 @@
 /* TinVin AI - Chat Style Translator
    Text Translation, Image OCR and Translated Image Creation
+   Improved Image Translate Viewer
 */
 
 (() => {
@@ -12,12 +13,7 @@
     return;
   }
 
-  const {
-    $,
-    postJSON,
-    setLastOutput,
-    languages
-  } = core;
+  const { $, postJSON, setLastOutput, languages } = core;
 
   let busy = false;
   let lastTranslation = "";
@@ -28,9 +24,109 @@
   const MAX_IMAGE_SIZE = 8 * 1024 * 1024;
 
   function getElement(id) {
-    return typeof $ === "function"
-      ? $(id)
-      : document.getElementById(id);
+    return typeof $ === "function" ? $(id) : document.getElementById(id);
+  }
+
+  function injectImageStyles() {
+    if (document.getElementById("tinvin-image-translate-css")) return;
+
+    const style = document.createElement("style");
+    style.id = "tinvin-image-translate-css";
+
+    style.textContent = `
+      .translator-image-tools {
+        display:flex;
+        flex-wrap:wrap;
+        gap:10px;
+        width:100%;
+        box-sizing:border-box;
+      }
+
+      .translator-image-preview {
+        display:flex;
+        flex-wrap:wrap;
+        align-items:center;
+        gap:10px;
+        width:100%;
+        margin-top:10px;
+      }
+
+      .translator-uploaded-image {
+        display:block;
+        width:auto;
+        max-width:100%;
+        max-height:240px;
+        object-fit:contain;
+        border-radius:12px;
+      }
+
+      .translator-image-result {
+        width:100%;
+        max-width:100%;
+        box-sizing:border-box;
+        margin-top:12px;
+        padding:10px;
+        border:1px solid rgba(81,184,255,.25);
+        border-radius:16px;
+        background:rgba(8,15,30,.55);
+        overflow:hidden;
+      }
+
+      .translator-image-toolbar {
+        display:flex;
+        align-items:center;
+        flex-wrap:wrap;
+        gap:8px;
+        margin-bottom:10px;
+      }
+
+      .translator-image-toolbar button {
+        min-height:36px;
+        padding:7px 13px;
+        border-radius:10px;
+        cursor:pointer;
+      }
+
+      .translator-image-viewport {
+        width:100%;
+        max-height:65vh;
+        min-height:100px;
+        overflow:auto;
+        display:flex;
+        justify-content:center;
+        align-items:flex-start;
+        border-radius:12px;
+      }
+
+      .translator-image-viewport img {
+        display:block;
+        width:auto;
+        height:auto;
+        max-width:100%;
+        max-height:65vh;
+        object-fit:contain;
+        transform-origin:top center;
+        transition:transform .15s ease;
+      }
+
+      .translator-image-status {
+        margin:8px 0;
+        overflow-wrap:anywhere;
+      }
+
+      @media(max-width:600px) {
+        .translator-image-result {
+          padding:7px;
+        }
+
+        .translator-image-viewport,
+        .translator-image-viewport img {
+          max-height:58vh;
+        }
+      }
+    `;
+
+    document.head.appendChild(style);
   }
 
   function extractTranslation(result) {
@@ -41,9 +137,7 @@
     }
 
     if (Array.isArray(result)) {
-      return result.map(extractTranslation)
-        .filter(Boolean)
-        .join("\n");
+      return result.map(extractTranslation).filter(Boolean).join("\n");
     }
 
     if (typeof result === "object") {
@@ -73,27 +167,19 @@
 
       const choice = result.choices?.[0]?.message?.content;
 
-      if (typeof choice === "string") {
-        return choice.trim();
-      }
+      if (typeof choice === "string") return choice.trim();
 
       if (Array.isArray(choice)) {
-        return choice.map(part => part?.text || "")
-          .join("\n")
-          .trim();
+        return choice.map(part => part?.text || "").join("\n").trim();
       }
 
       const parts = result.candidates?.[0]?.content?.parts;
 
       if (Array.isArray(parts)) {
-        return parts.map(part => part?.text || "")
-          .join("\n")
-          .trim();
+        return parts.map(part => part?.text || "").join("\n").trim();
       }
 
-      if (result.data) {
-        return extractTranslation(result.data);
-      }
+      if (result.data) return extractTranslation(result.data);
     }
 
     return "";
@@ -101,18 +187,13 @@
 
   function showStatus(message) {
     const status = getElement("translatorStatus");
-
-    if (status) {
-      status.textContent = message || "";
-    }
+    if (status) status.textContent = message || "";
   }
 
   function fillLanguages(select, selected) {
     if (!select) return;
 
-    const available = Array.isArray(languages)
-      ? languages
-      : [];
+    const available = Array.isArray(languages) ? languages : [];
 
     if (!available.length) {
       console.error("Translator language list is empty.");
@@ -142,29 +223,19 @@
 
     if (button) {
       button.disabled = value;
-      button.textContent = value
-        ? buttonText || "Processing..."
-        : "Send ↑";
+      button.textContent = value ? buttonText || "Processing..." : "Send ↑";
     }
 
     const imageButton = getElement("translatorImageButton");
-
-    if (imageButton) {
-      imageButton.disabled = value;
-    }
+    if (imageButton) imageButton.disabled = value;
 
     const createButton = getElement("createTranslatedImageBtn");
-
-    if (createButton) {
-      createButton.disabled = value;
-    }
+    if (createButton) createButton.disabled = value;
   }
 
   function createMessage(text, className, labelText) {
     const message = document.createElement("div");
-
-    message.className =
-      "translator-message " + className;
+    message.className = "translator-message " + className;
 
     const label = document.createElement("div");
     label.className = "translator-message-label";
@@ -184,11 +255,7 @@
     try {
       if (navigator.clipboard?.writeText) {
         await navigator.clipboard.writeText(text);
-
-        if (statusElement) {
-          statusElement.textContent = "Copied to clipboard.";
-        }
-
+        if (statusElement) statusElement.textContent = "Copied to clipboard.";
         return;
       }
 
@@ -196,7 +263,6 @@
 
     } catch {
       const area = document.createElement("textarea");
-
       area.value = text;
       area.style.position = "fixed";
       area.style.left = "-9999px";
@@ -215,9 +281,7 @@
       area.remove();
 
       if (statusElement) {
-        statusElement.textContent = copied
-          ? "Copied to clipboard."
-          : "Copy failed.";
+        statusElement.textContent = copied ? "Copied to clipboard." : "Copy failed.";
       }
     }
   }
@@ -226,7 +290,6 @@
     if (!container || !src) return null;
 
     const image = document.createElement("img");
-
     image.src = src;
     image.alt = "TinVin AI image";
     image.className = className || "translator-result-image";
@@ -248,9 +311,7 @@
       result.base64 ||
       "";
 
-    if (typeof raw !== "string" || !raw.trim()) {
-      return "";
-    }
+    if (typeof raw !== "string" || !raw.trim()) return "";
 
     const value = raw.trim();
 
@@ -268,45 +329,37 @@
   function createImageControls() {
     const input = getElement("translatorInput");
 
-    if (!input || input.dataset.imageControlsReady === "true") {
-      return;
-    }
+    if (!input || input.dataset.imageControlsReady === "true") return;
 
     input.dataset.imageControlsReady = "true";
 
     const wrapper = document.createElement("div");
-
     wrapper.className = "translator-image-tools";
     wrapper.id = "translatorImageTools";
 
     const fileInput = document.createElement("input");
-
     fileInput.type = "file";
     fileInput.accept = "image/png,image/jpeg,image/webp";
     fileInput.hidden = true;
     fileInput.id = "translatorImageInput";
 
     const cameraInput = document.createElement("input");
-
     cameraInput.type = "file";
     cameraInput.accept = "image/*";
     cameraInput.setAttribute("capture", "environment");
     cameraInput.hidden = true;
 
     const attachButton = document.createElement("button");
-
     attachButton.type = "button";
     attachButton.className = "secondary-btn";
     attachButton.textContent = "📎 Attach image";
 
     const cameraButton = document.createElement("button");
-
     cameraButton.type = "button";
     cameraButton.className = "secondary-btn";
     cameraButton.textContent = "📷 Camera";
 
     const preview = document.createElement("div");
-
     preview.className = "translator-image-preview";
     preview.id = "translatorImagePreview";
 
@@ -320,13 +373,8 @@
 
     input.parentElement?.insertBefore(wrapper, input);
 
-    attachButton.addEventListener("click", () => {
-      fileInput.click();
-    });
-
-    cameraButton.addEventListener("click", () => {
-      cameraInput.click();
-    });
+    attachButton.addEventListener("click", () => fileInput.click());
+    cameraButton.addEventListener("click", () => cameraInput.click());
 
     fileInput.addEventListener("change", () => {
       selectImage(fileInput.files?.[0]);
@@ -342,11 +390,7 @@
   function selectImage(file) {
     if (!file) return;
 
-    const allowed = [
-      "image/png",
-      "image/jpeg",
-      "image/webp"
-    ];
+    const allowed = ["image/png", "image/jpeg", "image/webp"];
 
     if (!allowed.includes(file.type)) {
       showStatus("Please select a PNG, JPG or WebP image.");
@@ -371,34 +415,28 @@
       showStatus("Image attached. Ready to translate.");
     };
 
-    reader.onerror = () => {
-      showStatus("Could not read the selected image.");
-    };
+    reader.onerror = () => showStatus("Could not read the selected image.");
 
     reader.readAsDataURL(file);
   }
 
   function renderImagePreview() {
     const preview = getElement("translatorImagePreview");
-
     if (!preview) return;
 
     preview.replaceChildren();
-
     if (!selectedImage) return;
 
     const image = document.createElement("img");
-
     image.src = selectedImage.data;
     image.alt = "Selected image";
     image.className = "translator-uploaded-image";
 
     const name = document.createElement("span");
-
     name.textContent = selectedImage.name;
+    name.style.overflowWrap = "anywhere";
 
     const remove = document.createElement("button");
-
     remove.type = "button";
     remove.textContent = "×";
     remove.title = "Remove image";
@@ -412,23 +450,77 @@
     preview.append(image, name, remove);
   }
 
-  function addTranslation(
-    message,
-    translated,
-    source,
-    target,
-    imageAttachment = null
-  ) {
+  function renderTranslatedImage(container, src) {
+    container.replaceChildren();
+    container.classList.add("translator-image-result");
+
+    const toolbar = document.createElement("div");
+    toolbar.className = "translator-image-toolbar";
+
+    const minus = document.createElement("button");
+    minus.type = "button";
+    minus.className = "secondary-btn";
+    minus.textContent = "−";
+
+    const zoomLabel = document.createElement("span");
+    zoomLabel.textContent = "100%";
+    zoomLabel.setAttribute("aria-live", "polite");
+
+    const plus = document.createElement("button");
+    plus.type = "button";
+    plus.className = "secondary-btn";
+    plus.textContent = "+";
+
+    const reset = document.createElement("button");
+    reset.type = "button";
+    reset.className = "secondary-btn";
+    reset.textContent = "Reset";
+
+    const viewport = document.createElement("div");
+    viewport.className = "translator-image-viewport";
+
+    const image = document.createElement("img");
+    image.src = src;
+    image.alt = "Translated image";
+    image.loading = "lazy";
+
+    let zoom = 1;
+
+    function updateZoom() {
+      zoom = Math.max(0.5, Math.min(3, zoom));
+      image.style.transform = `scale(${zoom})`;
+      zoomLabel.textContent = `${Math.round(zoom * 100)}%`;
+    }
+
+    minus.addEventListener("click", () => {
+      zoom -= 0.2;
+      updateZoom();
+    });
+
+    plus.addEventListener("click", () => {
+      zoom += 0.2;
+      updateZoom();
+    });
+
+    reset.addEventListener("click", () => {
+      zoom = 1;
+      updateZoom();
+      viewport.scrollTo({ top: 0, left: 0, behavior: "smooth" });
+    });
+
+    toolbar.append(minus, zoomLabel, plus, reset);
+    viewport.appendChild(image);
+    container.append(toolbar, viewport);
+  }
+
+  function addTranslation(message, translated, source, target, imageAttachment = null) {
     const history = getElement("translatorHistory");
 
     if (!history) {
-      throw new Error(
-        "Translator history container is missing from index.html."
-      );
+      throw new Error("Translator history container is missing from index.html.");
     }
 
     const conversation = document.createElement("div");
-
     conversation.className = "translator-conversation";
 
     const user = createMessage(
@@ -438,11 +530,7 @@
     );
 
     if (imageAttachment) {
-      addImageElement(
-        user.message,
-        imageAttachment.data,
-        "translator-uploaded-image"
-      );
+      addImageElement(user.message, imageAttachment.data, "translator-uploaded-image");
     }
 
     const ai = createMessage(
@@ -452,44 +540,35 @@
     );
 
     const actions = document.createElement("div");
-
     actions.className = "translator-result-actions";
 
     const copyButton = document.createElement("button");
-
     copyButton.type = "button";
     copyButton.className = "secondary-btn";
     copyButton.textContent = "Copy";
 
     const copyStatus = document.createElement("span");
-
     copyStatus.className = "translator-copy-status";
     copyStatus.setAttribute("role", "status");
 
-    copyButton.addEventListener("click", () => {
-      copyText(translated, copyStatus);
-    });
+    copyButton.addEventListener("click", () => copyText(translated, copyStatus));
 
     actions.append(copyButton, copyStatus);
-
     ai.message.appendChild(actions);
 
     conversation.append(user.message, ai.message);
 
     if (imageAttachment) {
       const createImageButton = document.createElement("button");
-
       createImageButton.type = "button";
       createImageButton.className = "secondary-btn";
       createImageButton.id = "createTranslatedImageBtn";
       createImageButton.textContent = "🖼️ Create translated image";
 
       const imageStatus = document.createElement("div");
-
       imageStatus.className = "translator-image-status";
 
       const imageResult = document.createElement("div");
-
       imageResult.className = "translator-image-result";
 
       createImageButton.addEventListener("click", () => {
@@ -503,20 +582,13 @@
         );
       });
 
-      conversation.append(
-        createImageButton,
-        imageStatus,
-        imageResult
-      );
+      conversation.append(createImageButton, imageStatus, imageResult);
     }
 
     history.appendChild(conversation);
 
     requestAnimationFrame(() => {
-      conversation.scrollIntoView({
-        behavior: "smooth",
-        block: "end"
-      });
+      conversation.scrollIntoView({ behavior: "smooth", block: "end" });
     });
   }
 
@@ -535,8 +607,7 @@
     button.textContent = "Creating translated image...";
 
     if (statusElement) {
-      statusElement.textContent =
-        "Reading and translating the image...";
+      statusElement.textContent = "Reading and translating the image...";
     }
 
     try {
@@ -550,36 +621,23 @@
       const image = getImageSource(result);
 
       if (!image) {
-        throw new Error(
-          "The server did not return the translated image."
-        );
+        throw new Error("The server did not return the translated image.");
       }
 
-      resultContainer.replaceChildren();
-
-      addImageElement(
-        resultContainer,
-        image,
-        "translator-result-image"
-      );
+      renderTranslatedImage(resultContainer, image);
 
       if (statusElement) {
-        statusElement.textContent =
-          "Translated image created.";
+        statusElement.textContent = "Translated image created.";
       }
 
       button.textContent = "Create again";
 
     } catch (error) {
-      console.error(
-        "Translated image creation failed:",
-        error
-      );
+      console.error("Translated image creation failed:", error);
 
       if (statusElement) {
         statusElement.textContent =
-          "Image creation failed: " +
-          (error.message || "Please try again.");
+          "Image creation failed: " + (error.message || "Please try again.");
       }
 
       button.disabled = false;
@@ -597,9 +655,7 @@
     const runButton = getElement("translatorRunBtn");
 
     if (!input || !runButton) {
-      console.error(
-        "Translator input or Send button is missing."
-      );
+      console.error("Translator input or Send button is missing.");
       return;
     }
 
@@ -627,22 +683,14 @@
       return;
     }
 
-    const imageAttachment = selectedImage
-      ? { ...selectedImage }
-      : null;
+    const imageAttachment = selectedImage ? { ...selectedImage } : null;
 
     setBusy(true, "Translating...");
-    showStatus(
-      imageAttachment
-        ? "Reading and translating image..."
-        : "Translating..."
-    );
+    showStatus(imageAttachment ? "Reading and translating image..." : "Translating...");
 
     try {
       if (typeof postJSON !== "function") {
-        throw new Error(
-          "TinVin AI connection function is not available."
-        );
+        throw new Error("TinVin AI connection function is not available.");
       }
 
       const result = await postJSON(API_PATH, {
@@ -650,17 +698,13 @@
         message,
         sourceLanguage,
         targetLanguage,
-        attachments: imageAttachment
-          ? [imageAttachment]
-          : []
+        attachments: imageAttachment ? [imageAttachment] : []
       });
 
       const translated = extractTranslation(result);
 
       if (!translated) {
-        throw new Error(
-          "The AI server returned an empty translation."
-        );
+        throw new Error("The AI server returned an empty translation.");
       }
 
       addTranslation(
@@ -682,16 +726,12 @@
 
       renderImagePreview();
       showStatus("");
-
       input.focus();
 
     } catch (error) {
       console.error("TinVin Translator error:", error);
 
-      showStatus(
-        "Translation failed: " +
-        (error?.message || "Please try again.")
-      );
+      showStatus("Translation failed: " + (error?.message || "Please try again."));
 
     } finally {
       setBusy(false);
@@ -705,7 +745,6 @@
     const history = getElement("translatorHistory");
 
     if (input) input.value = "";
-
     if (history) history.replaceChildren();
 
     selectedImage = null;
@@ -720,15 +759,14 @@
     showStatus("");
 
     const oldStatus = getElement("translatorResultStatus");
-
-    if (oldStatus) {
-      oldStatus.textContent = "";
-    }
+    if (oldStatus) oldStatus.textContent = "";
 
     input?.focus();
   }
 
   function initialize() {
+    injectImageStyles();
+
     const input = getElement("translatorInput");
     const sendButton = getElement("translatorRunBtn");
     const clearButton = getElement("translatorClearBtn");
@@ -741,19 +779,11 @@
         clearButton: !!clearButton,
         history: !!history
       });
-
       return;
     }
 
-    fillLanguages(
-      getElement("translatorSourceLang"),
-      "English"
-    );
-
-    fillLanguages(
-      getElement("translatorTargetLang"),
-      "Sorani Kurdish"
-    );
+    fillLanguages(getElement("translatorSourceLang"), "English");
+    fillLanguages(getElement("translatorTargetLang"), "Sorani Kurdish");
 
     createImageControls();
 
@@ -792,11 +822,7 @@
   }
 
   if (document.readyState === "loading") {
-    document.addEventListener(
-      "DOMContentLoaded",
-      initialize,
-      { once: true }
-    );
+    document.addEventListener("DOMContentLoaded", initialize, { once: true });
   } else {
     initialize();
   }
