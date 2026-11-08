@@ -1,74 +1,186 @@
-/* TinVin AI - QR Scanner */
+
+/* TinVin AI - Premium Glass QR Scanner */
 
 #qrPage {
   width: 100%;
   padding: 20px;
+  box-sizing: border-box;
+
+  background:
+    radial-gradient(ellipse at 10% 10%, rgba(70, 130, 255, .10), transparent 45%),
+    radial-gradient(ellipse at 90% 90%, rgba(180, 80, 255, .10), transparent 45%);
 }
+
+/* Main Glass Container */
 
 #qrPage .qr-container {
   width: 100%;
   max-width: 600px;
   margin: 0 auto;
-  padding: 22px;
-  border: 1px solid rgba(233, 189, 99, 0.25);
-  border-radius: 22px;
-  background: rgba(255, 255, 255, 0.045);
-  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+  padding: 25px;
+  box-sizing: border-box;
+
+  border: 1px solid rgba(150, 165, 255, .23);
+  border-radius: 25px;
+
+  background:
+    linear-gradient(145deg,
+      rgba(45, 65, 115, .28),
+      rgba(85, 55, 135, .20),
+      rgba(25, 45, 85, .32));
+
+  box-shadow:
+    0 18px 50px rgba(0, 0, 0, .22),
+    inset 0 1px 1px rgba(255, 255, 255, .09);
+
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
 }
 
+/* Heading */
+
 #qrPage h2 {
-  color: var(--gold, #e9bd63);
+  color: #b9a0ff;
   text-align: center;
+  text-shadow: 0 0 18px rgba(150, 110, 255, .3);
 }
 
 #qrPage .qr-description {
-  color: rgba(255, 255, 255, 0.7);
+  color: rgba(235, 235, 255, .72);
   text-align: center;
-  line-height: 1.7;
+  line-height: 1.8;
 }
+
+/* Camera */
 
 #qrPage video,
 #qrPage canvas {
   display: block;
   width: 100%;
   max-width: 100%;
-  border-radius: 16px;
+  border-radius: 18px;
+  object-fit: contain;
 }
+
+/* Preview */
 
 #qrPage .qr-preview {
   margin-top: 18px;
   overflow: hidden;
-  border-radius: 16px;
-  background: rgba(0, 0, 0, 0.25);
+  border-radius: 19px;
+
+  border: 1px solid rgba(130, 150, 255, .25);
+
+  background: rgba(5, 10, 25, .45);
+
+  box-shadow:
+    0 8px 25px rgba(0, 0, 0, .18),
+    inset 0 0 20px rgba(100, 100, 255, .06);
 }
+
+/* Scanner Buttons */
 
 #qrPage button,
 #qrPage .qr-button {
   min-height: 46px;
-  padding: 12px 18px;
-  border: 1px solid rgba(233, 189, 99, 0.4);
-  border-radius: 13px;
-  background: linear-gradient(135deg, #e9bd63, #c99535);
-  color: #111827;
+  padding: 12px 19px;
+
+  border: 1px solid rgba(160, 165, 255, .32);
+  border-radius: 14px;
+
+  background:
+    linear-gradient(135deg, #398dff, #7958ef, #b45be4);
+
+  color: #fff;
   font-weight: 800;
   cursor: pointer;
+
+  box-shadow:
+    0 6px 20px rgba(100, 100, 255, .20),
+    inset 0 1px 1px rgba(255, 255, 255, .2);
+
+  transition: .25s ease;
 }
 
-#qrPage button:hover {
-  filter: brightness(1.08);
+#qrPage button:hover,
+#qrPage .qr-button:hover {
+  filter: brightness(1.15);
+  transform: translateY(-2px);
+
+  box-shadow: 0 9px 25px rgba(120, 100, 255, .3);
 }
+
+#qrPage button:active,
+#qrPage .qr-button:active {
+  transform: scale(.97);
+}
+
+/* Result */
 
 #qrPage .qr-result {
   margin-top: 18px;
-  padding: 15px;
-  border-radius: 14px;
-  background: rgba(233, 189, 99, 0.08);
-  color: #ffffff;
+  padding: 16px;
+
+  border: 1px solid rgba(100, 190, 255, .25);
+  border-radius: 17px;
+
+  background:
+    linear-gradient(135deg,
+      rgba(60, 140, 255, .12),
+      rgba(150, 90, 230, .12));
+
+  color: #fff;
   overflow-wrap: anywhere;
+
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, .06);
+
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
 }
+
+/* Status */
 
 #qrPage .qr-status {
   margin-top: 12px;
-  color: var(--gold, #e9bd63);
+  color: #83caff;
   text-align: center;
+  font-size: 13px;
+}
+
+/* Mobile */
+
+@media (max-width: 600px) {
+  #qrPage {
+    padding: 12px;
+  }
+
+  #qrPage .qr-container {
+    padding: 17px;
+    border-radius: 20px;
+  }
+
+  #qrPage h2 {
+    font-size: 21px;
+  }
+
+  #qrPage button,
+  #qrPage .qr-button {
+    min-height: 44px;
+    padding: 10px 14px;
+    border-radius: 12px;
+  }
+
+  #qrPage video,
+  #qrPage canvas {
+    border-radius: 15px;
+  }
+}
+
+/* Accessibility */
+
+@media (prefers-reduced-motion: reduce) {
+  #qrPage button,
+  #qrPage .qr-button {
+    transition: none;
+  }
 }
