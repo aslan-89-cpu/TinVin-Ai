@@ -339,3 +339,31 @@
     min-height: 340px;
   }
 }
+
+/* TinVin AI - Fix uploaded image size in translator chat */
+
+.translator-user-message .translator-uploaded-image {
+  display: block;
+  width: auto !important;
+  height: auto !important;
+  max-width: min(220px, 65vw) !important;
+  max-height: 180px !important;
+  object-fit: contain !important;
+  border-radius: 10px;
+  margin-top: 8px;
+}
+
+.translator-conversation,
+.translator-message {
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+@ media (max-width: 600px) {
+  .translator-user-message .translator-uploaded-image {
+    max-width: 160px !important;
+    max-height: 130px !important;
+  }
+}
