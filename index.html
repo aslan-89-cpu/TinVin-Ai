@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,60 +7,121 @@
   <meta name="theme-color" content="#0b1020">
   <meta name="description" content="TinVin AI — Your smart AI workspace">
   <title>TinVin AI — Smart Workspace</title>
+
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="chat.css">
   <link rel="stylesheet" href="translator.css">
   <link rel="stylesheet" href="qr.css">
   <link rel="stylesheet" href="premium.css">
 </head>
+
 <body>
 <div class="app">
+
   <!-- TOPBAR -->
   <header class="topbar">
-    <div class="brand">TinVin <span>AI</span></div>
+
+    <details class="menu-wrap">
+      <summary class="menu-toggle" aria-label="Open menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </summary>
+
+      <div class="menu-dropdown">
+        <div class="menu-title">YOUR WORKSPACE</div>
+
+        <button
+          class="workspace-tab active"
+          data-tab="chatPage"
+          type="button">
+          <span>💬</span> AI Chat
+        </button>
+
+        <button
+          class="workspace-tab"
+          data-tab="translatorPage"
+          type="button">
+          <span>🌍</span> Translator
+        </button>
+
+        <button
+          class="workspace-tab"
+          data-tab="scannerPanel"
+          type="button">
+          <span>📷</span> QR Scanner
+        </button>
+
+        <div class="menu-divider"></div>
+
+        <button
+          class="menu-item"
+          id="settingsBtn"
+          type="button">
+          <span>⚙️</span> Settings
+        </button>
+      </div>
+    </details>
+
     <div class="top-actions">
-      <button id="premiumTopBtn" class="premium-top-btn"
-        type="button" onclick="window.TinVinPremium?.open()">
+      <button
+        id="premiumTopBtn"
+        class="premium-top-btn"
+        type="button"
+        onclick="window.TinVinPremium?.open()">
         👑 Premium
       </button>
-      <button class="small-btn" id="settingsBtn" type="button">
-        ⚙ Settings
-      </button>
     </div>
+
   </header>
+
+
   <!-- MAIN WORKSPACE -->
   <main id="workspacePage" class="page active">
+
+    <!-- HERO -->
     <section class="hero">
-      <div class="eyebrow">✦ Your AI workspace</div>
-      <h1>Think bigger.<br>Create smarter.</h1>
-      <p>Chat, translate, scan QR codes and create images with AI.</p>
-      <span class="hero-chip">✦ 3 main tools</span>
-      <span class="hero-chip">🌍 Multilingual</span>
-      <span class="hero-chip">🎨 AI Images</span>
+      <div class="eyebrow">✦ YOUR AI WORKSPACE</div>
+
+      <h1>
+        Think bigger.<br>
+        Create smarter.
+      </h1>
+
+      <div class="hero-brand">TinVin AI</div>
     </section>
+
+
     <!-- WORKSPACE TABS -->
     <nav class="workspace-tabs" aria-label="Main tools">
+
       <button
         class="workspace-tab active"
         data-tab="chatPage"
         type="button">
         💬 AI Chat
       </button>
+
       <button
         class="workspace-tab"
         data-tab="translatorPage"
         type="button">
         🌍 Translate
       </button>
+
       <button
         class="workspace-tab"
         data-tab="scannerPanel"
         type="button">
         📷 Scanner
       </button>
+
     </nav>
-    <!-- ================= AI CHAT ================= -->
+
+
+    <!-- AI CHAT -->
     <section id="chatPage" class="workspace-panel active">
+
       <div class="tool-heading">
         <div class="tool-icon">💬</div>
         <div>
@@ -67,52 +129,69 @@
           <p>Ask anything, create images and explore ideas.</p>
         </div>
       </div>
+
       <div class="panel chat-layout">
+
         <div
           id="chatHistory"
           class="chat-history"
           aria-live="polite">
         </div>
+
         <label class="field-label" for="chatInput">
           Message
         </label>
+
         <div class="chat-compose">
+
           <textarea
             class="textarea"
             id="chatInput"
             placeholder="Ask anything, or ask AI to create an image..."
-            rows="2">
-          </textarea>
+            rows="2"></textarea>
+
           <button
             class="primary-btn"
             id="sendBtn"
             type="button">
             Send ↑
           </button>
+
         </div>
+
         <div
           id="chatStatus"
           class="status"
           role="status">
         </div>
+
         <div class="actions chat-actions">
+
           <button
             id="newChatBtn"
             class="secondary-btn"
             type="button">
             New chat
           </button>
+
           <button
             class="secondary-btn"
             type="button"
             onclick="window.TinVinPremium?.open()">
             👑 Upgrade to Plus
           </button>
+
         </div>
       </div>
     </section>
-    <!-- ================= TRANSLATOR ================= -->
-    <section id="translatorPage" class="workspace-panel" hidden>
+
+
+    <!-- TRANSLATOR -->
+    <section
+      id="translatorPage"
+      class="workspace-panel"
+      hidden>
+
       <div class="tool-heading">
         <div class="tool-icon">🌍</div>
         <div>
@@ -120,64 +199,76 @@
           <p>Translate between languages with clear results.</p>
         </div>
       </div>
+
       <div class="panel translator-chat-layout">
-        <!-- LANGUAGE SELECTORS -->
+
         <div class="translator-languages">
+
           <div>
             <label
               class="field-label"
               for="translatorSourceLang">
               From
             </label>
+
             <select
               class="select"
               id="translatorSourceLang">
             </select>
           </div>
+
           <div>
             <label
               class="field-label"
               for="translatorTargetLang">
               To
             </label>
+
             <select
               class="select"
               id="translatorTargetLang">
             </select>
           </div>
+
         </div>
-        <!-- TRANSLATION HISTORY -->
+
         <div
           id="translatorHistory"
           class="translator-history"
           aria-live="polite">
         </div>
-        <!-- INPUT AREA -->
+
         <div class="translator-compose">
+
           <label
             class="field-label"
             for="translatorInput">
             Text to translate
           </label>
+
           <div class="translator-input-row">
+
             <textarea
               class="textarea"
               id="translatorInput"
               placeholder="Enter your text here..."
-              rows="2">
-            </textarea>
+              rows="2"></textarea>
+
             <button
               class="primary-btn"
               id="translatorRunBtn"
               type="button">
               Send ↑
             </button>
+
           </div>
+
           <div
             id="translatorStatus"
             class="status"
             role="status">
           </div>
+
           <div class="actions">
             <button
               class="secondary-btn"
@@ -186,14 +277,18 @@
               Clear
             </button>
           </div>
+
         </div>
       </div>
     </section>
-    <!-- ================= QR SCANNER ================= -->
+
+
+    <!-- QR SCANNER -->
     <section
       id="scannerPanel"
       class="workspace-panel"
       hidden>
+
       <div class="tool-heading">
         <div class="tool-icon">📷</div>
         <div>
@@ -201,34 +296,46 @@
           <p>Scan QR codes or create your own QR code.</p>
         </div>
       </div>
+
       <div class="panel scanner-panel">
+
         <div class="tool-icon">📷</div>
+
         <h2>Scan or Create QR</h2>
+
         <p>
           Open the scanner to use your camera,
           scan an image or generate a QR code.
         </p>
+
         <button
           id="openScannerBtn"
           class="primary-btn"
           type="button">
           Open QR Scanner
         </button>
+
       </div>
     </section>
-    <!-- FOOTER -->
+
+
     <footer class="footer">
       TinVin AI · Your ideas, powered by AI
     </footer>
+
   </main>
-  <!-- ================= SETTINGS ================= -->
+
+
+  <!-- SETTINGS -->
   <section id="settingsPage" class="page">
+
     <button
       class="back-btn"
       id="settingsBackBtn"
       type="button">
       ← Back
     </button>
+
     <div class="tool-heading">
       <div class="tool-icon">⚙️</div>
       <div>
@@ -236,14 +343,18 @@
         <p>Personalize your TinVin AI workspace.</p>
       </div>
     </div>
+
     <div class="settings-grid">
+
       <!-- THEME -->
       <div class="panel">
+
         <label
           class="field-label"
           for="themeSelect">
           Color theme
         </label>
+
         <select id="themeSelect" class="select">
           <option value="black">Black Mode</option>
           <option value="navy">Navy Gold</option>
@@ -253,15 +364,21 @@
           <option value="pink">Soft Pink</option>
           <option value="orange">Warm Orange</option>
         </select>
+
       </div>
+
+
       <!-- INTERFACE LANGUAGE -->
       <div class="panel">
+
         <label
           class="field-label"
           for="interfaceLang">
           Interface language
         </label>
+
         <select id="interfaceLang" class="select">
+
           <option value="English">English</option>
           <option value="Sorani Kurdish">کوردیی سۆرانی</option>
           <option value="Kurmanji Kurdish">Kurdî Kurmancî</option>
@@ -282,24 +399,32 @@
           <option value="Dutch">Nederlands</option>
           <option value="Ukrainian">Українська</option>
           <option value="Polish">Polski</option>
+
         </select>
+
         <p class="status">
           Choose a language for the visible interface.
         </p>
+
         <div
           id="languageStatus"
           class="status"
           role="status">
         </div>
+
       </div>
     </div>
   </section>
+
 </div>
+
+
 <!-- SCRIPTS -->
 <script src="app.js" defer></script>
 <script src="chat.js?v=20261104-2" defer></script>
 <script src="translator.js" defer></script>
 <script src="qr.js" defer></script>
 <script src="premium.js" defer></script>
+
 </body>
 </html>
