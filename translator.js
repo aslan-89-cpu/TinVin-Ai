@@ -1,5 +1,7 @@
+
 /* TinVin AI - Chat Style Translator
-   Text Translation, Image OCR and Translated Image Creation
+   Text Translation, Multilingual Image OCR and Translated Image Creation
+   Automatic Source Language Detection
    Improved Mobile Image Translate Viewer
 */
 
@@ -615,7 +617,7 @@
       createImageButton.addEventListener("click", () => {
         createTranslatedImage(
           imageAttachment,
-          source,
+          "Auto Detect",
           target,
           imageResult,
           imageStatus,
@@ -648,13 +650,13 @@
     button.textContent = "Creating translated image...";
 
     if (statusElement) {
-      statusElement.textContent = "Reading and translating the image...";
+      statusElement.textContent = "Detecting image language and translating...";
     }
 
     try {
       const result = await postJSON(IMAGE_PATH, {
         mode: "translate",
-        sourceLanguage,
+        sourceLanguage: "Auto Detect",
         targetLanguage,
         attachments: [attachment]
       });
@@ -702,19 +704,29 @@
 
     const message = input.value.trim();
 
-    const sourceLanguage =
+    const selectedSourceLanguage =
       getElement("translatorSourceLang")?.value || "English";
 
     const targetLanguage =
       getElement("translatorTargetLang")?.value || "Sorani Kurdish";
 
-    if (!message && !selectedImage) {
+    const imageAttachment = selectedImage ? { ...selectedImage } : null;
+
+    // For images, detect the actual source language automatically.
+    // For normal text, use the language selected by the user.
+    const sourceLanguage = imageAttachment
+      ? "Auto Detect"
+      : selectedSourceLanguage;
+
+    if (!message && !imageAttachment) {
       showStatus("Enter text or attach an image to translate.");
       input.focus();
       return;
     }
 
-    if (sourceLanguage === targetLanguage) {
+    // Same-language validation applies only to text translation.
+    // An image's source language is detected automatically.
+    if (!imageAttachment && sourceLanguage === targetLanguage) {
       showStatus("Please choose two different languages.");
       return;
     }
@@ -724,19 +736,42 @@
       return;
     }
 
-    const imageAttachment = selectedImage ? { ...selectedImage } : null;
-
     setBusy(true, "Translating...");
-    showStatus(imageAttachment ? "Reading and translating image..." : "Translating...");
+    showStatus(
+      imageAttachment
+        ? "Detecting image language and translating..."
+        : "Translating..."
+    );
 
     try {
       if (typeof postJSON !== "function") {
         throw new Error("TinVin AI connection function is not available.");
       }
 
+      // Give the AI explicit multilingual OCR instructions.
+      // Do not assume that the image contains English text.
+      const imagePrompt = imageAttachment
+        ? [
+            "You are a multilingual OCR and translation expert.",
+            "Examine the attached image carefully.",
+            "Read and extract ALL visible text from the image.",
+            "Automatically identify the actual source language and writing system.",
+            "Do NOT assume that the source language is English.",
+            "Support any language, alphabet, script, and direction of writing.",
+            "This includes Kurdish Sorani, Kurdish Kurmanji, Arabic, Persian, Turkish, English, German, Korean, Japanese, Chinese, French, Spanish, and other languages.",
+            `Translate all detected text into ${targetLanguage}.`,
+            "Preserve the original meaning, names, numbers, dates, and formatting as accurately as possible.",
+            "Do not skip text just because it is written in a non-Latin script.",
+            "Return the translated text only, without unnecessary explanations.",
+            message
+              ? `Additional user instruction: ${message}`
+              : "Translate all readable text in the image."
+          ].join("\n")
+        : message;
+
       const result = await postJSON(API_PATH, {
         tool: "translator",
-        message,
+        message: imagePrompt,
         sourceLanguage,
         targetLanguage,
         attachments: imageAttachment ? [imageAttachment] : []
