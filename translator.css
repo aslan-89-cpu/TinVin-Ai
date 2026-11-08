@@ -1,29 +1,42 @@
 
-/* TinVin AI - ChatGPT Style Translator */
+/* TinVin AI - Minimal Premium Translator
+   Clean Layout | Mobile First | Gold & Navy
+*/
+
+/* Main translator */
+#translatorPage {
+  --tr-gold: #e9bd63;
+  --tr-gold-light: #f3d58f;
+  --tr-bg: #0b1020;
+  --tr-panel: #121a30;
+  --tr-border: rgba(233,189,99,.20);
+}
 
 /* Icon */
 #translatorPage .tool-icon {
   color: #fff;
-  background: linear-gradient(135deg, #0ea5e9, #6366f1);
+  background: linear-gradient(135deg,#0ea5e9,#6366f1);
 }
 
 /* Main layout */
 #translatorPage .translator-chat-layout {
   display: flex;
   flex-direction: column;
-  height: min(760px, calc(100dvh - 190px));
-  min-height: 420px;
-  padding: 20px;
-  gap: 14px;
+  width: 100%;
+  height: min(760px,calc(100dvh - 170px));
+  min-height: 400px;
+  padding: 14px;
+  gap: 12px;
   overflow: hidden;
   box-sizing: border-box;
+  border-radius: 22px;
 }
 
 /* Language selectors */
 #translatorPage .translator-languages {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(2,minmax(0,1fr));
+  gap: 10px;
   flex: 0 0 auto;
   min-width: 0;
 }
@@ -34,48 +47,57 @@
 
 #translatorPage .translator-languages .field-label {
   display: block;
-  margin-bottom: 9px;
+  margin-bottom: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
 }
 
 #translatorPage .translator-languages .select {
   width: 100%;
   min-width: 0;
-  border-radius: 14px;
+  min-height: 46px;
+  padding: 10px;
+  border-radius: 13px;
+  border: 1px solid var(--tr-border);
   background: var(--panel-soft);
   color: var(--text);
+  outline: none;
 }
 
-/* History: only this area scrolls */
+/* Translation history */
 #translatorPage .translator-history {
   display: flex;
   flex-direction: column;
-  gap: 20px;
   flex: 1 1 auto;
   min-height: 0;
   max-height: none;
+  gap: 16px;
+  padding: 10px 4px;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 12px 5px;
   scroll-behavior: smooth;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: thin;
+  scrollbar-color: rgba(233,189,99,.35) transparent;
 }
 
 /* Conversation */
 #translatorPage .translator-conversation {
   display: flex;
   flex-direction: column;
-  gap: 13px;
+  gap: 12px;
   width: 100%;
   min-width: 0;
+  box-sizing: border-box;
 }
 
 /* Messages */
 #translatorPage .translator-message {
-  max-width: 88%;
-  padding: 16px;
-  border-radius: 18px;
+  max-width: 90%;
+  padding: 14px;
+  border-radius: 17px;
   overflow-wrap: anywhere;
   word-break: break-word;
   line-height: 1.8;
@@ -87,7 +109,7 @@
 #translatorPage .translator-user-message {
   align-self: flex-end;
   background: var(--panel-soft);
-  border: 1px solid rgba(233, 189, 99, 0.3);
+  border: 1px solid var(--tr-border);
   border-bottom-right-radius: 5px;
 }
 
@@ -95,23 +117,23 @@
   align-self: flex-start;
   width: 100%;
   max-width: 100%;
-  background: rgba(233, 189, 99, 0.055);
-  border: 1px solid rgba(233, 189, 99, 0.22);
+  background: rgba(233,189,99,.045);
+  border: 1px solid rgba(233,189,99,.18);
   border-bottom-left-radius: 5px;
 }
 
 /* Message labels */
 #translatorPage .translator-message-label {
-  font-size: 12px;
-  font-weight: 800;
+  margin-bottom: 7px;
   color: var(--muted);
-  margin-bottom: 9px;
+  font-size: 11px;
+  font-weight: 700;
 }
 
-/* Message content */
+/* Translation text */
 #translatorPage .translator-message-content {
-  font-size: 15px;
   color: var(--text);
+  font-size: 15px;
   line-height: 1.9;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
@@ -120,49 +142,50 @@
   unicode-bidi: plaintext;
 }
 
-/* Copy */
+/* Copy action */
 #translatorPage .translator-result-actions {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 14px;
+  gap: 8px;
+  margin-top: 12px;
 }
 
 #translatorPage .translator-result-actions button {
-  min-height: 38px;
-  padding: 8px 16px;
-  font-size: 13px;
+  min-height: 35px;
+  padding: 7px 14px;
+  border-radius: 10px;
+  font-size: 12px;
 }
 
 #translatorPage .translator-copy-status {
   color: var(--muted);
-  font-size: 12px;
+  font-size: 11px;
 }
 
-/* Fixed bottom compose area */
+/* Compose area */
 #translatorPage .translator-compose {
   position: relative;
   flex: 0 0 auto;
   width: 100%;
   min-width: 0;
-  border-top: 1px solid rgba(233, 189, 99, 0.2);
-  padding-top: 12px;
+  padding-top: 11px;
+  border-top: 1px solid var(--tr-border);
   background: var(--panel);
   box-sizing: border-box;
   z-index: 2;
 }
 
-#translatorPage .translator-compose .field-label {
-  display: block;
-  margin-bottom: 8px;
+/* Hide unnecessary compose labels */
+#translatorPage .translator-compose > .field-label {
+  display: none;
 }
 
-/* Input and Send row */
+/* Input row */
 #translatorPage .translator-input-row {
   display: flex;
-  align-items: flex-end;
-  gap: 10px;
+  align-items: center;
+  gap: 9px;
   width: 100%;
   min-width: 0;
 }
@@ -173,67 +196,192 @@
   flex: 1 1 auto;
   min-width: 0;
   width: 100%;
-  height: 54px;
-  min-height: 54px;
-  max-height: 140px;
+  height: 52px;
+  min-height: 52px;
+  max-height: 130px;
   resize: none;
   overflow-y: auto;
-  border: 2px solid #e9bd63;
-  border-radius: 20px;
+  padding: 12px 15px;
+  border: 1.5px solid rgba(233,189,99,.65);
+  border-radius: 16px;
   background: #0d1019;
   color: var(--text);
-  padding: 13px 15px;
   font-size: 16px;
   line-height: 1.6;
   outline: none;
   box-sizing: border-box;
-  -webkit-appearance: none;
   appearance: none;
+  transition: border-color .2s,box-shadow .2s;
 }
 
 #translatorPage #translatorInput:focus {
-  box-shadow: 0 0 0 4px rgba(233, 189, 99, 0.13);
+  border-color: var(--tr-gold);
+  box-shadow: 0 0 0 3px rgba(233,189,99,.10);
 }
 
-/* Send button always visible */
+/* Send button */
 #translatorPage #translatorRunBtn {
   display: inline-flex;
-  flex: 0 0 100px;
+  flex: 0 0 54px;
   align-items: center;
   justify-content: center;
-  min-width: 100px;
-  min-height: 54px;
-  padding: 10px 12px;
-  border-radius: 18px;
-  background: linear-gradient(135deg, #e9bd63, #f3d58f);
+  min-width: 54px;
+  min-height: 52px;
+  padding: 8px;
+  border: none;
+  border-radius: 15px;
+  background: linear-gradient(135deg,var(--tr-gold),var(--tr-gold-light));
   color: #111;
-  font-weight: 800;
+  font-size: 20px;
+  font-weight: 900;
   white-space: nowrap;
-  box-shadow: 0 8px 22px rgba(233, 189, 99, 0.15);
+  box-shadow: 0 5px 16px rgba(233,189,99,.12);
+  cursor: pointer;
 }
 
 #translatorPage #translatorRunBtn:disabled {
-  opacity: 0.55;
+  opacity: .55;
   cursor: not-allowed;
+}
+
+/* Image attachment controls */
+#translatorPage .translator-image-tools {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 7px;
+  width: 100%;
+  margin-bottom: 9px;
+  box-sizing: border-box;
+}
+
+#translatorPage .translator-image-tools > button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 35px;
+  padding: 7px 11px;
+  border: 1px solid var(--tr-border);
+  border-radius: 11px;
+  background: var(--panel-soft);
+  color: var(--text);
+  font-size: 12px;
+}
+
+/* Uploaded image preview */
+#translatorPage .translator-image-preview {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
+  margin-top: 7px;
+}
+
+#translatorPage .translator-uploaded-image {
+  display: block;
+  width: auto;
+  max-width: min(200px,65vw);
+  max-height: 150px;
+  object-fit: contain;
+  border-radius: 12px;
 }
 
 /* Status */
 #translatorPage #translatorStatus {
-  min-height: 18px;
-  margin-top: 6px;
+  min-height: 0;
+  margin-top: 5px;
+  color: var(--muted);
+  font-size: 11px;
   overflow-wrap: anywhere;
 }
 
 /* Bottom actions */
 #translatorPage .translator-compose .actions {
   display: flex;
-  justify-content: flex-start;
-  margin-top: 7px;
+  justify-content: flex-end;
+  margin-top: 5px;
 }
 
 #translatorPage #translatorClearBtn {
-  min-height: 40px;
-  min-width: 90px;
+  min-height: 32px;
+  min-width: auto;
+  padding: 5px 10px;
+  border-radius: 9px;
+  font-size: 11px;
+  opacity: .75;
+}
+
+/* Image result */
+#translatorPage .translator-image-result {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  margin-top: 10px;
+  padding: 8px;
+  border: 1px solid var(--tr-border);
+  border-radius: 15px;
+  background: rgba(8,15,30,.55);
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+#translatorPage .translator-image-toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-bottom: 9px;
+}
+
+#translatorPage .translator-image-toolbar button {
+  min-width: 36px;
+  min-height: 34px;
+  padding: 6px 10px;
+  border-radius: 9px;
+  cursor: pointer;
+}
+
+#translatorPage .translator-image-viewport {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  width: 100%;
+  min-height: 80px;
+  max-height: 55vh;
+  overflow: auto;
+  border-radius: 11px;
+  background: rgba(0,0,0,.16);
+}
+
+#translatorPage .translator-image-viewport img {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 52vh;
+  object-fit: contain;
+  transform-origin: top center;
+  transition: transform .15s ease;
+}
+
+#translatorPage .translator-image-status {
+  margin: 8px 0;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+/* Uploaded image inside conversation */
+#translatorPage .translator-user-message .translator-uploaded-image {
+  display: block;
+  width: auto !important;
+  height: auto !important;
+  max-width: min(220px,65vw) !important;
+  max-height: 170px !important;
+  object-fit: contain !important;
+  border-radius: 11px;
+  margin-top: 8px;
 }
 
 /* Hidden */
@@ -241,33 +389,46 @@
   display: none !important;
 }
 
+/* Global sizing safety */
+#translatorPage .translator-conversation,
+#translatorPage .translator-message {
+  min-width: 0;
+  box-sizing: border-box;
+}
+
 /* Mobile */
-@media (max-width: 600px) {
+@media (max-width:600px) {
   #translatorPage .translator-chat-layout {
-    height: calc(100dvh - 175px);
-    min-height: 400px;
-    padding: 12px;
-    gap: 10px;
+    height: calc(100dvh - 165px);
+    min-height: 390px;
+    padding: 10px;
+    gap: 9px;
   }
 
   #translatorPage .translator-languages {
-    gap: 8px;
+    gap: 7px;
   }
 
   #translatorPage .translator-languages .field-label {
-    margin-bottom: 6px;
+    font-size: 11px;
+    margin-bottom: 5px;
+  }
+
+  #translatorPage .translator-languages .select {
+    min-height: 43px;
+    padding: 8px;
     font-size: 12px;
+    border-radius: 11px;
   }
 
   #translatorPage .translator-history {
-    min-height: 0;
-    padding: 8px 3px;
-    gap: 15px;
+    padding: 7px 2px;
+    gap: 13px;
   }
 
   #translatorPage .translator-message {
-    max-width: 94%;
-    padding: 13px;
+    max-width: 95%;
+    padding: 12px;
   }
 
   #translatorPage .translator-message-content {
@@ -275,12 +436,7 @@
   }
 
   #translatorPage .translator-compose {
-    padding-top: 10px;
-  }
-
-  #translatorPage .translator-compose .field-label {
-    margin-bottom: 6px;
-    font-size: 12px;
+    padding-top: 9px;
   }
 
   #translatorPage .translator-input-row {
@@ -288,82 +444,75 @@
   }
 
   #translatorPage #translatorInput {
-    height: 52px;
-    min-height: 52px;
-    max-height: 120px;
-    padding: 11px;
+    height: 49px;
+    min-height: 49px;
+    padding: 10px 12px;
+    border-radius: 14px;
     font-size: 16px;
-    border-radius: 16px;
   }
 
   #translatorPage #translatorRunBtn {
-    flex-basis: 82px;
-    min-width: 82px;
-    min-height: 52px;
-    padding: 9px 7px;
-    font-size: 13px;
-    border-radius: 15px;
+    flex-basis: 49px;
+    min-width: 49px;
+    min-height: 49px;
+    border-radius: 13px;
+    font-size: 18px;
+  }
+
+  #translatorPage .translator-image-tools {
+    gap: 6px;
+    margin-bottom: 7px;
+  }
+
+  #translatorPage .translator-image-tools > button {
+    min-height: 32px;
+    padding: 6px 9px;
+    font-size: 11px;
+  }
+
+  #translatorPage .translator-uploaded-image {
+    max-height: 120px;
+  }
+
+  #translatorPage .translator-user-message .translator-uploaded-image {
+    max-width: 155px !important;
+    max-height: 125px !important;
   }
 
   #translatorPage #translatorStatus {
+    font-size: 11px;
     margin-top: 4px;
-    min-height: 16px;
-    font-size: 12px;
   }
 
   #translatorPage #translatorClearBtn {
-    min-height: 36px;
+    min-height: 30px;
+  }
+
+  #translatorPage .translator-image-result {
+    padding: 7px;
   }
 }
 
-/* Very small screens */
-@media (max-width: 380px) {
-  #translatorPage .translator-languages {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+/* Small phones */
+@media (max-width:380px) {
+  #translatorPage .translator-chat-layout {
+    padding: 8px;
   }
 
-  #translatorPage .translator-chat-layout {
-    padding: 9px;
+  #translatorPage .translator-languages {
+    gap: 5px;
   }
 
   #translatorPage #translatorRunBtn {
-    flex-basis: 74px;
-    min-width: 74px;
+    flex-basis: 45px;
+    min-width: 45px;
   }
 }
 
-/* Zoom and short screens */
-@media (max-height: 650px) {
+/* Short screens */
+@media (max-height:650px) {
   #translatorPage .translator-chat-layout {
-    height: calc(100dvh - 145px);
-    min-height: 340px;
-  }
-}
-
-/* TinVin AI - Fix uploaded image size in translator chat */
-
-.translator-user-message .translator-uploaded-image {
-  display: block;
-  width: auto !important;
-  height: auto !important;
-  max-width: min(220px, 65vw) !important;
-  max-height: 180px !important;
-  object-fit: contain !important;
-  border-radius: 10px;
-  margin-top: 8px;
-}
-
-.translator-conversation,
-.translator-message {
-  max-width: 100%;
-  min-width: 0;
-  box-sizing: border-box;
-  overflow: hidden;
-}
-
-@ media (max-width: 600px) {
-  .translator-user-message .translator-uploaded-image {
-    max-width: 160px !important;
-    max-height: 130px !important;
+    height: calc(100dvh - 135px);
+    min-height: 330px;
   }
 }
