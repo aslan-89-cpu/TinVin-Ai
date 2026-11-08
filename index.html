@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -18,7 +17,7 @@
 <body>
 <div class="app">
 
-  <!-- TOPBAR -->
+  <!-- TOP BAR -->
   <header class="topbar">
 
     <details class="menu-wrap">
@@ -28,39 +27,18 @@
         <span></span>
       </summary>
 
-      <div class="menu-dropdown">
-        <div class="menu-title">YOUR WORKSPACE</div>
+      <nav class="menu-panel">
+        <div class="menu-heading">YOUR WORKSPACE</div>
 
-        <button
-          class="workspace-tab active"
-          data-tab="chatPage"
-          type="button">
-          <span>💬</span> AI Chat
+        <div class="menu-item">👤 Profile</div>
+
+        <button id="settingsBtn" class="menu-item" type="button">
+          ⚙️ Settings
         </button>
 
-        <button
-          class="workspace-tab"
-          data-tab="translatorPage"
-          type="button">
-          <span>🌍</span> Translator
-        </button>
-
-        <button
-          class="workspace-tab"
-          data-tab="scannerPanel"
-          type="button">
-          <span>📷</span> QR Scanner
-        </button>
-
-        <div class="menu-divider"></div>
-
-        <button
-          class="menu-item"
-          id="settingsBtn"
-          type="button">
-          <span>⚙️</span> Settings
-        </button>
-      </div>
+        <div class="menu-item">🕘 History</div>
+        <div class="menu-item">✉️ Messages</div>
+      </nav>
     </details>
 
     <div class="top-actions">
@@ -75,24 +53,10 @@
 
   </header>
 
-
   <!-- MAIN WORKSPACE -->
   <main id="workspacePage" class="page active">
 
-    <!-- HERO -->
-    <section class="hero">
-      <div class="eyebrow">✦ YOUR AI WORKSPACE</div>
-
-      <h1>
-        Think bigger.<br>
-        Create smarter.
-      </h1>
-
-      <div class="hero-brand">TinVin AI</div>
-    </section>
-
-
-    <!-- WORKSPACE TABS -->
+    <!-- MAIN TOOL TABS: TOP -->
     <nav class="workspace-tabs" aria-label="Main tools">
 
       <button
@@ -118,6 +82,17 @@
 
     </nav>
 
+    <!-- HERO -->
+    <section class="hero">
+      <div class="eyebrow">✦ YOUR AI WORKSPACE</div>
+
+      <h1>
+        <span>Think bigger.</span>
+        <span>Create smarter.</span>
+      </h1>
+
+      <div class="hero-brand">TinVin AI</div>
+    </section>
 
     <!-- AI CHAT -->
     <section id="chatPage" class="workspace-panel active">
@@ -178,13 +153,12 @@
             class="secondary-btn"
             type="button"
             onclick="window.TinVinPremium?.open()">
-            👑 Upgrade to Plus
+            👑 Upgrade to Premium
           </button>
 
         </div>
       </div>
     </section>
-
 
     <!-- TRANSLATOR -->
     <section
@@ -205,9 +179,7 @@
         <div class="translator-languages">
 
           <div>
-            <label
-              class="field-label"
-              for="translatorSourceLang">
+            <label class="field-label" for="translatorSourceLang">
               From
             </label>
 
@@ -218,9 +190,7 @@
           </div>
 
           <div>
-            <label
-              class="field-label"
-              for="translatorTargetLang">
+            <label class="field-label" for="translatorTargetLang">
               To
             </label>
 
@@ -240,9 +210,7 @@
 
         <div class="translator-compose">
 
-          <label
-            class="field-label"
-            for="translatorInput">
+          <label class="field-label" for="translatorInput">
             Text to translate
           </label>
 
@@ -282,7 +250,6 @@
       </div>
     </section>
 
-
     <!-- QR SCANNER -->
     <section
       id="scannerPanel"
@@ -318,13 +285,11 @@
       </div>
     </section>
 
-
     <footer class="footer">
-      TinVin AI · Your ideas, powered by AI
+      TinVin AI
     </footer>
 
   </main>
-
 
   <!-- SETTINGS -->
   <section id="settingsPage" class="page">
@@ -346,12 +311,9 @@
 
     <div class="settings-grid">
 
-      <!-- THEME -->
       <div class="panel">
 
-        <label
-          class="field-label"
-          for="themeSelect">
+        <label class="field-label" for="themeSelect">
           Color theme
         </label>
 
@@ -367,18 +329,13 @@
 
       </div>
 
-
-      <!-- INTERFACE LANGUAGE -->
       <div class="panel">
 
-        <label
-          class="field-label"
-          for="interfaceLang">
+        <label class="field-label" for="interfaceLang">
           Interface language
         </label>
 
         <select id="interfaceLang" class="select">
-
           <option value="English">English</option>
           <option value="Sorani Kurdish">کوردیی سۆرانی</option>
           <option value="Kurmanji Kurdish">Kurdî Kurmancî</option>
@@ -399,7 +356,6 @@
           <option value="Dutch">Nederlands</option>
           <option value="Ukrainian">Українська</option>
           <option value="Polish">Polski</option>
-
         </select>
 
         <p class="status">
@@ -417,7 +373,6 @@
   </section>
 
 </div>
-
 
 <!-- SCRIPTS -->
 <script src="app.js" defer></script>
