@@ -1,6 +1,6 @@
 /* TinVin AI - Chat Style Translator
    Text Translation, Image OCR and Translated Image Creation
-   Improved Image Translate Viewer
+   Improved Mobile Image Translate Viewer
 */
 
 (() => {
@@ -36,38 +36,54 @@
     style.textContent = `
       .translator-image-tools {
         display:flex;
+        align-items:center;
         flex-wrap:wrap;
-        gap:10px;
+        gap:7px;
         width:100%;
         box-sizing:border-box;
+      }
+
+      .translator-image-tools > button {
+        display:inline-flex;
+        align-items:center;
+        justify-content:center;
+        min-height:36px;
+        min-width:0;
+        padding:7px 12px;
+        border-radius:10px;
+        font-size:13px;
+        white-space:nowrap;
+        flex:0 0 auto;
       }
 
       .translator-image-preview {
         display:flex;
         flex-wrap:wrap;
         align-items:center;
-        gap:10px;
+        gap:9px;
         width:100%;
-        margin-top:10px;
+        margin-top:9px;
+        min-width:0;
       }
 
       .translator-uploaded-image {
         display:block;
         width:auto;
         max-width:100%;
-        max-height:240px;
+        max-height:180px;
         object-fit:contain;
         border-radius:12px;
       }
 
       .translator-image-result {
+        display:block;
         width:100%;
         max-width:100%;
         box-sizing:border-box;
         margin-top:12px;
-        padding:10px;
+        padding:9px;
         border:1px solid rgba(81,184,255,.25);
-        border-radius:16px;
+        border-radius:15px;
         background:rgba(8,15,30,.55);
         overflow:hidden;
       }
@@ -75,27 +91,30 @@
       .translator-image-toolbar {
         display:flex;
         align-items:center;
+        justify-content:flex-start;
         flex-wrap:wrap;
-        gap:8px;
+        gap:7px;
         margin-bottom:10px;
       }
 
       .translator-image-toolbar button {
+        min-width:38px;
         min-height:36px;
-        padding:7px 13px;
-        border-radius:10px;
+        padding:6px 11px;
+        border-radius:9px;
         cursor:pointer;
       }
 
       .translator-image-viewport {
         width:100%;
         max-height:65vh;
-        min-height:100px;
+        min-height:80px;
         overflow:auto;
         display:flex;
         justify-content:center;
         align-items:flex-start;
-        border-radius:12px;
+        border-radius:11px;
+        background:rgba(0,0,0,.16);
       }
 
       .translator-image-viewport img {
@@ -103,7 +122,7 @@
         width:auto;
         height:auto;
         max-width:100%;
-        max-height:65vh;
+        max-height:60vh;
         object-fit:contain;
         transform-origin:top center;
         transition:transform .15s ease;
@@ -112,16 +131,44 @@
       .translator-image-status {
         margin:8px 0;
         overflow-wrap:anywhere;
+        font-size:13px;
+      }
+
+      .translator-conversation {
+        width:100%;
+        min-width:0;
+        box-sizing:border-box;
+      }
+
+      .translator-conversation img {
+        max-width:100%;
       }
 
       @media(max-width:600px) {
+        .translator-image-tools {
+          gap:6px;
+        }
+
+        .translator-image-tools > button {
+          min-height:34px;
+          padding:6px 9px;
+          font-size:12px;
+        }
+
+        .translator-uploaded-image {
+          max-height:145px;
+        }
+
         .translator-image-result {
           padding:7px;
         }
 
-        .translator-image-viewport,
+        .translator-image-viewport {
+          max-height:55vh;
+        }
+
         .translator-image-viewport img {
-          max-height:58vh;
+          max-height:52vh;
         }
       }
     `;
@@ -132,9 +179,7 @@
   function extractTranslation(result) {
     if (!result) return "";
 
-    if (typeof result === "string") {
-      return result.trim();
-    }
+    if (typeof result === "string") return result.trim();
 
     if (Array.isArray(result)) {
       return result.map(extractTranslation).filter(Boolean).join("\n");
@@ -228,9 +273,6 @@
 
     const imageButton = getElement("translatorImageButton");
     if (imageButton) imageButton.disabled = value;
-
-    const createButton = getElement("createTranslatedImageBtn");
-    if (createButton) createButton.disabled = value;
   }
 
   function createMessage(text, className, labelText) {
@@ -562,7 +604,6 @@
       const createImageButton = document.createElement("button");
       createImageButton.type = "button";
       createImageButton.className = "secondary-btn";
-      createImageButton.id = "createTranslatedImageBtn";
       createImageButton.textContent = "🖼️ Create translated image";
 
       const imageStatus = document.createElement("div");
@@ -640,10 +681,10 @@
           "Image creation failed: " + (error.message || "Please try again.");
       }
 
-      button.disabled = false;
       button.textContent = "Try again";
 
     } finally {
+      button.disabled = false;
       setBusy(false);
     }
   }
@@ -801,10 +842,7 @@
       input.dataset.translatorReady = "true";
 
       input.addEventListener("keydown", event => {
-        if (
-          event.key === "Enter" &&
-          (event.ctrlKey || event.metaKey)
-        ) {
+        if (event.key === "Enter" && (event.ctrlKey || event.metaKey)) {
           event.preventDefault();
           run();
         }
