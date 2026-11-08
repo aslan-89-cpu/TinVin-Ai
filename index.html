@@ -3,9 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#0b1020">
-  <meta name="description" content="TinVin AI — Your smart AI workspace">
-  <title>TinVin AI — Smart Workspace</title>
+  <meta name="theme-color" content="#090d1b">
+  <title>TinVin AI</title>
 
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="chat.css">
@@ -15,72 +14,65 @@
 </head>
 
 <body>
-<div class="app">
+
+<div class="app-shell">
 
   <!-- TOP BAR -->
   <header class="topbar">
 
-    <details class="menu-wrap">
-      <summary class="menu-toggle" aria-label="Open menu">
-        <span></span>
-        <span></span>
-        <span></span>
-      </summary>
+    <button class="menu-toggle" id="menuToggle"
+      type="button" aria-label="Open menu">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
 
-      <nav class="menu-panel">
-        <div class="menu-heading">YOUR WORKSPACE</div>
-
-        <div class="menu-item">👤 Profile</div>
-
-        <button id="settingsBtn" class="menu-item" type="button">
-          ⚙️ Settings
-        </button>
-
-        <div class="menu-item">🕘 History</div>
-        <div class="menu-item">✉️ Messages</div>
-      </nav>
-    </details>
-
-    <div class="top-actions">
-      <button
-        id="premiumTopBtn"
-        class="premium-top-btn"
-        type="button"
-        onclick="window.TinVinPremium?.open()">
-        👑 Premium
-      </button>
-    </div>
+    <button id="premiumTopBtn" class="premium-top-btn"
+      type="button" onclick="window.TinVinPremium?.open()">
+      ♛ Premium
+    </button>
 
   </header>
 
-  <!-- MAIN WORKSPACE -->
-  <main id="workspacePage" class="page active">
+  <!-- LEFT DRAWER -->
+  <div class="drawer-overlay" id="drawerOverlay"></div>
 
-    <!-- MAIN TOOL TABS: TOP -->
-    <nav class="workspace-tabs" aria-label="Main tools">
+  <aside class="sidebar" id="mainSidebar">
 
-      <button
-        class="workspace-tab active"
-        data-tab="chatPage"
-        type="button">
-        💬 AI Chat
+    <div class="sidebar-header">
+      <span>Workspace</span>
+      <button id="closeMenu" type="button" aria-label="Close menu">×</button>
+    </div>
+
+    <nav class="sidebar-menu">
+
+      <button class="menu-item" type="button" data-menu="profile">
+        <span>◉</span> Profile
       </button>
 
-      <button
-        class="workspace-tab"
-        data-tab="translatorPage"
-        type="button">
-        🌍 Translate
+      <button class="menu-item" id="settingsBtn" type="button">
+        <span>⚙</span> Settings
       </button>
 
-      <button
-        class="workspace-tab"
-        data-tab="scannerPanel"
-        type="button">
-        📷 Scanner
+      <button class="menu-item" type="button" data-menu="history">
+        <span>◷</span> History
+      </button>
+
+      <button class="menu-item" type="button" data-menu="messages">
+        <span>✉</span> Messages
       </button>
 
     </nav>
+
+    <div class="sidebar-bottom">
+      <span>✦ TinVin AI</span>
+      <small>Your AI workspace</small>
+    </div>
+
+  </aside>
+
+  <!-- MAIN -->
+  <main id="workspacePage" class="page active">
 
     <!-- HERO -->
     <section class="hero">
@@ -94,287 +86,168 @@
       <div class="hero-brand">TinVin AI</div>
     </section>
 
-    <!-- AI CHAT -->
+    <!-- TOP TOOL NAVIGATION -->
+    <nav class="workspace-tabs">
+
+      <button class="workspace-tab active"
+        data-tab="chatPage" type="button">
+        <span>✧</span> AI Chat
+      </button>
+
+      <button class="workspace-tab"
+        data-tab="translatorPage" type="button">
+        <span>◎</span> Translate
+      </button>
+
+      <button class="workspace-tab"
+        data-tab="scannerPanel" type="button">
+        <span>▦</span> Scanner
+      </button>
+
+    </nav>
+
+    <!-- CHAT -->
     <section id="chatPage" class="workspace-panel active">
 
       <div class="tool-heading">
-        <div class="tool-icon">💬</div>
-        <div>
-          <h1>AI Chat</h1>
-          <p>Ask anything, create images and explore ideas.</p>
-        </div>
+        <h2>AI Chat</h2>
+        <p>Your intelligent assistant</p>
       </div>
 
-      <div class="panel chat-layout">
+      <div class="chat-layout">
 
-        <div
-          id="chatHistory"
-          class="chat-history"
-          aria-live="polite">
-        </div>
-
-        <label class="field-label" for="chatInput">
-          Message
-        </label>
+        <div id="chatHistory" class="chat-history"></div>
 
         <div class="chat-compose">
 
           <textarea
-            class="textarea"
             id="chatInput"
-            placeholder="Ask anything, or ask AI to create an image..."
-            rows="2"></textarea>
+            class="textarea"
+            placeholder="Message TinVin AI..."
+            rows="2">
+          </textarea>
 
-          <button
-            class="primary-btn"
-            id="sendBtn"
-            type="button">
-            Send ↑
+          <button id="sendBtn" class="primary-btn" type="button">
+            ↑
           </button>
 
         </div>
 
-        <div
-          id="chatStatus"
-          class="status"
-          role="status">
-        </div>
+        <div id="chatStatus" class="status"></div>
 
-        <div class="actions chat-actions">
-
-          <button
-            id="newChatBtn"
-            class="secondary-btn"
-            type="button">
-            New chat
-          </button>
-
-          <button
-            class="secondary-btn"
-            type="button"
-            onclick="window.TinVinPremium?.open()">
-            👑 Upgrade to Premium
-          </button>
-
-        </div>
-      </div>
-    </section>
-
-    <!-- TRANSLATOR -->
-    <section
-      id="translatorPage"
-      class="workspace-panel"
-      hidden>
-
-      <div class="tool-heading">
-        <div class="tool-icon">🌍</div>
-        <div>
-          <h1>Translate</h1>
-          <p>Translate between languages with clear results.</p>
-        </div>
-      </div>
-
-      <div class="panel translator-chat-layout">
-
-        <div class="translator-languages">
-
-          <div>
-            <label class="field-label" for="translatorSourceLang">
-              From
-            </label>
-
-            <select
-              class="select"
-              id="translatorSourceLang">
-            </select>
-          </div>
-
-          <div>
-            <label class="field-label" for="translatorTargetLang">
-              To
-            </label>
-
-            <select
-              class="select"
-              id="translatorTargetLang">
-            </select>
-          </div>
-
-        </div>
-
-        <div
-          id="translatorHistory"
-          class="translator-history"
-          aria-live="polite">
-        </div>
-
-        <div class="translator-compose">
-
-          <label class="field-label" for="translatorInput">
-            Text to translate
-          </label>
-
-          <div class="translator-input-row">
-
-            <textarea
-              class="textarea"
-              id="translatorInput"
-              placeholder="Enter your text here..."
-              rows="2"></textarea>
-
-            <button
-              class="primary-btn"
-              id="translatorRunBtn"
-              type="button">
-              Send ↑
-            </button>
-
-          </div>
-
-          <div
-            id="translatorStatus"
-            class="status"
-            role="status">
-          </div>
-
-          <div class="actions">
-            <button
-              class="secondary-btn"
-              id="translatorClearBtn"
-              type="button">
-              Clear
-            </button>
-          </div>
-
-        </div>
-      </div>
-    </section>
-
-    <!-- QR SCANNER -->
-    <section
-      id="scannerPanel"
-      class="workspace-panel"
-      hidden>
-
-      <div class="tool-heading">
-        <div class="tool-icon">📷</div>
-        <div>
-          <h1>QR Scanner</h1>
-          <p>Scan QR codes or create your own QR code.</p>
-        </div>
-      </div>
-
-      <div class="panel scanner-panel">
-
-        <div class="tool-icon">📷</div>
-
-        <h2>Scan or Create QR</h2>
-
-        <p>
-          Open the scanner to use your camera,
-          scan an image or generate a QR code.
-        </p>
-
-        <button
-          id="openScannerBtn"
-          class="primary-btn"
-          type="button">
-          Open QR Scanner
+        <button id="newChatBtn" class="secondary-btn" type="button">
+          + New Chat
         </button>
 
       </div>
+
     </section>
 
-    <footer class="footer">
-      TinVin AI
-    </footer>
+    <!-- TRANSLATOR -->
+    <section id="translatorPage" class="workspace-panel" hidden>
+
+      <div class="tool-heading">
+        <h2>AI Translator</h2>
+        <p>Translate naturally between languages</p>
+      </div>
+
+      <div class="translator-languages">
+
+        <select id="translatorSourceLang" class="select"></select>
+
+        <select id="translatorTargetLang" class="select"></select>
+
+      </div>
+
+      <div id="translatorHistory" class="translator-history"></div>
+
+      <div class="translator-compose">
+
+        <textarea
+          id="translatorInput"
+          class="textarea"
+          placeholder="Write something to translate..."
+          rows="3">
+        </textarea>
+
+        <button id="translatorRunBtn" class="primary-btn" type="button">
+          Translate ↑
+        </button>
+
+        <button id="translatorClearBtn" class="secondary-btn" type="button">
+          Clear
+        </button>
+
+        <div id="translatorStatus" class="status"></div>
+
+      </div>
+
+    </section>
+
+    <!-- QR -->
+    <section id="scannerPanel" class="workspace-panel" hidden>
+
+      <div class="tool-heading">
+        <h2>QR Scanner</h2>
+        <p>Scan and create QR codes</p>
+      </div>
+
+      <button id="openScannerBtn" class="primary-btn" type="button">
+        Open Scanner
+      </button>
+
+    </section>
+
+    <footer class="footer">TinVin AI</footer>
 
   </main>
 
   <!-- SETTINGS -->
   <section id="settingsPage" class="page">
 
-    <button
-      class="back-btn"
-      id="settingsBackBtn"
-      type="button">
+    <button id="settingsBackBtn" class="back-btn" type="button">
       ← Back
     </button>
 
-    <div class="tool-heading">
-      <div class="tool-icon">⚙️</div>
-      <div>
-        <h1>Settings</h1>
-        <p>Personalize your TinVin AI workspace.</p>
-      </div>
-    </div>
+    <h1>Settings</h1>
 
     <div class="settings-grid">
 
       <div class="panel">
-
-        <label class="field-label" for="themeSelect">
-          Color theme
-        </label>
+        <label for="themeSelect">Theme</label>
 
         <select id="themeSelect" class="select">
-          <option value="black">Black Mode</option>
+          <option value="black">Black</option>
           <option value="navy">Navy Gold</option>
-          <option value="blue">Ocean Blue</option>
-          <option value="purple">Lavender Purple</option>
-          <option value="green">Emerald Green</option>
-          <option value="pink">Soft Pink</option>
-          <option value="orange">Warm Orange</option>
+          <option value="blue">Blue</option>
+          <option value="purple">Purple</option>
+          <option value="green">Green</option>
+          <option value="pink">Pink</option>
+          <option value="orange">Orange</option>
         </select>
-
       </div>
 
       <div class="panel">
-
-        <label class="field-label" for="interfaceLang">
-          Interface language
-        </label>
+        <label for="interfaceLang">Interface Language</label>
 
         <select id="interfaceLang" class="select">
           <option value="English">English</option>
           <option value="Sorani Kurdish">کوردیی سۆرانی</option>
           <option value="Kurmanji Kurdish">Kurdî Kurmancî</option>
           <option value="Arabic">العربية</option>
-          <option value="Spanish">Español</option>
-          <option value="French">Français</option>
-          <option value="Portuguese">Português</option>
-          <option value="German">Deutsch</option>
           <option value="Turkish">Türkçe</option>
           <option value="Persian">فارسی</option>
-          <option value="Russian">Русский</option>
-          <option value="Chinese Simplified">简体中文</option>
-          <option value="Japanese">日本語</option>
-          <option value="Korean">한국어</option>
-          <option value="Hindi">हिन्दी</option>
-          <option value="Urdu">اردو</option>
-          <option value="Italian">Italiano</option>
-          <option value="Dutch">Nederlands</option>
-          <option value="Ukrainian">Українська</option>
-          <option value="Polish">Polski</option>
         </select>
 
-        <p class="status">
-          Choose a language for the visible interface.
-        </p>
-
-        <div
-          id="languageStatus"
-          class="status"
-          role="status">
-        </div>
-
+        <div id="languageStatus" class="status"></div>
       </div>
+
     </div>
+
   </section>
 
 </div>
 
-<!-- SCRIPTS -->
 <script src="app.js" defer></script>
 <script src="chat.js?v=20261104-2" defer></script>
 <script src="translator.js" defer></script>
