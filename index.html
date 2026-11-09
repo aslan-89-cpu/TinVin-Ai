@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -17,7 +18,6 @@
 
 <div class="app-shell">
 
-  <!-- TOP BAR -->
   <header class="topbar">
 
     <button class="menu-toggle" id="menuToggle"
@@ -27,6 +27,11 @@
       <span></span>
     </button>
 
+    <div class="brand">
+      <span class="brand-icon">✧</span>
+      <span>TinVin AI</span>
+    </div>
+
     <button id="premiumTopBtn" class="premium-top-btn"
       type="button" onclick="window.TinVinPremium?.open()">
       ♛ Premium
@@ -34,7 +39,6 @@
 
   </header>
 
-  <!-- LEFT DRAWER -->
   <div class="drawer-overlay" id="drawerOverlay"></div>
 
   <aside class="sidebar" id="mainSidebar">
@@ -71,12 +75,13 @@
 
   </aside>
 
-  <!-- MAIN -->
   <main id="workspacePage" class="page active">
 
-    <!-- HERO -->
     <section class="hero">
-      <div class="eyebrow">✦ YOUR AI WORKSPACE</div>
+
+      <div class="eyebrow">✦ YOUR INTELLIGENT AI WORKSPACE</div>
+
+      <div class="hero-logo">✧</div>
 
       <h1>
         <span>Think bigger.</span>
@@ -84,9 +89,17 @@
       </h1>
 
       <div class="hero-brand">TinVin AI</div>
+
+      <p class="hero-description">
+        Your world of artificial intelligence.
+      </p>
+
+      <div class="hero-chip">
+        ✦ POWERED BY AI
+      </div>
+
     </section>
 
-    <!-- TOP TOOL NAVIGATION -->
     <nav class="workspace-tabs">
 
       <button class="workspace-tab active"
@@ -106,11 +119,10 @@
 
     </nav>
 
-    <!-- CHAT -->
     <section id="chatPage" class="workspace-panel active">
 
       <div class="tool-heading">
-        <h2>AI Chat</h2>
+        <h2>✧ AI Chat</h2>
         <p>Your intelligent assistant</p>
       </div>
 
@@ -143,11 +155,10 @@
 
     </section>
 
-    <!-- TRANSLATOR -->
     <section id="translatorPage" class="workspace-panel" hidden>
 
       <div class="tool-heading">
-        <h2>AI Translator</h2>
+        <h2>◎ AI Translator</h2>
         <p>Translate naturally between languages</p>
       </div>
 
@@ -184,11 +195,10 @@
 
     </section>
 
-    <!-- QR -->
     <section id="scannerPanel" class="workspace-panel" hidden>
 
       <div class="tool-heading">
-        <h2>QR Scanner</h2>
+        <h2>▦ QR Scanner</h2>
         <p>Scan and create QR codes</p>
       </div>
 
@@ -198,18 +208,24 @@
 
     </section>
 
-    <footer class="footer">TinVin AI</footer>
+    <footer class="footer">
+      <span>✧ TinVin AI</span>
+      <small>Intelligence without limits.</small>
+    </footer>
 
   </main>
 
-  <!-- SETTINGS -->
   <section id="settingsPage" class="page">
 
     <button id="settingsBackBtn" class="back-btn" type="button">
       ← Back
     </button>
 
-    <h1>Settings</h1>
+    <div class="settings-heading">
+      <div class="eyebrow">PERSONALIZE YOUR EXPERIENCE</div>
+      <h1>⚙ Settings</h1>
+      <p>Make TinVin AI yours.</p>
+    </div>
 
     <div class="settings-grid">
 
