@@ -962,26 +962,21 @@ button:focus-visible {
     background-color: rgba(8, 25, 32, .94);
   }
 }
-/* Hide sidebar visual elements only */
+/* Keep Settings visible, hide only X */
+#mainSidebar {
+  display: flex !important;
+}
 
 .sidebar-header,
 .sidebar-menu,
-.sidebar-bottom,
+.sidebar-bottom {
+  display: flex !important;
+}
+
 #closeMenu {
   display: none !important;
 }
 
-/* Keep sidebar hidden */
-#mainSidebar {
-  display: none !important;
-}
-
-/* Hide menu button */
 #menuToggle {
-  display: none !important;
-}
-
-/* Hide drawer overlay */
-#drawerOverlay {
-  display: none !important;
+  display: flex !important;
 }
