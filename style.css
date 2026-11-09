@@ -1048,3 +1048,160 @@ button:focus-visible {
 #closeMenu {
   display: none !important;
 }
+
+/* ==========================================
+   TINVIN AI — UNIFIED CRYSTAL GLASS
+   ONE HARMONIOUS COLOR PALETTE
+   ========================================== */
+
+:root {
+  --bg: #070d14;
+
+  /* One unified glass color */
+  --glass: rgba(15, 27, 39, .30);
+  --glass-strong: rgba(15, 27, 39, .43);
+  --glass-soft: rgba(255, 255, 255, .035);
+
+  /* Six coordinated accent colors */
+  --c1: #42e6c4;
+  --c2: #45c8ef;
+  --c3: #8b9cff;
+  --c4: #b69aff;
+  --c5: #f09bd0;
+  --c6: #a4edbd;
+
+  --accent: #42e6c4;
+  --accent-2: #45c8ef;
+  --accent-3: #b9fff0;
+
+  --text: #f2fbff;
+  --muted: #9aafbd;
+
+  --glass-border: rgba(160, 220, 230, .16);
+}
+
+/* Unified background */
+body {
+  background:
+    radial-gradient(ellipse at 10% 10%, rgba(66,230,196,.12), transparent 38%),
+    radial-gradient(ellipse at 90% 15%, rgba(69,200,239,.11), transparent 38%),
+    radial-gradient(ellipse at 75% 85%, rgba(182,154,255,.09), transparent 42%),
+    radial-gradient(ellipse at 20% 90%, rgba(240,155,208,.07), transparent 40%),
+    #070d14;
+}
+
+/* Same transparent glass everywhere */
+.topbar,
+.sidebar,
+.hero,
+.workspace-tabs,
+.workspace-panel,
+.panel,
+.tool-card,
+.chat-history,
+.translator-history,
+.sidebar-bottom {
+  background-color: var(--glass) !important;
+  border-color: var(--glass-border) !important;
+
+  backdrop-filter: blur(32px) saturate(165%) !important;
+  -webkit-backdrop-filter: blur(32px) saturate(165%) !important;
+
+  box-shadow:
+    0 12px 45px rgba(0,0,0,.13),
+    inset 0 1px 0 rgba(255,255,255,.07) !important;
+}
+
+/* Chat bubbles: same glass, slightly different transparency */
+.bubble,
+.chat-bubble {
+  background: rgba(25, 43, 57, .30) !important;
+  border: 1px solid rgba(160,220,230,.13) !important;
+  backdrop-filter: blur(25px) saturate(160%) !important;
+  -webkit-backdrop-filter: blur(25px) saturate(160%) !important;
+}
+
+.bubble.user,
+.chat-bubble.user {
+  background: rgba(66,230,196,.12) !important;
+  border-color: rgba(66,230,196,.23) !important;
+}
+
+.bubble.assistant,
+.chat-bubble.assistant {
+  background: rgba(69,200,239,.075) !important;
+  border-color: rgba(69,200,239,.15) !important;
+}
+
+/* Inputs */
+.textarea,
+.field,
+.select {
+  background: rgba(8, 19, 30, .34) !important;
+  border-color: rgba(160,220,230,.17) !important;
+  color: var(--text) !important;
+  backdrop-filter: blur(24px) !important;
+  -webkit-backdrop-filter: blur(24px) !important;
+}
+
+/* Six colors used softly across the same design */
+.brand,
+.hero h1 {
+  background: linear-gradient(
+    100deg,
+    #ffffff,
+    var(--c1),
+    var(--c2),
+    var(--c3),
+    var(--c4),
+    var(--c5),
+    var(--c6)
+  );
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+.eyebrow,
+.hero-logo,
+.hero-brand,
+.tool-heading h2,
+.sidebar-header,
+.sidebar-bottom span {
+  color: var(--c1);
+}
+
+.workspace-tab span,
+.menu-item span {
+  color: var(--c2);
+}
+
+/* Buttons stay coordinated */
+.primary-btn {
+  background: linear-gradient(110deg, var(--c1), var(--c2)) !important;
+  color: #06151b !important;
+}
+
+.premium-top-btn {
+  background: linear-gradient(
+    120deg,
+    rgba(182,154,255,.13),
+    rgba(69,200,239,.12)
+  ) !important;
+  border-color: rgba(182,154,255,.27) !important;
+  color: #e2d8ff !important;
+}
+
+/* Selected tabs */
+.workspace-tab.active,
+.workspace-tab:hover {
+  background: linear-gradient(
+    120deg,
+    rgba(66,230,196,.10),
+    rgba(69,200,239,.09),
+    rgba(182,154,255,.07)
+  ) !important;
+  border-color: rgba(160,220,230,.22) !important;
+}
+
+/* No layout, sizing, position or navigation changes */
