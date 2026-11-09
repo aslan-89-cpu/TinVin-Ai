@@ -279,3 +279,33 @@ body::before {
     grid-template-columns: 1fr;
   }
 }
+/* Separate Home and Settings completely */
+
+#workspacePage.page:not(.active),
+#settingsPage.page:not(.active) {
+  display: none !important;
+}
+
+#workspacePage.page.active {
+  display: block !important;
+}
+
+#settingsPage.page.active {
+  display: block !important;
+  position: relative;
+  width: 100%;
+  clear: both;
+}
+
+/* Keep settings content inside settings page */
+#settingsPage .settings-heading,
+#settingsPage .settings-grid {
+  position: relative;
+  width: 100%;
+  clear: both;
+}
+
+/* Hide inactive workspace sections */
+#workspacePage .workspace-panel[hidden] {
+  display: none !important;
+}
