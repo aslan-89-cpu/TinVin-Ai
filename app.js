@@ -586,6 +586,41 @@
     window.TinVinQR?.open?.();
   });
 
+// Sidebar — ChatGPT style menu
+const sidebar = $("mainSidebar");
+const menuToggle = $("menuToggle");
+const drawerOverlay = $("drawerOverlay");
+
+function setSidebarOpen(open) {
+  sidebar?.classList.toggle("open", open);
+  menuToggle?.classList.toggle("open", open);
+  drawerOverlay?.classList.toggle("active", open);
+
+  document.body.classList.toggle("sidebar-open", open);
+
+  menuToggle?.setAttribute("aria-expanded", String(open));
+}
+
+menuToggle?.addEventListener("click", () => {
+  setSidebarOpen(!sidebar?.classList.contains("open"));
+});
+
+$("closeMenu")?.addEventListener("click", () => {
+  setSidebarOpen(false);
+});
+
+drawerOverlay?.addEventListener("click", () => {
+  setSidebarOpen(false);
+});
+
+document.addEventListener("keydown", event => {
+  if (event.key === "Escape") {
+    setSidebarOpen(false);
+  }
+});
+
+setSidebarOpen(false);
+
   // Settings
   $("settingsBtn")?.addEventListener("click", () => {
     showPage("settingsPage");
