@@ -980,3 +980,71 @@ button:focus-visible {
 #menuToggle {
   display: flex !important;
 }
+/* TINVIN AI — CHATGPT SIDEBAR */
+
+#mainSidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 300;
+
+  width: 290px;
+  height: 100dvh;
+
+  transform: translateX(-105%);
+  visibility: hidden;
+
+  transition:
+    transform .3s ease,
+    visibility .3s ease;
+}
+
+#mainSidebar.open {
+  transform: translateX(0);
+  visibility: visible;
+}
+
+#drawerOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 250;
+
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+
+  transition: .3s ease;
+}
+
+#drawerOverlay.active {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+#menuToggle {
+  position: relative;
+  z-index: 350;
+}
+
+#menuToggle span {
+  transition: .25s ease;
+  transform-origin: center;
+}
+
+#menuToggle.open span:first-child {
+  transform: translateY(8px) rotate(45deg);
+}
+
+#menuToggle.open span:nth-child(2) {
+  opacity: 0;
+}
+
+#menuToggle.open span:last-child {
+  transform: translateY(-8px) rotate(-45deg);
+}
+
+/* Hide duplicate close button */
+#closeMenu {
+  display: none !important;
+}
