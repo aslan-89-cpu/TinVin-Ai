@@ -237,3 +237,45 @@ body::before {
     transition: all .25s ease;
   }
 }
+
+/* FIX: Separate Home and Settings pages */
+
+#workspacePage.page:not(.active),
+#settingsPage.page:not(.active) {
+  display: none !important;
+}
+
+#workspacePage.page.active {
+  display: block !important;
+}
+
+#settingsPage.page.active {
+  display: block !important;
+}
+
+/* Keep inactive workspace tabs hidden */
+#workspacePage .workspace-panel[hidden] {
+  display: none !important;
+}
+
+/* Settings must stay inside its own page */
+#settingsPage {
+  position: relative;
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+#settingsPage .settings-grid {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+@media (max-width: 700px) {
+  #settingsPage .settings-grid {
+    grid-template-columns: 1fr;
+  }
+}
