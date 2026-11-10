@@ -1,0 +1,213 @@
+/* TinVin AI - Glass Home */
+
+.workspace-panel[hidden] { display: none !important; }
+
+#homePanel {
+  position: relative;
+  display: block;
+  animation: none;
+  transform: none;
+  min-height: calc(100dvh - 90px);
+  padding: 18px 16px calc(110px + env(safe-area-inset-bottom, 0px));
+  background:
+    radial-gradient(circle at 15% 10%, rgba(80, 120, 255, .35), transparent 45%),
+    radial-gradient(circle at 90% 85%, rgba(150, 90, 255, .30), transparent 50%),
+    linear-gradient(160deg, #0b1230 0%, #0a0f26 55%, #120d2e 100%);
+  border-radius: 26px;
+  overflow: hidden;
+}
+#homePanel[hidden] { display: none !important; }
+
+#homePanel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(115deg, transparent 48%, rgba(120, 170, 255, .12) 49%, transparent 50%) 0 0 / 120px 120px,
+    linear-gradient(65deg, transparent 48%, rgba(120, 170, 255, .10) 49%, transparent 50%) 0 0 / 160px 160px;
+  pointer-events: none;
+}
+
+#homePanel > * { position: relative; }
+
+.home-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 16px;
+  margin-bottom: 18px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, .08);
+  border: 1px solid rgba(255, 255, 255, .22);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, .35), inset 0 1px 0 rgba(255, 255, 255, .25);
+}
+.home-title h1 { margin: 0; font-size: 1.6rem; letter-spacing: .5px; color: #eaf1ff; }
+.home-logo { font-size: 1.8rem; color: #9fc0ff; }
+
+.home-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 16px;
+  border-radius: 26px;
+  background: rgba(255, 255, 255, .06);
+  border: 1px solid rgba(255, 255, 255, .16);
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, .4);
+}
+
+.glass-btn {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  min-height: 62px;
+  padding: 0 20px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, .24);
+  background: linear-gradient(135deg, rgba(255, 255, 255, .16), rgba(255, 255, 255, .05));
+  color: #eef3ff;
+  font: inherit;
+  font-size: 1.15rem;
+  font-weight: 600;
+  text-align: start;
+  cursor: pointer;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, .3), inset 0 1px 0 rgba(255, 255, 255, .3);
+  transition: transform .15s ease, background .15s ease;
+}
+.glass-btn:active { transform: scale(.97); }
+.glass-btn:focus-visible { outline: 2px solid #9fc0ff; outline-offset: 2px; }
+
+.glass-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  font-size: 1.5rem;
+  color: #b9d0ff;
+}
+
+.home-row { display: flex; gap: 12px; }
+
+.glass-btn.gold {
+  flex: 1;
+  color: #ffd98a;
+  border-color: rgba(255, 205, 100, .7);
+  background: linear-gradient(135deg, rgba(255, 200, 90, .22), rgba(150, 90, 255, .16));
+  box-shadow: 0 0 24px rgba(255, 190, 80, .35), inset 0 1px 0 rgba(255, 255, 255, .3);
+}
+.glass-btn.gold .glass-icon { color: #ffd98a; }
+
+.glass-btn.small {
+  flex: 0 0 auto;
+  width: auto;
+  flex-direction: column;
+  gap: 2px;
+  justify-content: center;
+  padding: 0 16px;
+  font-size: .8rem;
+}
+.glass-btn.small .glass-icon { font-size: 1.3rem; }
+
+.home-bar {
+  position: fixed;
+  left: 12px;
+  right: 12px;
+  bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  border-radius: 22px;
+  background: rgba(20, 28, 60, .55);
+  border: 1px solid rgba(255, 255, 255, .24);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, .45);
+}
+
+.home-bar-btn {
+  flex: 0 0 auto;
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, .1);
+  color: #dbe7ff;
+  font-size: 1.15rem;
+  cursor: pointer;
+}
+.home-bar-btn.listening { background: rgba(255, 80, 100, .5); }
+
+.home-input {
+  flex: 1;
+  min-width: 0;
+  height: 42px;
+  padding: 0 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(110, 170, 255, .6);
+  background: rgba(255, 255, 255, .08);
+  color: #fff;
+  font: inherit;
+  font-size: 16px;
+}
+.home-input::placeholder { color: rgba(220, 230, 255, .6); }
+.home-input:focus { outline: none; box-shadow: 0 0 0 3px rgba(110, 170, 255, .3); }
+
+.home-send {
+  flex: 0 0 auto;
+  width: 42px;
+  height: 42px;
+  border: 0;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  color: #fff;
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+
+.back-home {
+  align-self: flex-start;
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 38px;
+  margin: 0 0 10px;
+  padding: 0 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, .22);
+  background: rgba(255, 255, 255, .08);
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+#scannerPanel { flex-direction: column; align-items: flex-start; gap: 12px; }
+
+#chatPage .chat-layout {
+  flex: 1 1 0 !important;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: none !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+body:has(#homePanel:not([hidden])) .premium-top-btn { visibility: hidden; }
+
+@media (prefers-reduced-motion: reduce) {
+  .glass-btn { transition: none; }
+}
