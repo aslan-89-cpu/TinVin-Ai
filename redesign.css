@@ -940,3 +940,21 @@ body.sidebar-open {
     min-height: 480px;
   }
 }
+/* Make Translate button smaller */
+#translatorRunBtn {
+  flex: 0 0 auto !important;
+  width: auto !important;
+  min-width: 105px !important;
+  min-height: 40px !important;
+  padding: 0 16px !important;
+  font-size: 13px !important;
+  border-radius: 12px !important;
+}
+
+@media (max-width: 760px) {
+  #translatorRunBtn {
+    width: auto !important;
+    min-width: 105px !important;
+    min-height: 40px !important;
+  }
+}
