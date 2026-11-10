@@ -885,25 +885,58 @@ body.sidebar-open {
   }
 }
 
-/* Translate button sizing */
-#translatorRunBtn {
+/* SAME SIZE — CHAT & TRANSLATOR */
+
+#chatPage,
+#translatorPage {
+  height: min(790px, calc(100vh - 160px));
+  min-height: 540px;
+}
+
+/* Chat gets more conversation space */
+#chatPage .chat-layout {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+#chatPage #chatHistory {
+  flex: 1;
+  min-height: 0;
+}
+
+#chatPage .chat-compose {
   flex: 0 0 auto;
-  min-width: 145px;
+}
+
+#chatInput {
   min-height: 54px;
-  padding: 0 24px;
-  font-size: 15px;
-  font-weight: 800;
-  border-radius: 15px;
+}
+
+/* Translator same overall dimensions */
+#translatorPage {
+  display: flex;
+  flex-direction: column;
+}
+
+#translatorPage #translatorHistory {
+  flex: 1;
+  min-height: 0;
+}
+
+#translatorPage .translator-compose {
+  flex: 0 0 auto;
 }
 
 #translatorInput {
-  flex: 1 1 100%;
-  min-height: 125px;
+  min-height: 54px;
 }
 
 @media (max-width: 760px) {
-  #translatorRunBtn {
-    width: 100%;
-    min-height: 48px;
+  #chatPage,
+  #translatorPage {
+    height: calc(100dvh - 145px);
+    min-height: 480px;
   }
 }
