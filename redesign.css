@@ -884,3 +884,26 @@ body.sidebar-open {
     font-size: 11px;
   }
 }
+
+/* Translate button sizing */
+#translatorRunBtn {
+  flex: 0 0 auto;
+  min-width: 145px;
+  min-height: 54px;
+  padding: 0 24px;
+  font-size: 15px;
+  font-weight: 800;
+  border-radius: 15px;
+}
+
+#translatorInput {
+  flex: 1 1 100%;
+  min-height: 125px;
+}
+
+@media (max-width: 760px) {
+  #translatorRunBtn {
+    width: 100%;
+    min-height: 48px;
+  }
+}
