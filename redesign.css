@@ -958,3 +958,69 @@ body.sidebar-open {
     min-height: 40px !important;
   }
 }
+
+/* TINVIN — MATCHED CHAT & TRANSLATOR */
+
+#chatPage,
+#translatorPage {
+  width: 100% !important;
+  height: calc(100vh - 145px) !important;
+  min-height: 650px !important;
+  max-height: 900px !important;
+  padding: 22px !important;
+  border-radius: 25px !important;
+}
+
+/* Give both tools the same large conversation area */
+#chatPage .chat-layout,
+#translatorPage {
+  display: flex !important;
+  flex-direction: column !important;
+  flex: 1 !important;
+  min-height: 0 !important;
+}
+
+#chatPage #chatHistory,
+#translatorPage #translatorHistory {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  width: 100% !important;
+  margin-bottom: 12px !important;
+}
+
+/* Keep writing areas compact */
+#chatPage .chat-compose,
+#translatorPage .translator-compose {
+  flex: 0 0 auto !important;
+}
+
+#chatInput,
+#translatorInput {
+  min-height: 52px !important;
+  max-height: 120px !important;
+}
+
+/* Smaller Translate button */
+#translatorRunBtn {
+  flex: 0 0 auto !important;
+  width: auto !important;
+  min-width: 105px !important;
+  min-height: 40px !important;
+  padding: 0 16px !important;
+}
+
+/* No extra camera decoration */
+#chatPage .camera-decoration,
+#translatorPage .camera-decoration {
+  display: none !important;
+}
+
+@media (max-width: 760px) {
+  #chatPage,
+  #translatorPage {
+    height: calc(100dvh - 135px) !important;
+    min-height: 570px !important;
+    max-height: none !important;
+    padding: 13px !important;
+  }
+}
