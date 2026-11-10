@@ -375,3 +375,11 @@ body {
 
   #chatPage #newChatBtn { top: 13px; inset-inline-end: 13px; }
 }
+
+/* Hidden tools must stay hidden (beats #translatorPage { display:flex !important }) */
+#homePanel[hidden],
+#chatPage[hidden],
+#translatorPage[hidden],
+#scannerPanel[hidden] {
+  display: none !important;
+}
