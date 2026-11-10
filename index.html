@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="theme-color" content="#090d1b">
   <title>TinVin AI</title>
 
@@ -12,6 +12,7 @@
   <link rel="stylesheet" href="qr.css">
   <link rel="stylesheet" href="premium.css">
   <link rel="stylesheet" href="redesign.css?v=20261111">
+  <link rel="stylesheet" href="home.css?v=1">
 </head>
 
 <body>
@@ -68,43 +69,56 @@
 
   <main id="workspacePage" class="page active">
 
-    <section class="hero">
-      <div class="eyebrow">✦ YOUR INTELLIGENT AI WORKSPACE</div>
+    <section id="homePanel" class="workspace-panel active">
+      <div class="home-title">
+        <span class="home-logo">✧</span>
+        <h1>TinVin AI</h1>
+      </div>
 
-      <div class="hero-logo">✧</div>
+      <div class="home-menu">
+        <button class="glass-btn" type="button" data-open="chat">
+          <span class="glass-icon">✧</span>
+          <span>AI Chat</span>
+        </button>
 
-      <h1>
-        <span>Think bigger.</span>
-        <span>Create smarter.</span>
-      </h1>
+        <button class="glass-btn" type="button" data-open="translator">
+          <span class="glass-icon">◎</span>
+          <span>Translate</span>
+        </button>
 
-      <div class="hero-brand">TinVin AI</div>
+        <button class="glass-btn" type="button" data-open="qr">
+          <span class="glass-icon">▦</span>
+          <span>Scanner</span>
+        </button>
 
-      <p class="hero-description">
-        Your world of artificial intelligence.
-      </p>
+        <div class="home-row">
+          <button class="glass-btn gold" id="homePremiumBtn" type="button">
+            <span class="glass-icon">♛</span>
+            <span>Premium</span>
+          </button>
 
-      <div class="hero-chip">✦ POWERED BY AI</div>
+          <button class="glass-btn small" id="homeSettingsBtn" type="button">
+            <span class="glass-icon">⚙</span>
+            <span>Settings</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="home-bar">
+        <button class="home-bar-btn" id="homeMicBtn" type="button"
+          aria-label="Voice input">🎤</button>
+        <button class="home-bar-btn" id="homeImageBtn" type="button"
+          aria-label="Add image">🖼</button>
+        <input id="homeInput" class="home-input" type="text"
+          placeholder="Type your prompt here..." enterkeyhint="send">
+        <button class="home-send" id="homeSendBtn" type="button"
+          aria-label="Send">↑</button>
+      </div>
+
+      <div id="homeStatus" class="status"></div>
     </section>
 
-    <nav class="workspace-tabs">
-      <button class="workspace-tab active"
-        data-tab="chatPage" type="button">
-        <span>✧</span> AI Chat
-      </button>
-
-      <button class="workspace-tab"
-        data-tab="translatorPage" type="button">
-        <span>◎</span> Translate
-      </button>
-
-      <button class="workspace-tab"
-        data-tab="scannerPanel" type="button">
-        <span>▦</span> Scanner
-      </button>
-    </nav>
-
-    <section id="chatPage" class="workspace-panel active">
+    <section id="chatPage" class="workspace-panel" hidden>
       <div class="tool-heading">
         <h2>✧ AI Chat</h2>
         <p>Your intelligent assistant</p>
@@ -168,10 +182,6 @@
       </button>
     </section>
 
-    <footer class="footer">
-      <span>✧ TinVin AI</span>
-      <small>Intelligence without limits.</small>
-    </footer>
   </main>
 
   <section id="settingsPage" class="page">
@@ -224,6 +234,7 @@
 <script src="translator.js" defer></script>
 <script src="qr.js" defer></script>
 <script src="premium.js" defer></script>
+<script src="home.js?v=1" defer></script>
 
 </body>
 </html>
