@@ -383,3 +383,10 @@ body {
 #scannerPanel[hidden] {
   display: none !important;
 }
+
+/* While Home is showing, the tools must never show */
+body:has(#homePanel:not([hidden])) #chatPage,
+body:has(#homePanel:not([hidden])) #translatorPage,
+body:has(#homePanel:not([hidden])) #scannerPanel {
+  display: none !important;
+}
