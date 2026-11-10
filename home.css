@@ -211,3 +211,167 @@ body:has(#homePanel:not([hidden])) .premium-top-btn { visibility: hidden; }
 @media (prefers-reduced-motion: reduce) {
   .glass-btn { transition: none; }
 }
+
+/* ===== Round 2: fixes + working themes + bigger chat ===== */
+
+/* 1) Home prompt bar stays fixed at the bottom */
+#homePanel > .home-bar { position: fixed; }
+
+/* 2) Themes */
+:root {
+  --tv-a: #3b82f6;
+  --tv-b: #8b5cf6;
+  --tv-bg: #080d1b;
+  --tv-g1: rgba(69, 139, 255, .22);
+  --tv-g2: rgba(154, 91, 255, .18);
+  --tv-panel: 18, 27, 49;
+}
+html[data-theme="black"] {
+  --tv-a: #9aa0ad; --tv-b: #4b5060; --tv-bg: #050506;
+  --tv-g1: rgba(255,255,255,.07); --tv-g2: rgba(255,255,255,.04);
+  --tv-panel: 20, 20, 24;
+}
+html[data-theme="navy"] {
+  --tv-a: #e9bd63; --tv-b: #2d4a9a; --tv-bg: #060b1c;
+  --tv-g1: rgba(233,189,99,.16); --tv-g2: rgba(50,90,200,.22);
+  --tv-panel: 14, 22, 48;
+}
+html[data-theme="blue"] {
+  --tv-a: #38bdf8; --tv-b: #2563eb; --tv-bg: #04101f;
+  --tv-g1: rgba(56,189,248,.22); --tv-g2: rgba(37,99,235,.22);
+  --tv-panel: 10, 26, 52;
+}
+html[data-theme="green"] {
+  --tv-a: #34d399; --tv-b: #059669; --tv-bg: #04130e;
+  --tv-g1: rgba(52,211,153,.2); --tv-g2: rgba(5,150,105,.2);
+  --tv-panel: 10, 36, 28;
+}
+html[data-theme="pink"] {
+  --tv-a: #f472b6; --tv-b: #c026d3; --tv-bg: #14060f;
+  --tv-g1: rgba(244,114,182,.2); --tv-g2: rgba(192,38,211,.2);
+  --tv-panel: 44, 14, 34;
+}
+html[data-theme="orange"] {
+  --tv-a: #fb923c; --tv-b: #dc2626; --tv-bg: #140a04;
+  --tv-g1: rgba(251,146,60,.2); --tv-g2: rgba(220,38,38,.18);
+  --tv-panel: 44, 24, 10;
+}
+
+html { background: var(--tv-bg); }
+
+body {
+  background:
+    radial-gradient(ellipse at 12% 10%, var(--tv-g1), transparent 40%),
+    radial-gradient(ellipse at 88% 18%, var(--tv-g2), transparent 36%),
+    var(--tv-bg);
+  background-attachment: fixed;
+}
+
+.app-shell::before { background: var(--tv-a); }
+.app-shell::after { background: var(--tv-b); }
+
+.topbar { background: rgba(var(--tv-panel), .78); }
+.sidebar { background: rgba(var(--tv-panel), .96); }
+
+.brand-icon { color: var(--tv-a); border-color: var(--tv-a); }
+.status { color: var(--tv-a); }
+
+#chatPage,
+#translatorPage,
+#scannerPanel,
+#settingsPage {
+  background:
+    linear-gradient(145deg, rgba(255,255,255,.07), transparent 42%),
+    rgba(var(--tv-panel), .62) !important;
+}
+
+#homePanel {
+  background:
+    radial-gradient(circle at 15% 10%, var(--tv-g1), transparent 45%),
+    radial-gradient(circle at 90% 85%, var(--tv-g2), transparent 50%),
+    linear-gradient(160deg, rgb(var(--tv-panel)), var(--tv-bg));
+}
+
+.home-logo,
+.glass-icon { color: var(--tv-a); }
+.home-input { border-color: var(--tv-a); }
+
+.home-send,
+.primary-btn,
+#sendBtn,
+#chatPage #sendBtn,
+#translatorRunBtn,
+#openScannerBtn {
+  background: linear-gradient(135deg, var(--tv-a), var(--tv-b)) !important;
+  color: #fff !important;
+}
+
+/* keep the gold Premium look on every theme */
+.glass-btn.gold .glass-icon { color: #ffd98a; }
+
+/* 3) Chat: one compact input row, bigger message area */
+#chatPage .chat-compose {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  align-items: center !important;
+  gap: 8px !important;
+  padding: 8px !important;
+}
+
+#chatPage .chat-attachment-controls {
+  display: flex !important;
+  flex: 0 0 auto !important;
+  gap: 6px !important;
+}
+
+#chatPage .chat-attach-btn {
+  width: 40px !important;
+  height: 40px !important;
+  padding: 0 !important;
+  font-size: 1.05rem !important;
+}
+
+#chatPage #chatInput {
+  flex: 1 1 0 !important;
+  width: auto !important;
+  min-width: 0 !important;
+  height: 44px !important;
+  min-height: 44px !important;
+  max-height: 110px !important;
+  padding: 11px 12px !important;
+  resize: none !important;
+}
+
+#chatPage #sendBtn {
+  flex: 0 0 auto !important;
+  width: 44px !important;
+  min-width: 44px !important;
+  height: 44px !important;
+  min-height: 44px !important;
+  padding: 0 !important;
+}
+
+/* New Chat: small button, top corner, next to "← Home" */
+#chatPage { position: relative; }
+
+#chatPage #newChatBtn {
+  position: absolute;
+  top: 22px;
+  inset-inline-end: 22px;
+  z-index: 3;
+  min-height: 38px;
+  padding: 0 14px;
+}
+
+#chatPage #chatStatus { min-height: 0; margin: 0; }
+
+@media (max-width: 760px) {
+  #chatPage,
+  #translatorPage {
+    height: calc(100dvh - 100px) !important;
+    min-height: 0 !important;
+    padding: 13px !important;
+  }
+
+  #chatPage #newChatBtn { top: 13px; inset-inline-end: 13px; }
+}
