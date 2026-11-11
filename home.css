@@ -456,3 +456,8 @@ body:has(#homePanel:not([hidden])) #scannerPanel {
 #scannerPanel .back-home {
   align-self: flex-start;
 }
+
+/* Hide menu items that are not built yet */
+.sidebar-menu .menu-item[data-menu] {
+  display: none;
+}
