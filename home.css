@@ -395,3 +395,21 @@ body:has(#homePanel:not([hidden])) #scannerPanel {
   background: rgba(255, 80, 100, .5) !important;
   border-color: rgba(255, 120, 140, .8) !important;
 }
+
+#translatorPage .translator-mic-btn {
+  flex: 0 0 auto;
+  width: 44px;
+  height: 40px;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, .2);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, .08);
+  color: #dbe7ff;
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+
+#translatorPage .translator-mic-btn.listening {
+  background: rgba(255, 80, 100, .5);
+  border-color: rgba(255, 120, 140, .8);
+}
