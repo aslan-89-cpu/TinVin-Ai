@@ -112,3 +112,78 @@
 
   showHome();
 })();
+
+/* Microphone inside AI Chat */
+(() => {
+  "use strict";
+
+  const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+  function speechLang() {
+    const lang = document.documentElement.lang || "en";
+    if (lang === "ckb") return "ckb-IQ";
+    return lang;
+  }
+
+  function addChatMic() {
+    const controls = document.querySelector("#chatPage .chat-attachment-controls");
+    if (!controls || controls.querySelector(".chat-mic-btn")) return !!controls;
+
+    const mic = document.createElement("button");
+    mic.type = "button";
+    mic.className = "chat-attach-btn chat-mic-btn";
+    mic.textContent = "🎤";
+    mic.title = "Voice input";
+    mic.setAttribute("aria-label", "Voice input");
+    controls.appendChild(mic);
+
+    mic.addEventListener("click", () => {
+      const status = document.getElementById("chatStatus");
+
+      if (!Recognition) {
+        if (status) status.textContent = "Voice input is not supported in this browser.";
+        return;
+      }
+
+      const recognition = new Recognition();
+      recognition.lang = speechLang();
+      recognition.interimResults = false;
+
+      mic.classList.add("listening");
+      if (status) status.textContent = "Listening...";
+
+      recognition.onresult = event => {
+        const text = event.results[0]?.[0]?.transcript || "";
+        const input = document.getElementById("chatInput");
+        if (input) {
+          input.value = (input.value + " " + text).trim();
+          input.focus();
+        }
+      };
+
+      recognition.onerror = () => {
+        if (status) status.textContent = "Could not hear you. Try again.";
+      };
+
+      recognition.onend = () => {
+        mic.classList.remove("listening");
+        if (status && status.textContent === "Listening...") status.textContent = "";
+      };
+
+      try {
+        recognition.start();
+      } catch {
+        mic.classList.remove("listening");
+      }
+    });
+
+    return true;
+  }
+
+  if (!addChatMic()) {
+    let tries = 0;
+    const timer = setInterval(() => {
+      if (addChatMic() || ++tries > 20) clearInterval(timer);
+    }, 250);
+  }
+})();
