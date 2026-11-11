@@ -1,4 +1,4 @@
-/* TinVin AI - Home navigation (loads after app.js and chat.js) */
+/* TinVin AI - Home navigation + microphones (loads after app.js and chat.js) */
 (() => {
   "use strict";
 
@@ -9,7 +9,10 @@
   }
 
   const $ = id => document.getElementById(id);
+  const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   const panels = ["homePanel", "chatPage", "translatorPage", "scannerPanel"];
+
+  /* ---------- Navigation ---------- */
 
   function showHome() {
     panels.forEach(id => {
@@ -48,6 +51,8 @@
 
   $("settingsBackBtn")?.addEventListener("click", showHome);
 
+  /* ---------- Home prompt bar ---------- */
+
   function sendFromHome() {
     const input = $("homeInput");
     const text = input?.value.trim();
@@ -76,150 +81,80 @@
     document.querySelector("#chatPage .chat-attach-btn")?.click();
   });
 
-  const micButton = $("homeMicBtn");
-  const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  /* ---------- Microphone helper ---------- */
 
-  micButton?.addEventListener("click", () => {
+  let activeRecognition = null;
+
+  function startListening(options) {
+    const { button, lang, say, onText } = options;
+
+    if (activeRecognition) {
+      activeRecognition.stop();
+      return;
+    }
+
     if (!Recognition) {
-      core.setStatus("homeStatus", "Voice input is not supported in this browser.");
+      say("Voice input is not supported in this browser.");
       return;
     }
 
     const recognition = new Recognition();
-    recognition.lang = document.documentElement.lang || "en";
+    recognition.lang = lang;
     recognition.interimResults = false;
+    recognition.continuous = false;
+    recognition.maxAlternatives = 1;
+    activeRecognition = recognition;
 
-    micButton.classList.add("listening");
+    recognition.onstart = () => {
+      button.classList.add("listening");
+      say("Listening... speak now.");
+    };
 
     recognition.onresult = event => {
       const text = event.results[0]?.[0]?.transcript || "";
-      const input = $("homeInput");
-      if (input) input.value = (input.value + " " + text).trim();
+      if (text) onText(text);
+      say("");
     };
 
-    recognition.onerror = () => {
-      core.setStatus("homeStatus", "Could not hear you. Try again.");
+    recognition.onerror = event => {
+      if (event.error === "no-speech") {
+        say("Nothing heard. Tap the microphone and speak right away.");
+      } else {
+        say("Mic error: " + (event.error || "unknown"));
+      }
     };
 
-    recognition.onend = () => micButton.classList.remove("listening");
+    recognition.onend = () => {
+      button.classList.remove("listening");
+      activeRecognition = null;
+    };
 
     try {
       recognition.start();
-    } catch {
-      micButton.classList.remove("listening");
+    } catch (error) {
+      button.classList.remove("listening");
+      activeRecognition = null;
+      say("Mic error: " + error.message);
     }
-  });
+  }
 
-  showHome();
-})();
+  function appendTo(inputId) {
+    return text => {
+      const input = $(inputId);
+      if (!input) return;
+      input.value = (input.value + " " + text).trim();
+      input.focus();
+    };
+  }
 
-/* Microphone inside AI Chat (v2) */
-(() => {
-  "use strict";
-
-  const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-
-  const supported = {
+  /* Languages the browser can recognise. Kurdish is not supported, so
+     the interface language falls back to English. */
+  const chatLangs = {
     en: "en-US", ar: "ar-SA", fa: "fa-IR", tr: "tr-TR",
     fr: "fr-FR", de: "de-DE", es: "es-ES", ru: "ru-RU"
   };
 
-  // Unsupported languages (such as Kurdish) fall back to English
-  function speechLang() {
-    const base = (document.documentElement.lang || "en").split("-")[0];
-    return supported[base] || "en-US";
-  }
-
-  let active = null;
-
-  function addChatMic() {
-    const controls = document.querySelector("#chatPage .chat-attachment-controls");
-    if (!controls || controls.querySelector(".chat-mic-btn")) return !!controls;
-
-    const mic = document.createElement("button");
-    mic.type = "button";
-    mic.className = "chat-attach-btn chat-mic-btn";
-    mic.textContent = "🎤";
-    mic.setAttribute("aria-label", "Voice input");
-    controls.appendChild(mic);
-
-    const status = document.getElementById("chatStatus");
-    const say = text => { if (status) status.textContent = text; };
-
-    mic.addEventListener("click", () => {
-      // second tap stops listening
-      if (active) {
-        active.stop();
-        return;
-      }
-
-      if (!Recognition) {
-        say("Voice input is not supported in this browser.");
-        return;
-      }
-
-      const recognition = new Recognition();
-      recognition.lang = speechLang();
-      recognition.interimResults = false;
-      recognition.continuous = false;
-      recognition.maxAlternatives = 1;
-      active = recognition;
-
-      recognition.onstart = () => {
-        mic.classList.add("listening");
-        say("Listening... speak now.");
-      };
-
-      recognition.onresult = event => {
-        const text = event.results[0]?.[0]?.transcript || "";
-        const input = document.getElementById("chatInput");
-        if (input && text) {
-          input.value = (input.value + " " + text).trim();
-          input.focus();
-        }
-        say("");
-      };
-
-      recognition.onerror = event => {
-        if (event.error === "no-speech") {
-          say("Nothing heard. Tap 🎤 and speak right away.");
-        } else {
-          say("Mic error: " + (event.error || "unknown"));
-        }
-      };
-
-      recognition.onend = () => {
-        mic.classList.remove("listening");
-        active = null;
-      };
-
-      try {
-        recognition.start();
-      } catch (error) {
-        mic.classList.remove("listening");
-        active = null;
-        say("Mic error: " + error.message);
-      }
-    });
-
-    return true;
-  }
-
-  if (!addChatMic()) {
-    let tries = 0;
-    const timer = setInterval(() => {
-      if (addChatMic() || ++tries > 20) clearInterval(timer);
-    }, 250);
-  }
-})();
-
-/* Microphone inside Translate */
-(() => {
-  "use strict";
-
-  const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-
-  const codes = {
+  const translateLangs = {
     "English": "en-US", "Arabic": "ar-SA", "Persian": "fa-IR",
     "Turkish": "tr-TR", "Spanish": "es-ES", "French": "fr-FR",
     "German": "de-DE", "Italian": "it-IT", "Portuguese": "pt-PT",
@@ -235,10 +170,48 @@
     "Chinese Traditional": "zh-TW", "Japanese": "ja-JP", "Korean": "ko-KR"
   };
 
-  let active = null;
+  /* Home mic */
+  $("homeMicBtn")?.addEventListener("click", () => {
+    const base = (document.documentElement.lang || "en").split("-")[0];
 
+    startListening({
+      button: $("homeMicBtn"),
+      lang: chatLangs[base] || "en-US",
+      say: text => core.setStatus("homeStatus", text),
+      onText: appendTo("homeInput")
+    });
+  });
+
+  /* AI Chat mic */
+  function addChatMic() {
+    const controls = document.querySelector("#chatPage .chat-attachment-controls");
+    if (!controls) return false;
+    if (controls.querySelector(".chat-mic-btn")) return true;
+
+    const mic = document.createElement("button");
+    mic.type = "button";
+    mic.className = "chat-attach-btn chat-mic-btn";
+    mic.textContent = "🎤";
+    mic.setAttribute("aria-label", "Voice input");
+    controls.appendChild(mic);
+
+    mic.addEventListener("click", () => {
+      const base = (document.documentElement.lang || "en").split("-")[0];
+
+      startListening({
+        button: mic,
+        lang: chatLangs[base] || "en-US",
+        say: text => core.setStatus("chatStatus", text),
+        onText: appendTo("chatInput")
+      });
+    });
+
+    return true;
+  }
+
+  /* Translate mic (uses the source language) */
   function addTranslatorMic() {
-    const runBtn = document.getElementById("translatorRunBtn");
+    const runBtn = $("translatorRunBtn");
     if (!runBtn) return false;
     if (document.querySelector(".translator-mic-btn")) return true;
 
@@ -249,51 +222,43 @@
     mic.setAttribute("aria-label", "Voice input");
     runBtn.parentNode.insertBefore(mic, runBtn);
 
-    const say = text => {
-      const status = document.getElementById("translatorStatus");
-      if (status) status.textContent = text;
-    };
-
     mic.addEventListener("click", () => {
-      if (active) {
-        active.stop();
-        return;
-      }
-
-      if (!Recognition) {
-        say("Voice input is not supported in this browser.");
-        return;
-      }
-
-      const source = document.getElementById("translatorSourceLang")?.value || "English";
-      const lang = codes[source];
+      const say = text => core.setStatus("translatorStatus", text);
+      const source = $("translatorSourceLang")?.value || "English";
+      const lang = translateLangs[source];
 
       if (!lang) {
-        say("Voice input does not support " + source + " yet. Choose another source language, or type.");
+        say("Voice input does not support " + source +
+          " yet. Choose another source language, or type.");
         return;
       }
 
-      const recognition = new Recognition();
-      recognition.lang = lang;
-      recognition.interimResults = false;
-      recognition.continuous = false;
-      active = recognition;
+      startListening({
+        button: mic,
+        lang,
+        say,
+        onText: appendTo("translatorInput")
+      });
+    });
 
-      recognition.onstart = () => {
-        mic.classList.add("listening");
-        say("Listening in " + source + "... speak now.");
-      };
+    return true;
+  }
 
-      recognition.onresult = event => {
-        const text = event.results[0]?.[0]?.transcript || "";
-        const input = document.getElementById("translatorInput");
-        if (input && text) {
-          input.value = (input.value + " " + text).trim();
-          input.focus();
-        }
-        say("");
-      };
+  function addMicsWhenReady() {
+    let tries = 0;
 
-      recognition.onerror = event => {
-        if (event.error === "no-speech") {
-          say("Nothing heard. Tap 🎤 and speak right away.
+    const timer = setInterval(() => {
+      const chatDone = addChatMic();
+      const translatorDone = addTranslatorMic();
+
+      if ((chatDone && translatorDone) || ++tries > 20) {
+        clearInterval(timer);
+      }
+    }, 250);
+  }
+
+  addMicsWhenReady();
+
+  /* Start on Home */
+  showHome();
+})();
