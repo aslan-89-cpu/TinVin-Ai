@@ -212,3 +212,88 @@
     }, 250);
   }
 })();
+
+/* Microphone inside Translate */
+(() => {
+  "use strict";
+
+  const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+  const codes = {
+    "English": "en-US", "Arabic": "ar-SA", "Persian": "fa-IR",
+    "Turkish": "tr-TR", "Spanish": "es-ES", "French": "fr-FR",
+    "German": "de-DE", "Italian": "it-IT", "Portuguese": "pt-PT",
+    "Brazilian Portuguese": "pt-BR", "Russian": "ru-RU",
+    "Ukrainian": "uk-UA", "Polish": "pl-PL", "Dutch": "nl-NL",
+    "Swedish": "sv-SE", "Norwegian": "nb-NO", "Danish": "da-DK",
+    "Finnish": "fi-FI", "Greek": "el-GR", "Romanian": "ro-RO",
+    "Hungarian": "hu-HU", "Czech": "cs-CZ", "Slovak": "sk-SK",
+    "Bulgarian": "bg-BG", "Serbian": "sr-RS", "Croatian": "hr-HR",
+    "Hindi": "hi-IN", "Urdu": "ur-PK", "Bengali": "bn-BD",
+    "Thai": "th-TH", "Vietnamese": "vi-VN", "Indonesian": "id-ID",
+    "Malay": "ms-MY", "Chinese Simplified": "zh-CN",
+    "Chinese Traditional": "zh-TW", "Japanese": "ja-JP", "Korean": "ko-KR"
+  };
+
+  let active = null;
+
+  function addTranslatorMic() {
+    const runBtn = document.getElementById("translatorRunBtn");
+    if (!runBtn) return false;
+    if (document.querySelector(".translator-mic-btn")) return true;
+
+    const mic = document.createElement("button");
+    mic.type = "button";
+    mic.className = "translator-mic-btn";
+    mic.textContent = "🎤";
+    mic.setAttribute("aria-label", "Voice input");
+    runBtn.parentNode.insertBefore(mic, runBtn);
+
+    const say = text => {
+      const status = document.getElementById("translatorStatus");
+      if (status) status.textContent = text;
+    };
+
+    mic.addEventListener("click", () => {
+      if (active) {
+        active.stop();
+        return;
+      }
+
+      if (!Recognition) {
+        say("Voice input is not supported in this browser.");
+        return;
+      }
+
+      const source = document.getElementById("translatorSourceLang")?.value || "English";
+      const lang = codes[source];
+
+      if (!lang) {
+        say("Voice input does not support " + source + " yet. Choose another source language, or type.");
+        return;
+      }
+
+      const recognition = new Recognition();
+      recognition.lang = lang;
+      recognition.interimResults = false;
+      recognition.continuous = false;
+      active = recognition;
+
+      recognition.onstart = () => {
+        mic.classList.add("listening");
+        say("Listening in " + source + "... speak now.");
+      };
+
+      recognition.onresult = event => {
+        const text = event.results[0]?.[0]?.transcript || "";
+        const input = document.getElementById("translatorInput");
+        if (input && text) {
+          input.value = (input.value + " " + text).trim();
+          input.focus();
+        }
+        say("");
+      };
+
+      recognition.onerror = event => {
+        if (event.error === "no-speech") {
+          say("Nothing heard. Tap 🎤 and speak right away.
