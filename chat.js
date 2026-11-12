@@ -136,6 +136,29 @@
     return messages;
   }
 
+  // Tell the cloud module (cloud.js) that the chat changed, so it can save it
+  function notifyChanged() {
+    window.TinVinTools?.onChange?.(
+      history.map(turn => ({ user: turn.user, assistant: turn.assistant || "" }))
+    );
+  }
+
+  // Load a saved chat back into the screen
+  function setHistory(turns) {
+    history.length = 0;
+
+    (turns || []).forEach(turn => {
+      history.push({
+        user: turn.user,
+        userAttachments: [],
+        assistant: turn.assistant || "",
+        assistantImage: ""
+      });
+    });
+
+    renderHistory();
+  }
+
   function readFile(file) {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -477,6 +500,8 @@
 
       if (sendButton) sendButton.disabled = false;
       if (input) input.focus();
+
+      notifyChanged();
     }
   }
 
@@ -494,6 +519,8 @@
 
     renderAttachmentPreview();
     setStatus("");
+
+    notifyChanged();
   }
 
   function initialize() {
@@ -536,6 +563,7 @@
     newChat,
     addBubble,
     renderHistory,
+    setHistory,
     getHistory: () => history.map(turn => ({ ...turn }))
   };
 
