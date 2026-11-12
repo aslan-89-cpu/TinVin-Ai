@@ -489,12 +489,23 @@
     } catch (error) {
       console.error("TinVin Chat error:", error);
 
-      turn.assistant =
-        "Sorry, something went wrong: " +
-        (error.message || "Please try again.");
+      if (error.message === "limit_reached") {
+        // Daily limit reached: explain in Sorani and open the Premium page
+        turn.assistant =
+          "سنووری ئەمڕۆت تەواو بوو. بۆ زیاتر بەکارهێنان، Premium بکڕە.";
+        turn.assistantImage = "";
 
-      renderHistory();
-      setStatus("Message could not be completed.");
+        renderHistory();
+        setStatus("");
+        window.TinVinPremium?.open?.();
+      } else {
+        turn.assistant =
+          "Sorry, something went wrong: " +
+          (error.message || "Please try again.");
+
+        renderHistory();
+        setStatus("Message could not be completed.");
+      }
     } finally {
       sending = false;
 
