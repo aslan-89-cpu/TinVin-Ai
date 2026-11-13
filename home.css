@@ -910,3 +910,34 @@ body:has(#homePanel:not([hidden])) #scannerPanel {
 }
 
 #homePanel { padding-bottom: calc(110px + env(safe-area-inset-bottom, 0px)); }
+
+/* ===== Mic button: round, line-icon mic; white wave when listening ===== */
+#homeMicBtn,
+.chat-mic-btn,
+.translator-mic-btn {
+  width: 44px !important;
+  height: 44px !important;
+  min-width: 44px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 50% !important;
+  font-size: 0 !important;
+  color: transparent !important;
+  background-color: rgba(255, 255, 255, .12) !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23d0d4dc' stroke-width='1.8' stroke-linecap='round'%3E%3Crect x='9' y='3' width='6' height='11' rx='3'/%3E%3Cpath d='M5 11a7 7 0 0 0 14 0M12 18v3'/%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+  background-size: 22px 22px !important;
+  box-shadow: none !important;
+  animation: none !important;
+}
+
+#homeMicBtn.listening,
+.chat-mic-btn.listening,
+.translator-mic-btn.listening {
+  background-color: #fafaf7 !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23111' stroke-width='2.2' stroke-linecap='round'%3E%3Cpath d='M3 12v0M6 9v6M9 6v12M12 3v18M15 7v10M18 10v4M21 12v0'/%3E%3C/svg%3E") !important;
+  background-size: 24px 24px !important;
+  box-shadow: none !important;
+  animation: none !important;
+}
