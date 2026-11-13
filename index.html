@@ -5,12 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="theme-color" content="#090d1b">
   <title>TinVin AI</title>
-   
+
   <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="TinVin AI">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
   <link rel="stylesheet" href="style.css?v=20261111">
   <link rel="stylesheet" href="chat.css">
   <link rel="stylesheet" href="translator.css">
@@ -76,36 +77,34 @@
 
     <!-- HOME -->
     <section id="homePanel" class="workspace-panel active">
-      <div class="home-title">
-        <span class="home-logo">✧</span>
-        <h1>TinVin AI</h1>
+      <div class="hx-head">
+        <span class="hx-logo">✧</span>
+        <h1 class="hx-title">TinVin AI</h1>
+        <button id="homePremiumBtn" class="hx-premium" type="button">♛ TinVin AI Premium</button>
       </div>
 
-      <div class="home-menu">
-        <button class="glass-btn" type="button" data-open="chat">
-          <span class="glass-icon">✧</span>
-          <span>AI Chat</span>
-        </button>
+      <div class="hx-body">
+        <aside class="hx-side">
+          <button class="hx-nav active" type="button">⌂ Home</button>
+          <button class="hx-nav" type="button" onclick="document.getElementById('menuToggle').click()">◷ History</button>
+          <button class="hx-nav" type="button" onclick="document.getElementById('menuToggle').click()">◉ Profile</button>
+          <button id="homeSettingsBtn" class="hx-nav" type="button">⚙ Settings</button>
+        </aside>
 
-        <button class="glass-btn" type="button" data-open="translator">
-          <span class="glass-icon">◎</span>
-          <span>Translate</span>
-        </button>
-
-        <button class="glass-btn" type="button" data-open="qr">
-          <span class="glass-icon">▦</span>
-          <span>Scanner</span>
-        </button>
-
-        <div class="home-row">
-          <button class="glass-btn gold" id="homePremiumBtn" type="button">
-            <span class="glass-icon">♛</span>
-            <span>Premium</span>
+        <div class="hx-cards">
+          <button class="hx-card" type="button" data-open="chat">
+            <span class="hx-orb">✧</span>
+            <span class="hx-label">AI Chat</span>
           </button>
 
-          <button class="glass-btn small" id="homeSettingsBtn" type="button">
-            <span class="glass-icon">⚙</span>
-            <span>Settings</span>
+          <button class="hx-card" type="button" data-open="translator">
+            <span class="hx-orb">◎</span>
+            <span class="hx-label">Smart Translate</span>
+          </button>
+
+          <button class="hx-card" type="button" data-open="qr">
+            <span class="hx-orb">▦</span>
+            <span class="hx-label">Vision Scanner</span>
           </button>
         </div>
       </div>
@@ -116,7 +115,7 @@
         <button class="home-bar-btn" id="homeImageBtn" type="button"
           aria-label="Add image">🖼</button>
         <input id="homeInput" class="home-input" type="text"
-          placeholder="Type your prompt here..." enterkeyhint="send">
+          placeholder="Ask TinVin AI anything..." enterkeyhint="send">
         <button class="home-send" id="homeSendBtn" type="button"
           aria-label="Send">↑</button>
       </div>
