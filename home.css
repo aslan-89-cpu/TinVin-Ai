@@ -655,3 +655,91 @@ body:has(#homePanel:not([hidden])) #scannerPanel {
   max-width: 420px;
   margin: 0 auto;
 }
+
+/* ===== Chat composer: "+" left, mic and send right ===== */
+#chatPage .chat-compose {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  align-items: flex-end !important;
+  gap: 8px !important;
+}
+
+#chatPage .chat-compose > #chatInput {
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  width: auto !important;
+}
+
+#chatPage .chat-attachment-controls {
+  display: flex !important;
+  flex: 0 0 auto !important;
+  gap: 6px !important;
+}
+
+/* hide the old 📎 and 📷 buttons (they now live in the "+" menu) */
+#chatPage .chat-attachment-controls > .chat-attach-btn:not(.chat-mic-btn) {
+  display: none !important;
+}
+
+#chatPage .chat-mic-btn {
+  width: 42px !important;
+  height: 42px !important;
+  padding: 0 !important;
+}
+
+#chatPage #sendBtn {
+  flex: 0 0 auto !important;
+  width: 44px !important;
+  height: 44px !important;
+  min-height: 44px !important;
+  padding: 0 !important;
+}
+
+.plus-wrap {
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.plus-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  border: 1px solid rgba(190, 210, 255, .3);
+  background: rgba(255, 255, 255, .08);
+  color: #eaf1ff;
+  font-size: 26px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.plus-menu {
+  position: absolute;
+  bottom: 52px;
+  left: 0;
+  z-index: 50;
+  display: grid;
+  gap: 6px;
+  min-width: 170px;
+  padding: 8px;
+  border-radius: 16px;
+  border: 1px solid rgba(190, 210, 255, .25);
+  background: rgba(12, 18, 38, .97);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, .45);
+}
+
+.plus-menu[hidden] {
+  display: none !important;
+}
+
+.plus-item {
+  min-height: 42px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, .06);
+  color: #eaf1ff;
+  font: inherit;
+  font-size: 15px;
+  text-align: start;
+  cursor: pointer;
+}
