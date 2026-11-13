@@ -743,3 +743,52 @@ body:has(#homePanel:not([hidden])) #scannerPanel {
   text-align: start;
   cursor: pointer;
 }
+
+/* ===== Top Sign in button ===== */
+.top-signin-btn {
+  min-height: 40px;
+  padding: 0 14px;
+  margin-inline-end: 8px;
+  border-radius: 14px;
+  border: 1px solid rgba(120, 190, 255, .45);
+  background: rgba(60, 110, 200, .18);
+  color: #dfeeff;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* ===== Translator: mic and translate button on the right ===== */
+#translatorPage .translator-compose {
+  display: flex !important;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+#translatorPage #translatorInput {
+  flex: 1 1 100%;
+  order: 0;
+}
+
+#translatorPage .translator-mic-btn { order: 1; }
+
+#translatorPage #translatorRunBtn {
+  order: 2;
+  flex: 0 0 auto;
+}
+
+#translatorPage #translatorClearBtn {
+  order: 3;
+  flex: 0 0 auto;
+}
+
+#translatorPage #translatorStatus {
+  order: 4;
+  flex: 1 1 100%;
+}
+
+/* On small phones, keep the top bar from overflowing */
+@media (max-width: 380px) {
+  .top-signin-btn { padding: 0 10px; font-size: 12px; }
+}
