@@ -1,23 +1,25 @@
-/* TinVin AI - Chat composer: "+" on the left, mic and send on the right */
+/* TinVin AI - Chat "+" menu, translator layout and top Sign in button */
 (() => {
   "use strict";
 
-  let tries = 0;
+  const $ = id => document.getElementById(id);
 
-  const timer = setInterval(() => {
-    tries++;
-    if (setupComposer() || tries > 60) clearInterval(timer);
-  }, 250);
+  function make(tag, className, text) {
+    const node = document.createElement(tag);
+    if (className) node.className = className;
+    if (text) node.textContent = text;
+    return node;
+  }
 
-  function setupComposer() {
+  /* Chat: [+] [text] [mic] [send]  with gallery, camera and file in the "+" menu */
+  function setupChatComposer() {
     const composer = document.querySelector("#chatPage .chat-compose");
     if (!composer) return false;
-
     if (composer.dataset.plusReady === "true") return true;
 
     const controls = composer.querySelector(".chat-attachment-controls");
-    const send = document.getElementById("sendBtn");
-    const input = document.getElementById("chatInput");
+    const send = $("sendBtn");
+    const input = $("chatInput");
     const fileInput = composer.querySelector('input[type="file"]:not([capture])');
     const cameraInput = composer.querySelector('input[type="file"][capture]');
 
@@ -25,9 +27,8 @@
 
     composer.dataset.plusReady = "true";
 
-    /* Gallery picker: images only, no camera.
-       Its files are passed to the existing file input, so chat.js handles them. */
-    const galleryInput = document.createElement("input");
+    /* Gallery: images only. Its files are handed to chat.js through the file input. */
+    const galleryInput = make("input");
     galleryInput.type = "file";
     galleryInput.accept = "image/*";
     galleryInput.multiple = true;
@@ -43,30 +44,24 @@
     });
 
     /* "+" button and its menu */
-    const wrap = document.createElement("div");
-    wrap.className = "plus-wrap";
+    const wrap = make("div", "plus-wrap");
 
-    const plusBtn = document.createElement("button");
+    const plusBtn = make("button", "plus-btn", "+");
     plusBtn.type = "button";
-    plusBtn.className = "plus-btn";
-    plusBtn.textContent = "+";
     plusBtn.setAttribute("aria-label", "Add");
 
-    const menu = document.createElement("div");
-    menu.className = "plus-menu";
+    const menu = make("div", "plus-menu");
     menu.hidden = true;
 
     const items = [
-      { label: "📷  کامێرا", action: () => cameraInput.click() },
-      { label: "🖼  گالێری", action: () => galleryInput.click() },
-      { label: "📎  فایل", action: () => fileInput.click() }
+      { label: "📷  Camera", action: () => cameraInput.click() },
+      { label: "🖼  Gallery", action: () => galleryInput.click() },
+      { label: "📎  File", action: () => fileInput.click() }
     ];
 
     items.forEach(item => {
-      const b = document.createElement("button");
+      const b = make("button", "plus-item", item.label);
       b.type = "button";
-      b.className = "plus-item";
-      b.textContent = item.label;
       b.addEventListener("click", () => {
         menu.hidden = true;
         item.action();
@@ -85,10 +80,60 @@
 
     wrap.append(plusBtn, menu);
 
-    /* Layout: [+] [text box] [mic] [send] */
     composer.insertBefore(wrap, composer.firstChild);
     composer.insertBefore(controls, send);
 
     return true;
   }
+
+  /* Translator: keep the mic and translate button on the right */
+  function setupTranslatorComposer() {
+    const composer = document.querySelector("#translatorPage .translator-compose");
+    if (!composer) return false;
+    composer.dataset.layoutReady = "true";
+    return true;
+  }
+
+  /* Top bar "Sign in" button: it presses the sign-in button in the sidebar */
+  function setupSignInButton() {
+    const topbar = document.querySelector(".topbar");
+    const premium = $("premiumTopBtn");
+    if (!topbar || !premium) return false;
+    if ($("topSignInBtn")) return true;
+
+    const btn = make("button", "top-signin-btn", "Sign in");
+    btn.id = "topSignInBtn";
+    btn.type = "button";
+
+    btn.addEventListener("click", () => {
+      document.querySelector("#authBox .auth-btn")?.click();
+    });
+
+    topbar.insertBefore(btn, premium);
+
+    const sync = () => {
+      const signedIn = !!document.querySelector("#authBox .auth-name");
+      btn.textContent = signedIn ? "Sign out" : "Sign in";
+    };
+
+    const box = $("authBox");
+    if (box) new MutationObserver(sync).observe(box, { childList: true, subtree: true });
+
+    sync();
+    return true;
+  }
+
+  let tries = 0;
+
+  const timer = setInterval(() => {
+    tries++;
+
+    const chatDone = setupChatComposer();
+    const translatorDone = setupTranslatorComposer();
+    const signInDone = setupSignInButton();
+
+    if ((chatDone && translatorDone && signInDone) || tries > 80) {
+      clearInterval(timer);
+    }
+  }, 250);
 })();
