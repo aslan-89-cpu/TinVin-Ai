@@ -587,3 +587,71 @@ body:has(#homePanel:not([hidden])) #scannerPanel {
   color: #6b5a2c; font-weight: 800; background: #e9d3a0; cursor: not-allowed; opacity: .75;
 }
 .upgrade-status { margin-top: 10px; font-size: .85rem; color: #9fb0d0; text-align: center; }
+
+/* Scanner: neat, centered layout */
+#qrPage,
+#scannerPanel .qr-container,
+#scannerPanel > div {
+  text-align: center;
+}
+
+#scannerPanel .qr-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 22px 16px !important;
+  border-radius: 22px;
+}
+
+#scannerPanel h2,
+#scannerPanel h1,
+#qrPage h2 {
+  margin: 0 0 6px;
+}
+
+#scannerPanel p,
+#qrPage p {
+  margin: 0 0 8px;
+  color: #aebbd5;
+  font-size: .95rem;
+}
+
+/* Buttons side by side, same size */
+#scannerPanel button,
+#qrPage button {
+  min-width: 150px;
+  min-height: 48px;
+  padding: 0 18px !important;
+  border-radius: 16px !important;
+  font-weight: 700;
+}
+
+#scannerPanel .qr-buttons,
+#qrPage .qr-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+}
+
+/* File picker row: full width and centered */
+#scannerPanel input[type="file"],
+#qrPage input[type="file"] {
+  width: 100%;
+  max-width: 340px;
+  margin: 6px auto;
+  color: #dbe7ff;
+}
+
+/* Status and hint text centered */
+#scannerPanel .qr-status,
+#qrPage .qr-status,
+#scannerPanel .qr-note,
+#qrPage .qr-note {
+  text-align: center;
+  line-height: 1.6;
+  max-width: 420px;
+  margin: 0 auto;
+}
