@@ -494,3 +494,17 @@ body:has(#homePanel:not([hidden])) #scannerPanel {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+/* Keep the top bar below the iPhone status bar (Safari and Home Screen) */
+.topbar {
+  padding-top: env(safe-area-inset-top, 0px) !important;
+  height: auto !important;
+  min-height: calc(64px + env(safe-area-inset-top, 0px)) !important;
+  align-items: center !important;
+}
+
+/* Leave room for the top bar so content is not hidden under it */
+#workspacePage,
+#settingsPage {
+  padding-top: 12px;
+}
