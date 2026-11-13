@@ -1,4 +1,3 @@
-
 (() => {
   "use strict";
 
@@ -105,6 +104,8 @@
     "Pashto"
   ];
 
+  const I18N_PREFIX = "tinvin_i18n_";
+
   let activeTab = "chatPage";
   let lastOutput = "";
   let busy = false;
@@ -115,6 +116,22 @@
   const originalPlaceholders = new WeakMap();
 
   window.TinVinTools = window.TinVinTools || {};
+
+  /* Saved translations per language, so a language that was used before
+     appears instantly on the next visit or the next switch. */
+  function loadCache(language) {
+    try {
+      return JSON.parse(localStorage.getItem(I18N_PREFIX + language) || "{}");
+    } catch {
+      return {};
+    }
+  }
+
+  function saveCache(language, cache) {
+    try {
+      localStorage.setItem(I18N_PREFIX + language, JSON.stringify(cache));
+    } catch {}
+  }
 
   function showPage(id) {
     const settings = id === "settingsPage";
@@ -379,7 +396,7 @@
 
     const payload = {};
 
-    entries.forEach((item, index) => {
+    entries.forEach(item => {
       payload[item.key] = item.text;
     });
 
@@ -466,64 +483,79 @@
 
     setStatus("languageStatus", "Translating interface...");
 
-    const items = getTranslatableNodes();
-    const batchSize = 10;
+    const cache = loadCache(language);
+
+    // Each distinct English text, and every place it should be applied
+    const groups = new Map();
+
+    const addItem = (text, apply) => {
+      const key = String(text || "").trim();
+      if (!key) return;
+
+      // Already translated before: apply instantly, no request needed
+      if (cache[key]) {
+        apply(cache[key]);
+        return;
+      }
+
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key).push(apply);
+    };
+
+    getTranslatableNodes().forEach(item => {
+      addItem(item.original, value => {
+        if (!item.node.isConnected) return;
+
+        if (!translatedNodes.some(entry => entry[0] === item.node)) {
+          translatedNodes.push([item.node, item.original]);
+        }
+
+        item.node.nodeValue = item.original.replace(
+          item.original.trim(),
+          value
+        );
+      });
+    });
+
+    document.querySelectorAll("input[placeholder],textarea[placeholder]")
+      .forEach(element => {
+        const original =
+          originalPlaceholders.get(element) ??
+          element.getAttribute("placeholder");
+
+        if (original) {
+          addItem(original, value => {
+            element.setAttribute("placeholder", value);
+          });
+        }
+      });
+
+    const pending = [...groups.keys()];
+    const batchSize = 12;
+    const batches = [];
+
+    for (let start = 0; start < pending.length; start += batchSize) {
+      batches.push(pending.slice(start, start + batchSize));
+    }
 
     try {
-      for (let start = 0; start < items.length; start += batchSize) {
-        if (runId !== translationRun) return;
-
-        const batch = items.slice(start, start + batchSize);
-
-        const entries = batch.map((item, index) => ({
+      // All batches are sent at the same time, not one after another
+      await Promise.all(batches.map(batch => {
+        const entries = batch.map((text, index) => ({
           key: "s" + index,
-          text: item.original.trim(),
+          text,
           apply: value => {
-            if (!item.node.isConnected) return;
-
-            if (!translatedNodes.some(entry => entry[0] === item.node)) {
-              translatedNodes.push([item.node, item.original]);
-            }
-
-            item.node.nodeValue = item.original.replace(
-              item.original.trim(),
-              value
-            );
+            cache[text] = value;
+            (groups.get(text) || []).forEach(fn => fn(value));
           }
         }));
 
-        await requestTranslationBatch(entries, language, runId);
-      }
-
-      const fields = [
-        ...document.querySelectorAll(
-          "input[placeholder],textarea[placeholder]"
-        )
-      ];
-
-      const fieldData = fields.map(element => ({
-        element,
-        original: originalPlaceholders.get(element) ??
-          element.getAttribute("placeholder")
-      })).filter(item => item.original);
-
-      for (let start = 0; start < fieldData.length; start += batchSize) {
-        if (runId !== translationRun) return;
-
-        const batch = fieldData.slice(start, start + batchSize);
-
-        const entries = batch.map((item, index) => ({
-          key: "p" + index,
-          text: item.original,
-          apply: value => {
-            item.element.setAttribute("placeholder", value);
-          }
-        }));
-
-        await requestTranslationBatch(entries, language, runId);
-      }
+        return requestTranslationBatch(entries, language, runId);
+      }));
 
       if (runId !== translationRun) return;
+
+      saveCache(language, cache);
 
       setLanguageDirection(language);
 
@@ -534,6 +566,8 @@
 
     } catch (error) {
       if (runId === translationRun) {
+        saveCache(language, cache);
+
         setStatus(
           "languageStatus",
           "Could not translate the full interface: " +
@@ -586,40 +620,40 @@
     window.TinVinQR?.open?.();
   });
 
-// Sidebar — ChatGPT style menu
-const sidebar = $("mainSidebar");
-const menuToggle = $("menuToggle");
-const drawerOverlay = $("drawerOverlay");
+  // Sidebar
+  const sidebar = $("mainSidebar");
+  const menuToggle = $("menuToggle");
+  const drawerOverlay = $("drawerOverlay");
 
-function setSidebarOpen(open) {
-  sidebar?.classList.toggle("open", open);
-  menuToggle?.classList.toggle("open", open);
-  drawerOverlay?.classList.toggle("active", open);
+  function setSidebarOpen(open) {
+    sidebar?.classList.toggle("open", open);
+    menuToggle?.classList.toggle("open", open);
+    drawerOverlay?.classList.toggle("active", open);
 
-  document.body.classList.toggle("sidebar-open", open);
+    document.body.classList.toggle("sidebar-open", open);
 
-  menuToggle?.setAttribute("aria-expanded", String(open));
-}
-
-menuToggle?.addEventListener("click", () => {
-  setSidebarOpen(!sidebar?.classList.contains("open"));
-});
-
-$("closeMenu")?.addEventListener("click", () => {
-  setSidebarOpen(false);
-});
-
-drawerOverlay?.addEventListener("click", () => {
-  setSidebarOpen(false);
-});
-
-document.addEventListener("keydown", event => {
-  if (event.key === "Escape") {
-    setSidebarOpen(false);
+    menuToggle?.setAttribute("aria-expanded", String(open));
   }
-});
 
-setSidebarOpen(false);
+  menuToggle?.addEventListener("click", () => {
+    setSidebarOpen(!sidebar?.classList.contains("open"));
+  });
+
+  $("closeMenu")?.addEventListener("click", () => {
+    setSidebarOpen(false);
+  });
+
+  drawerOverlay?.addEventListener("click", () => {
+    setSidebarOpen(false);
+  });
+
+  document.addEventListener("keydown", event => {
+    if (event.key === "Escape") {
+      setSidebarOpen(false);
+    }
+  });
+
+  setSidebarOpen(false);
 
   // Settings
   $("settingsBtn")?.addEventListener("click", () => {
