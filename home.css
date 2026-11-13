@@ -941,3 +941,25 @@ body:has(#homePanel:not([hidden])) #scannerPanel {
   box-shadow: none !important;
   animation: none !important;
 }
+
+/* Cards show the full images (the labels are already inside the images) */
+.hx-card {
+  display: block !important;
+  padding: 0 !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+  border-radius: 20px !important;
+}
+
+.hx-card .hx-label {
+  display: none !important;
+}
+
+.hx-card .hx-ico {
+  display: block !important;
+  width: 100% !important;
+  height: auto !important;
+  max-width: none !important;
+  object-fit: cover !important;
+  filter: none !important;
+}
