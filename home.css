@@ -1433,3 +1433,23 @@ body:has(#homePanel:not([hidden])) {
 #homePanel .hx-body {
   margin-top: 0 !important;
 }
+
+/* Drawer footer: under Sign out, no extra gap, no stray line */
+.sidebar-bottom {
+  position: static !important;
+  margin: 10px 0 0 !important;
+  padding: 14px 16px !important;
+  border-radius: 18px !important;
+  border: 1px solid rgba(190, 210, 255, .2) !important;
+  background: rgba(20, 30, 58, .6) !important;
+}
+
+#authBox {
+  margin-bottom: 0 !important;
+}
+
+/* hide the thin empty strip above the footer */
+#historyList:empty,
+.sidebar-menu + #authBox + #historyList {
+  display: none !important;
+}
