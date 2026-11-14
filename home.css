@@ -1119,3 +1119,36 @@ body:has(#homePanel:not([hidden])) #scannerPanel { display: none !important; }
   right: 14px !important;
   z-index: 30 !important;
 }
+
+/* Cards: the image fills the whole card, all four corners */
+.hx-cards {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 10px !important;
+  height: calc(100% - 4px) !important;
+}
+
+.hx-card {
+  flex: 1 1 0 !important;
+  width: 100% !important;
+  max-height: none !important;
+  min-height: 0 !important;
+  height: auto !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  overflow: hidden !important;
+  border-radius: 22px !important;
+  display: block !important;
+}
+
+.hx-card .hx-ico {
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
+  object-fit: cover !important;
+  object-position: center 45% !important;
+  border-radius: 0 !important;
+  margin: 0 !important;
+}
