@@ -963,3 +963,21 @@ body:has(#homePanel:not([hidden])) #scannerPanel {
   object-fit: cover !important;
   filter: none !important;
 }
+
+/* Full-screen network background behind Home */
+html,
+body {
+  background: #050a18 url("bg.jpg") center / cover no-repeat fixed !important;
+}
+
+#homePanel {
+  background:
+    linear-gradient(180deg, rgba(5, 10, 24, .45) 0%, rgba(5, 10, 24, .25) 50%, rgba(5, 10, 24, .65) 100%) !important;
+}
+
+/* Sidebar frosted so the network shows through softly */
+.hx-side {
+  background: linear-gradient(160deg, rgba(20, 30, 58, .6), rgba(8, 14, 30, .6)) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
