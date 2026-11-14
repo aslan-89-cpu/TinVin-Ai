@@ -1204,3 +1204,37 @@ body:has(#homePanel:not([hidden])) {
 .hx-card::after {
   pointer-events: none !important;
 }
+
+/* Left menu back to the earlier, wider size */
+.hx-body {
+  grid-template-columns: minmax(0, 27%) minmax(0, 1fr) !important;
+  gap: 10px !important;
+}
+
+.hx-nav {
+  font-size: 14px !important;
+  min-height: 44px !important;
+  padding: 0 10px !important;
+  white-space: normal !important;
+}
+
+/* Cards: the image fills the whole card, no black side bands */
+.hx-card {
+  position: relative !important;
+  overflow: hidden !important;
+  padding: 0 !important;
+  border-radius: 22px !important;
+}
+
+.hx-card .hx-ico {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
+  object-fit: cover !important;
+  object-position: center 40% !important;
+  border-radius: 0 !important;
+  margin: 0 !important;
+}
