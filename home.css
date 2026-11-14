@@ -1534,3 +1534,18 @@ body:has(#homePanel:not([hidden])) {
   border-radius: 0 !important;
   margin: 0 !important;
 }
+
+/* ===== Home: medium cards ===== */
+#homePanel .hx-card {
+  height: 150px !important;
+  min-height: 150px !important;
+}
+
+#homePanel .hx-cards {
+  gap: 10px !important;
+}
+
+#homePanel .hx-card .hx-ico {
+  object-fit: cover !important;
+  object-position: center 50% !important;
+}
