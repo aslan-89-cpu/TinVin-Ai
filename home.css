@@ -1292,3 +1292,32 @@ body:has(#homePanel:not([hidden])) {
   min-width: 44px !important;
   height: 44px !important;
 }
+
+/* Cards: whole image visible, centred, not zoomed or cut */
+.hx-card {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 6px !important;
+  overflow: hidden !important;
+  background: linear-gradient(160deg, rgba(20, 34, 66, .55), rgba(8, 14, 30, .75)) !important;
+}
+
+.hx-card .hx-ico {
+  position: static !important;
+  inset: auto !important;
+  width: auto !important;
+  height: 92% !important;
+  max-width: 100% !important;
+  max-height: none !important;
+  object-fit: contain !important;
+  object-position: center !important;
+  margin: 0 auto !important;
+  border-radius: 14px !important;
+}
+
+/* keep "Settings" on one line in the left menu */
+.hx-nav {
+  white-space: nowrap !important;
+  font-size: 13px !important;
+}
