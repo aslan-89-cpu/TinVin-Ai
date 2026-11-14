@@ -1005,3 +1005,16 @@ body {
   margin: 0 auto !important;
   border-radius: 14px;
 }
+
+/* Cards: same size, images centred */
+.hx-cards {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 10px !important;
+}
+
+.hx-card {
+  height: 200px !important;
+  min-height: 200px !important;
+  justify-content: center !important;
+}
