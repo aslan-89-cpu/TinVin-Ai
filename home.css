@@ -1488,3 +1488,49 @@ body:has(#homePanel:not([hidden])) {
   min-width: 28px !important;
   text-align: center !important;
 }
+
+/* ===== Home: big cards, page can scroll ===== */
+body:has(#homePanel:not([hidden])) {
+  overflow: auto !important;
+}
+
+#homePanel {
+  height: auto !important;
+  min-height: calc(100dvh - 92px) !important;
+  overflow: visible !important;
+  padding: 12px 12px 120px !important;
+}
+
+#homePanel .hx-body {
+  height: auto !important;
+  flex: 0 0 auto !important;
+}
+
+#homePanel .hx-cards {
+  height: auto !important;
+  flex: 0 0 auto !important;
+  gap: 14px !important;
+}
+
+#homePanel .hx-card {
+  flex: 0 0 auto !important;
+  height: 230px !important;
+  min-height: 230px !important;
+  width: 100% !important;
+  position: relative !important;
+  border-radius: 24px !important;
+  overflow: hidden !important;
+}
+
+#homePanel .hx-card .hx-ico {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
+  object-fit: cover !important;
+  object-position: center 55% !important;
+  border-radius: 0 !important;
+  margin: 0 !important;
+}
