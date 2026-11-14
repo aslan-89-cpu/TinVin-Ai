@@ -1549,3 +1549,46 @@ body:has(#homePanel:not([hidden])) {
   object-fit: cover !important;
   object-position: center 50% !important;
 }
+
+/* ===== Home: fix card crop + bottom bar ===== */
+#homePanel .hx-card {
+  height: 180px !important;
+  min-height: 180px !important;
+}
+
+#homePanel .hx-card .hx-ico {
+  object-fit: cover !important;
+  object-position: center 35% !important;
+}
+
+/* show the card name as text, since the image gets cropped */
+#homePanel .hx-card .hx-label {
+  display: block !important;
+  position: absolute !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  z-index: 3 !important;
+  padding: 22px 0 10px !important;
+  text-align: center !important;
+  font-size: 18px !important;
+  font-weight: 800 !important;
+  color: #fff !important;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, .8) !important;
+  background: linear-gradient(transparent, rgba(5, 10, 24, .85)) !important;
+  pointer-events: none !important;
+}
+
+/* prompt bar stays visible at the bottom while scrolling */
+#homePanel {
+  padding-bottom: 12px !important;
+}
+
+#homePanel .home-bar {
+  position: sticky !important;
+  left: auto !important;
+  right: auto !important;
+  bottom: calc(12px + env(safe-area-inset-bottom, 0px)) !important;
+  margin-top: 14px !important;
+  z-index: 30 !important;
+}
