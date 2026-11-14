@@ -1152,3 +1152,38 @@ body:has(#homePanel:not([hidden])) #scannerPanel { display: none !important; }
   border-radius: 0 !important;
   margin: 0 !important;
 }
+
+/* Show the full image (names included), no cropping */
+.hx-card .hx-ico {
+  object-fit: contain !important;
+  object-position: center !important;
+  background: rgba(5, 10, 24, .92) !important;
+  border-radius: 18px !important;
+}
+
+/* Home fits one screen: no scroll */
+body:has(#homePanel:not([hidden])) {
+  overflow: hidden !important;
+}
+
+#homePanel {
+  height: calc(100dvh - 150px) !important;
+  min-height: 0 !important;
+  padding-bottom: 96px !important;
+  overflow: hidden !important;
+}
+
+.hx-body {
+  height: calc(100% - 130px) !important;
+  min-height: 0 !important;
+}
+
+.hx-cards {
+  height: 100% !important;
+  min-height: 0 !important;
+}
+
+.hx-card {
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
