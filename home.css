@@ -1401,3 +1401,35 @@ body:has(#homePanel:not([hidden])) {
 .sidebar {
   overflow-y: auto !important;
 }
+/* Home top: no ✧ icon, Premium and the name are compact, cards move up */
+#homePanel .hx-logo {
+  display: none !important;
+}
+
+#homePanel .hx-head {
+  margin: 0 0 4px !important;
+  gap: 4px !important;
+  padding-top: 0 !important;
+}
+
+#homePanel .hx-premium {
+  margin-bottom: 2px !important;
+  padding: 6px 16px !important;
+  font-size: 14px !important;
+}
+
+#homePanel .hx-title {
+  margin: 0 !important;
+  font-size: 1.4rem !important;
+  line-height: 1.1 !important;
+}
+
+#homePanel .hx-sub {
+  margin: 0 !important;
+  font-size: .75rem !important;
+  line-height: 1.1 !important;
+}
+
+#homePanel .hx-body {
+  margin-top: 0 !important;
+}
