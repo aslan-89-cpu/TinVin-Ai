@@ -981,3 +981,27 @@ body {
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
 }
+
+/* Smaller card images: fixed height, centred, no cropping */
+.hx-cards {
+  gap: 10px !important;
+}
+
+.hx-card {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  height: auto !important;
+  min-height: 0 !important;
+  padding: 8px !important;
+}
+
+.hx-card .hx-ico {
+  display: block !important;
+  width: auto !important;
+  max-width: 100% !important;
+  height: 165px !important;
+  object-fit: contain !important;
+  margin: 0 auto !important;
+  border-radius: 14px;
+}
