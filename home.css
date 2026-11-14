@@ -1321,3 +1321,66 @@ body:has(#homePanel:not([hidden])) {
   white-space: nowrap !important;
   font-size: 13px !important;
 }
+
+/* ===== Home: full-screen layout, three wide cards, bottom bar ===== */
+#homePanel {
+  display: flex !important;
+  flex-direction: column !important;
+  height: calc(100dvh - 92px) !important;
+  min-height: 0 !important;
+  padding: 12px 12px 96px !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+  border-radius: 26px !important;
+}
+
+#homePanel .hx-head {
+  flex: 0 0 auto !important;
+  margin: 0 0 10px !important;
+}
+
+#homePanel .hx-body {
+  flex: 1 1 0 !important;
+  min-height: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 10px !important;
+}
+
+#homePanel .hx-side { display: none !important; }
+
+#homePanel .hx-cards {
+  flex: 1 1 0 !important;
+  min-height: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 10px !important;
+}
+
+#homePanel .hx-card {
+  flex: 1 1 0 !important;
+  min-height: 0 !important;
+  width: 100% !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  border-radius: 22px !important;
+  display: block !important;
+}
+
+/* each card shows the whole picture, label included */
+#homePanel .hx-card .hx-ico {
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
+  object-fit: contain !important;
+  object-position: center !important;
+  border-radius: 0 !important;
+  margin: 0 !important;
+}
+
+/* bottom bar stays above the edge */
+#homePanel .home-bar {
+  bottom: calc(14px + env(safe-area-inset-bottom, 0px)) !important;
+}
