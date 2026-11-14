@@ -1453,3 +1453,8 @@ body:has(#homePanel:not([hidden])) {
 .sidebar-menu + #authBox + #historyList {
   display: none !important;
 }
+
+.sidebar { display: flex; flex-direction: column; }
+.brand-card { order: -1; }          /* karti TinVin AI bibe sarawe */
+.sidebar-head span { display: none; } /* WORKSPACE labe */
+.sidebar-head { justify-content: flex-end; }
