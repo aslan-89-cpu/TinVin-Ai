@@ -788,3 +788,52 @@ body:has(#homePanel:not([hidden])) #scannerPanel { display: none !important; }
 @media (prefers-reduced-motion: reduce) {
   .hx-card, .hx-card::after, .hx-premium { animation: none !important; transition: none !important; }
 }
+
+/* Translator: the run button shows only the arrow and sits on the right */
+#translatorPage #translatorRunBtn {
+  font-size: 0 !important;
+  color: transparent !important;
+  width: 50px !important;
+  min-width: 50px !important;
+  height: 46px !important;
+  position: relative;
+}
+
+#translatorPage #translatorRunBtn::before {
+  content: "↑";
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #fff;
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* keep the row in one line: + | text | 🎤 | ↑ */
+#translatorPage .translator-compose {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+
+#translatorPage .translator-compose #translatorInput {
+  flex: 1 1 0 !important;
+  min-width: 0 !important;
+  width: auto !important;
+}
+
+#translatorPage .translator-compose .translator-mic-btn,
+#translatorPage .translator-compose #translatorRunBtn,
+#translatorPage .translator-compose .plus-wrap {
+  flex: 0 0 auto !important;
+}
+
+/* Clear goes on its own line under the row */
+#translatorPage .translator-compose #translatorClearBtn {
+  flex: 1 1 100% !important;
+  order: 9 !important;
+  min-height: 36px !important;
+}
