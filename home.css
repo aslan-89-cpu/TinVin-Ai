@@ -1026,3 +1026,73 @@ body:has(#homePanel:not([hidden])) #scannerPanel { display: none !important; }
 #translatorPage .translator-compose #translatorRunBtn::after {
   content: none !important;
 }
+
+/* ===== Home fits one screen (no scroll), rounded cards ===== */
+#homePanel {
+  min-height: 100dvh !important;
+  height: 100dvh;
+  padding: 10px 14px 96px !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+/* smaller top block so there is room for all three cards */
+#homePanel .hx-head {
+  margin: 2px 0 8px !important;
+  gap: 4px !important;
+}
+
+.hx-premium {
+  padding: 7px 14px !important;
+  font-size: 14px !important;
+}
+
+.hx-logo { font-size: 1.4rem !important; }
+
+.hx-title { font-size: 1.4rem !important; }
+
+.hx-sub { font-size: .78rem !important; }
+
+/* sidebar and cards share the remaining height */
+.hx-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  align-items: stretch !important;
+}
+
+.hx-side {
+  min-height: 0 !important;
+  height: 100%;
+  border-radius: 22px !important;
+}
+
+.hx-cards {
+  height: 100%;
+  min-height: 0;
+  gap: 8px !important;
+}
+
+/* each card: rounded corners on all four sides, image fits inside */
+.hx-card {
+  flex: 1 1 0 !important;
+  min-height: 0 !important;
+  border-radius: 24px !important;
+  padding: 6px !important;
+  overflow: hidden !important;
+}
+
+.hx-card .hx-ico {
+  height: 100% !important;
+  width: auto !important;
+  max-width: 100% !important;
+  max-height: 100%;
+  object-fit: contain !important;
+  border-radius: 16px;
+}
+
+/* keep the bottom prompt bar visible */
+.home-bar {
+  bottom: calc(10px + env(safe-area-inset-bottom, 0px)) !important;
+}
