@@ -327,7 +327,7 @@ body:has(#homePanel:not([hidden])) #scannerPanel { display: none !important; }
   display: block !important;
   width: auto !important;
   max-width: 100% !important;
-  height: 165px !important;
+  height: 180px !important;
   object-fit: contain !important;
   margin: 0 auto !important;
   border-radius: 14px;
