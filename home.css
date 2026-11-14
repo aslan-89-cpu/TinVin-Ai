@@ -1454,7 +1454,37 @@ body:has(#homePanel:not([hidden])) {
   display: none !important;
 }
 
-.sidebar { display: flex; flex-direction: column; }
-.brand-card { order: -1; }          /* karti TinVin AI bibe sarawe */
-.sidebar-head span { display: none; } /* WORKSPACE labe */
-.sidebar-head { justify-content: flex-end; }
+/* Drawer: TinVin AI card on top, X on the right */
+.sidebar {
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.sidebar-header {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+}
+
+.sidebar-header .sidebar-bottom {
+  flex: 1 !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+}
+
+.sidebar-header #closeMenu {
+  flex: 0 0 auto !important;
+}
+
+/* keep menu icons aligned */
+.sidebar-menu .menu-item {
+  display: flex !important;
+  align-items: center !important;
+  gap: 16px !important;
+}
+
+.sidebar-menu .menu-item > span {
+  width: 28px !important;
+  min-width: 28px !important;
+  text-align: center !important;
+}
