@@ -1238,3 +1238,57 @@ body:has(#homePanel:not([hidden])) {
   border-radius: 0 !important;
   margin: 0 !important;
 }
+
+/* Home bar: [+] [text] [🎤] [↑] like AI Chat */
+.home-bar {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+
+/* 🖼 becomes a "+" button on the left */
+#homeImageBtn {
+  order: 0 !important;
+  width: 44px !important;
+  height: 44px !important;
+  min-width: 44px !important;
+  padding: 0 !important;
+  border: 1px solid rgba(190, 210, 255, .3) !important;
+  border-radius: 14px !important;
+  background: rgba(255, 255, 255, .08) !important;
+  font-size: 0 !important;
+  color: transparent !important;
+  position: relative;
+}
+
+#homeImageBtn::before {
+  content: "+";
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  line-height: 1;
+  color: #eaf1ff;
+}
+
+/* text box in the middle */
+#homeInput {
+  order: 1 !important;
+  flex: 1 1 0 !important;
+  min-width: 0 !important;
+}
+
+/* 🎤 on the right, next to send */
+#homeMicBtn {
+  order: 2 !important;
+}
+
+/* ↑ on the far right */
+#homeSendBtn {
+  order: 3 !important;
+  width: 44px !important;
+  min-width: 44px !important;
+  height: 44px !important;
+}
