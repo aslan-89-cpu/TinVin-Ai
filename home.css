@@ -1006,3 +1006,23 @@ body:has(#homePanel:not([hidden])) #scannerPanel { display: none !important; }
 #translatorPage .translator-compose .tr-hidden {
   display: none !important;
 }
+
+/* Translator: remove the "Send" text, keep only the arrow */
+#translatorPage .translator-compose #translatorRunBtn {
+  font-size: 0 !important;
+  color: transparent !important;
+  text-indent: -9999px !important;
+  overflow: hidden !important;
+}
+
+#translatorPage .translator-compose #translatorRunBtn::before {
+  content: "↑" !important;
+  text-indent: 0 !important;
+  font-size: 1.5rem !important;
+  font-weight: 700 !important;
+  color: #fff !important;
+}
+
+#translatorPage .translator-compose #translatorRunBtn::after {
+  content: none !important;
+}
