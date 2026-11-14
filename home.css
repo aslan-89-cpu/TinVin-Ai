@@ -1096,3 +1096,26 @@ body:has(#homePanel:not([hidden])) #scannerPanel { display: none !important; }
 .home-bar {
   bottom: calc(10px + env(safe-area-inset-bottom, 0px)) !important;
 }
+
+/* Leave room for the prompt bar at the bottom, so nothing is cut off */
+#homePanel {
+  height: calc(100dvh - 60px) !important;
+  padding-bottom: 104px !important;
+}
+
+/* a little shorter cards so all three fit above the bar */
+.hx-cards {
+  height: calc(100% - 4px) !important;
+}
+
+.hx-card {
+  max-height: 31% !important;
+}
+
+/* prompt bar: fully visible above the bottom edge */
+.home-bar {
+  bottom: calc(18px + env(safe-area-inset-bottom, 0px)) !important;
+  left: 14px !important;
+  right: 14px !important;
+  z-index: 30 !important;
+}
