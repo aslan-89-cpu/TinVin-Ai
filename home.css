@@ -1187,3 +1187,20 @@ body:has(#homePanel:not([hidden])) {
   min-height: 0 !important;
   overflow: hidden !important;
 }
+
+/* Cards are always tappable */
+.hx-card {
+  position: relative;
+  z-index: 2;
+  cursor: pointer;
+  pointer-events: auto !important;
+}
+
+.hx-card .hx-ico,
+.hx-card .hx-label {
+  pointer-events: none;
+}
+
+.hx-card::after {
+  pointer-events: none !important;
+}
