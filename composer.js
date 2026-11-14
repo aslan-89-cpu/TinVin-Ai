@@ -137,3 +137,41 @@
     }
   }, 250);
 })();
+
+/* Translator: icon-only attach/camera, send-style Translate button */
+(() => {
+  const tidy = () => {
+    const page = document.getElementById("translatorPage");
+    if (!page) return;
+
+    page.querySelectorAll("button").forEach(b => {
+      const t = b.textContent.trim();
+
+      if (t === "Attach image") {
+        b.textContent = "📎";
+        b.title = "Attach image";
+        b.setAttribute("aria-label", "Attach image");
+        b.classList.add("tr-icon-btn");
+      }
+
+      if (t === "Camera") {
+        b.textContent = "📷";
+        b.title = "Camera";
+        b.setAttribute("aria-label", "Camera");
+        b.classList.add("tr-icon-btn");
+      }
+
+      if (b.id === "translatorRunBtn" && t !== "↑") {
+        b.textContent = "↑";
+        b.setAttribute("aria-label", "Translate");
+      }
+    });
+  };
+
+  tidy();
+  let n = 0;
+  const timer = setInterval(() => {
+    tidy();
+    if (++n > 20) clearInterval(timer);
+  }, 300);
+})();
