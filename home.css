@@ -837,3 +837,80 @@ body:has(#homePanel:not([hidden])) #scannerPanel { display: none !important; }
   order: 9 !important;
   min-height: 36px !important;
 }
+
+/* ===== Translator: final clean layout (like AI Chat) ===== */
+#translatorPage .translator-compose {
+  display: grid !important;
+  grid-template-columns: auto minmax(0, 1fr) auto auto !important;
+  align-items: center !important;
+  gap: 8px !important;
+  padding: 10px !important;
+}
+
+#translatorPage .translator-compose .plus-wrap {
+  grid-column: 1 !important;
+  grid-row: 1 !important;
+}
+
+#translatorPage .translator-compose #translatorInput {
+  grid-column: 2 !important;
+  grid-row: 1 !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  height: 46px !important;
+  min-height: 46px !important;
+  max-height: 120px !important;
+  padding: 12px !important;
+  resize: none !important;
+}
+
+#translatorPage .translator-compose .translator-mic-btn {
+  grid-column: 3 !important;
+  grid-row: 1 !important;
+  width: 46px !important;
+  height: 46px !important;
+  min-width: 46px !important;
+  border-radius: 50% !important;
+}
+
+#translatorPage .translator-compose #translatorRunBtn {
+  grid-column: 4 !important;
+  grid-row: 1 !important;
+  width: 50px !important;
+  min-width: 50px !important;
+  height: 46px !important;
+  padding: 0 !important;
+  font-size: 1.5rem !important;
+  font-weight: 700 !important;
+  color: #fff !important;
+  border-radius: 14px !important;
+}
+
+#translatorPage .translator-compose #translatorRunBtn::before {
+  content: none !important;
+}
+
+#translatorPage .translator-compose #translatorClearBtn {
+  grid-column: 1 / -1 !important;
+  grid-row: 2 !important;
+  justify-self: end !important;
+  min-height: 36px !important;
+  padding: 0 14px !important;
+  font-size: 13px !important;
+}
+
+#translatorPage .translator-compose #translatorStatus {
+  grid-column: 1 / -1 !important;
+  grid-row: 3 !important;
+  font-size: 13px !important;
+  line-height: 1.5 !important;
+  text-align: center !important;
+}
+
+#translatorPage .translator-compose #translatorStatus:empty {
+  display: none !important;
+}
+
+#translatorPage .translator-compose .tr-hidden {
+  display: none !important;
+}
