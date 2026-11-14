@@ -1384,3 +1384,20 @@ body:has(#homePanel:not([hidden])) {
 #homePanel .home-bar {
   bottom: calc(14px + env(safe-area-inset-bottom, 0px)) !important;
 }
+
+/* History list: show it properly under the menu, and let the drawer scroll */
+#historyList[hidden] {
+  display: none !important;
+}
+
+#historyList:not([hidden]) {
+  display: grid !important;
+  margin-top: 10px;
+  max-height: 45vh;
+  overflow-y: auto;
+  padding: 4px;
+}
+
+.sidebar {
+  overflow-y: auto !important;
+}
