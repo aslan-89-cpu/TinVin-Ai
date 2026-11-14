@@ -914,3 +914,95 @@ body:has(#homePanel:not([hidden])) #scannerPanel { display: none !important; }
 #translatorPage .translator-compose .tr-hidden {
   display: none !important;
 }
+
+/* ===== Translator: Claude-style composer ===== */
+#translatorPage .translator-compose {
+  display: grid !important;
+  grid-template-columns: auto 1fr auto auto !important;
+  grid-template-areas:
+    "input input input input"
+    "plus clear mic send"
+    "status status status status" !important;
+  align-items: center !important;
+  gap: 10px !important;
+  padding: 12px !important;
+  border-radius: 22px !important;
+  border: 1px solid rgba(150, 190, 255, .25) !important;
+  background: rgba(7, 13, 30, .72) !important;
+}
+
+/* big writing area on top */
+#translatorPage .translator-compose #translatorInput {
+  grid-area: input !important;
+  width: 100% !important;
+  min-height: 64px !important;
+  max-height: 180px !important;
+  padding: 14px 16px !important;
+  resize: none !important;
+  border-radius: 16px !important;
+}
+
+/* + on the left */
+#translatorPage .translator-compose .plus-wrap {
+  grid-area: plus !important;
+}
+
+/* Clear (small) between + and the mic */
+#translatorPage .translator-compose #translatorClearBtn {
+  grid-area: clear !important;
+  justify-self: start !important;
+  min-height: 34px !important;
+  padding: 0 12px !important;
+  font-size: 13px !important;
+  border-radius: 12px !important;
+}
+
+/* 🎤 on the right */
+#translatorPage .translator-compose .translator-mic-btn {
+  grid-area: mic !important;
+  width: 44px !important;
+  height: 44px !important;
+  min-width: 44px !important;
+  border-radius: 50% !important;
+}
+
+/* ↑ only (hide the text "Send"/"Translate") */
+#translatorPage .translator-compose #translatorRunBtn {
+  grid-area: send !important;
+  width: 48px !important;
+  height: 44px !important;
+  min-width: 48px !important;
+  padding: 0 !important;
+  font-size: 0 !important;
+  color: transparent !important;
+  border-radius: 14px !important;
+  position: relative;
+}
+
+#translatorPage .translator-compose #translatorRunBtn::before {
+  content: "↑";
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+/* status line under the row */
+#translatorPage .translator-compose #translatorStatus {
+  grid-area: status !important;
+  font-size: 13px !important;
+  text-align: center !important;
+}
+
+#translatorPage .translator-compose #translatorStatus:empty {
+  display: none !important;
+}
+
+/* keep the old 📎 and 📷 hidden */
+#translatorPage .translator-compose .tr-hidden {
+  display: none !important;
+}
