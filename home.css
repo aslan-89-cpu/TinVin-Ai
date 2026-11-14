@@ -326,7 +326,7 @@ body:has(#homePanel:not([hidden])) #scannerPanel { display: none !important; }
 .hx-ico {
   display: block !important;
   width: auto !important;
-  max-width: 130% !important;
+  max-width: 150% !important;
   height: 170px !important;
   object-fit: contain !important;
   margin: 0 auto !important;
