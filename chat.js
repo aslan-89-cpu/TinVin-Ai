@@ -20,6 +20,10 @@
   const MAX_FILE_SIZE = 8 * 1024 * 1024;
   const MAX_FILES = 4;
 
+  // Shown when the daily limit is reached (translated into the user's language)
+  const LIMIT_MESSAGE =
+    "You have reached today's limit. Upgrade to Premium for more messages.";
+
   function setStatus(message) {
     const status = $("chatStatus");
     if (status) status.textContent = message || "";
@@ -590,9 +594,13 @@
       console.error("TinVin Chat error:", error);
 
       if (error.message === "limit_reached") {
-        // Daily limit reached: explain in Sorani and open the Premium page
-        turn.assistant =
-          "سنووری ئەمڕۆت تەواو بوو. بۆ زیاتر بەکارهێنان، Premium بکڕە.";
+        // Daily limit reached: explain in the user's own language
+        // and open the Premium page
+        const limitText = await (
+          window.TinVinI18n?.t?.(LIMIT_MESSAGE) ?? LIMIT_MESSAGE
+        );
+
+        turn.assistant = limitText;
         turn.assistantImage = "";
 
         renderHistory();
