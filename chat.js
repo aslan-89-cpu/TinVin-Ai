@@ -1,4 +1,5 @@
-/* TinVin AI - Chat, Vision, Image Generation and Editing */
+/* TinVin AI - Chat, Vision, Image Generation and Editing
+   + code blocks with a Copy button */
 
 (() => {
   "use strict";
@@ -50,6 +51,108 @@
     return `data:${result.mimeType || result.mime_type || "image/png"};base64,${value}`;
   }
 
+  /* ---------- Copy button for code ---------- */
+
+  async function copyText(text) {
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(text);
+        return true;
+      }
+    } catch {}
+
+    // Fallback for browsers that block the clipboard API
+    const area = document.createElement("textarea");
+    area.value = text;
+    area.setAttribute("readonly", "");
+    area.style.position = "fixed";
+    area.style.opacity = "0";
+    document.body.appendChild(area);
+    area.select();
+    area.setSelectionRange(0, text.length);
+
+    let ok = false;
+
+    try {
+      ok = document.execCommand("copy");
+    } catch {}
+
+    area.remove();
+    return ok;
+  }
+
+  function appendText(bubble, text) {
+    const clean = String(text || "").replace(/^\n+|\n+$/g, "");
+    if (!clean) return;
+
+    const message = document.createElement("div");
+    message.className = "chat-message";
+    message.textContent = clean;
+    bubble.appendChild(message);
+  }
+
+  function appendCode(bubble, language, code) {
+    const block = document.createElement("div");
+    block.className = "code-block";
+
+    const head = document.createElement("div");
+    head.className = "code-head";
+
+    const label = document.createElement("span");
+    label.className = "code-lang";
+    label.textContent = language || "code";
+
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "code-copy";
+    button.textContent = "Copy";
+
+    button.addEventListener("click", async () => {
+      const ok = await copyText(code);
+
+      button.textContent = ok ? "Copied ✓" : "Failed";
+      button.classList.toggle("copied", ok);
+
+      setTimeout(() => {
+        button.textContent = "Copy";
+        button.classList.remove("copied");
+      }, 1800);
+    });
+
+    head.append(label, button);
+
+    const pre = document.createElement("pre");
+    const codeEl = document.createElement("code");
+    codeEl.textContent = code;
+    pre.appendChild(codeEl);
+
+    block.append(head, pre);
+    bubble.appendChild(block);
+  }
+
+  // Splits an answer into normal text and ``` code blocks
+  function appendContent(bubble, content, role) {
+    if (role !== "assistant" || !content.includes("```")) {
+      const message = document.createElement("div");
+      message.className = "chat-message";
+      message.textContent = content;
+      bubble.appendChild(message);
+      return;
+    }
+
+    const pattern = /```([^\n`]*)\n([\s\S]*?)```/g;
+    let last = 0;
+    let match;
+
+    while ((match = pattern.exec(content))) {
+      appendText(bubble, content.slice(last, match.index));
+      appendCode(bubble, match[1].trim(), match[2].replace(/\n$/, ""));
+      last = pattern.lastIndex;
+    }
+
+    appendText(bubble, content.slice(last));
+  }
+
   function addBubble(role, content, imageUrl = "", attachments = []) {
     const container = $("chatHistory");
     if (!container) return null;
@@ -58,10 +161,7 @@
     bubble.className = "chat-bubble " + role;
 
     if (content) {
-      const message = document.createElement("div");
-      message.className = "chat-message";
-      message.textContent = content;
-      bubble.appendChild(message);
+      appendContent(bubble, content, role);
     }
 
     if (imageUrl) {
