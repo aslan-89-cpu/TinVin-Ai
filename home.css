@@ -1448,11 +1448,7 @@ body:has(#homePanel:not([hidden])) {
   margin-bottom: 0 !important;
 }
 
-/* hide the thin empty strip above the footer */
-#historyList:empty,
-.sidebar-menu + #authBox + #historyList {
-  display: none !important;
-}
+/* (removed: the rule that always hid #historyList) */
 
 /* Drawer: TinVin AI card on top, X on the right */
 .sidebar {
