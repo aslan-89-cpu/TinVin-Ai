@@ -31,6 +31,47 @@ let currentChatId = null;
 
 const $ = id => document.getElementById(id);
 
+/* ---------- Send the sign-in token to the TinVin server ----------
+   The server uses it to know who you are (Free / Premium / Pro)
+   and to count your daily messages. */
+
+const API_HOST = "https://tinvin-ai-server.aslan89aslan1.workers.dev";
+
+// Resolves after Firebase has finished restoring the saved sign-in
+const authReady = new Promise(resolve => {
+  const stop = onAuthStateChanged(auth, () => {
+    stop();
+    resolve();
+  });
+});
+
+const nativeFetch = window.fetch.bind(window);
+
+window.fetch = async (input, init = {}) => {
+  try {
+    const url = typeof input === "string" ? input : (input && input.url) || "";
+
+    if (url.startsWith(API_HOST)) {
+      await authReady;
+
+      if (auth.currentUser) {
+        const token = await auth.currentUser.getIdToken();
+        const headers = new Headers(
+          init.headers || (typeof input !== "string" ? input.headers : undefined)
+        );
+
+        headers.set("Authorization", "Bearer " + token);
+
+        return nativeFetch(input, { ...init, headers });
+      }
+    }
+  } catch (error) {
+    console.error("Could not attach sign-in token:", error);
+  }
+
+  return nativeFetch(input, init);
+};
+
 function setStatus(text) {
   const el = $("chatStatus");
   if (el) el.textContent = text || "";
