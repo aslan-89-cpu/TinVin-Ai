@@ -24,6 +24,10 @@
   const IMAGE_PATH = "/api/image";
   const MAX_IMAGE_SIZE = 8 * 1024 * 1024;
 
+  // Shown when the daily limit is reached (translated into the user's language)
+  const LIMIT_MESSAGE =
+    "You have reached today's limit. Upgrade to Premium for more messages.";
+
   function getElement(id) {
     return typeof $ === "function" ? $(id) : document.getElementById(id);
   }
@@ -919,7 +923,11 @@
       console.error("TinVin Translator error:", error);
 
       if (error?.message === "limit_reached") {
-        showStatus("Daily limit reached. Upgrade to Premium for more.");
+        const limitText = await (
+          window.TinVinI18n?.t?.(LIMIT_MESSAGE) ?? LIMIT_MESSAGE
+        );
+
+        showStatus(limitText);
         window.TinVinPremium?.open?.();
       } else {
         showStatus("Translation failed: " + (error?.message || "Please try again."));
