@@ -1588,3 +1588,30 @@ body:has(#homePanel:not([hidden])) {
   margin-top: 14px !important;
   z-index: 30 !important;
 }
+
+/* ===== Drawer: one scroll only, page behind stays still ===== */
+body.sidebar-open,
+body.sidebar-open:has(#homePanel:not([hidden])) {
+  overflow: hidden !important;
+}
+
+html:has(body.sidebar-open) {
+  overflow: hidden !important;
+}
+
+.sidebar {
+  overflow-y: auto !important;
+  overscroll-behavior: contain !important;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* the list no longer scrolls by itself, the drawer does */
+#historyList:not([hidden]) {
+  max-height: none !important;
+  overflow: visible !important;
+}
+
+/* Drawer: only History and Settings */
+.sidebar-menu .menu-item[data-open] {
+  display: none !important;
+}
