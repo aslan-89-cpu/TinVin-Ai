@@ -1,6 +1,5 @@
-
 /* TinVin AI - Chat Style Translator
-   Text Translation, Multilingual Image OCR and Translated Image Creation
+   Text Translation (streaming), Multilingual Image OCR and Translated Image Creation
    Automatic Source Language Detection
    Improved Mobile Image Translate Viewer
 */
@@ -15,7 +14,7 @@
     return;
   }
 
-  const { $, postJSON, setLastOutput, languages } = core;
+  const { $, postJSON, setLastOutput, languages, API_BASE } = core;
 
   let busy = false;
   let lastTranslation = "";
@@ -557,6 +556,8 @@
     container.append(toolbar, viewport);
   }
 
+  // Adds one translation to the screen.
+  // Returns { setText } so streaming can keep updating the text.
   function addTranslation(message, translated, source, target, imageAttachment = null) {
     const history = getElement("translatorHistory");
 
@@ -595,7 +596,10 @@
     copyStatus.className = "translator-copy-status";
     copyStatus.setAttribute("role", "status");
 
-    copyButton.addEventListener("click", () => copyText(translated, copyStatus));
+    // Copies whatever text is on screen right now
+    copyButton.addEventListener("click", () => {
+      copyText(ai.content.textContent, copyStatus);
+    });
 
     actions.append(copyButton, copyStatus);
     ai.message.appendChild(actions);
@@ -633,6 +637,13 @@
     requestAnimationFrame(() => {
       conversation.scrollIntoView({ behavior: "smooth", block: "end" });
     });
+
+    return {
+      setText(text) {
+        ai.content.textContent = text;
+        history.scrollTop = history.scrollHeight;
+      }
+    };
   }
 
   async function createTranslatedImage(
@@ -691,6 +702,74 @@
     }
   }
 
+  /* Streaming translation.
+     The server sends the translation word by word; onText gets the full
+     text so far each time. If the server answers with normal JSON instead
+     (fallback, or an error), that is handled too. */
+  async function streamTranslation(payload, onText) {
+    const response = await fetch(API_BASE + API_PATH, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    const type = response.headers.get("content-type") || "";
+
+    if (type.includes("application/json")) {
+      let data;
+
+      try {
+        data = await response.json();
+      } catch {
+        throw new Error("The server returned an unreadable response.");
+      }
+
+      if (!response.ok || data.ok === false) {
+        throw new Error(
+          data.error ||
+          data.message ||
+          ("Request failed (" + response.status + ")")
+        );
+      }
+
+      const text = extractTranslation(data);
+
+      if (!text) {
+        throw new Error("The AI server returned an empty translation.");
+      }
+
+      onText(text);
+      return text;
+    }
+
+    if (!response.ok || !response.body) {
+      throw new Error("Request failed (" + response.status + ")");
+    }
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let full = "";
+
+    while (true) {
+      const { done, value } = await reader.read();
+
+      if (done) break;
+
+      full += decoder.decode(value, { stream: true });
+      onText(full);
+    }
+
+    full += decoder.decode();
+    full = full.trim();
+
+    if (!full) {
+      throw new Error("The AI server returned an empty translation.");
+    }
+
+    onText(full);
+    return full;
+  }
+
   async function run() {
     if (busy) return;
 
@@ -744,52 +823,84 @@
     );
 
     try {
-      if (typeof postJSON !== "function") {
-        throw new Error("TinVin AI connection function is not available.");
+      let translated = "";
+
+      if (imageAttachment) {
+        // Image: one answer at the end (no streaming)
+        if (typeof postJSON !== "function") {
+          throw new Error("TinVin AI connection function is not available.");
+        }
+
+        // Give the AI explicit multilingual OCR instructions.
+        // Do not assume that the image contains English text.
+        const imagePrompt = [
+          "You are a multilingual OCR and translation expert.",
+          "Examine the attached image carefully.",
+          "Read and extract ALL visible text from the image.",
+          "Automatically identify the actual source language and writing system.",
+          "Do NOT assume that the source language is English.",
+          "Support any language, alphabet, script, and direction of writing.",
+          "This includes Kurdish Sorani, Kurdish Kurmanji, Arabic, Persian, Turkish, English, German, Korean, Japanese, Chinese, French, Spanish, and other languages.",
+          `Translate all detected text into ${targetLanguage}.`,
+          "Preserve the original meaning, names, numbers, dates, and formatting as accurately as possible.",
+          "Do not skip text just because it is written in a non-Latin script.",
+          "Return the translated text only, without unnecessary explanations.",
+          message
+            ? `Additional user instruction: ${message}`
+            : "Translate all readable text in the image."
+        ].join("\n");
+
+        const result = await postJSON(API_PATH, {
+          tool: "translator",
+          message: imagePrompt,
+          sourceLanguage,
+          targetLanguage,
+          attachments: [imageAttachment]
+        });
+
+        translated = extractTranslation(result);
+
+        if (!translated) {
+          throw new Error("The AI server returned an empty translation.");
+        }
+
+        addTranslation(
+          message || "Read and translate image text",
+          translated,
+          sourceLanguage,
+          targetLanguage,
+          imageAttachment
+        );
+
+      } else {
+        // Text: the translation appears word by word
+        let view = null;
+
+        translated = await streamTranslation(
+          {
+            tool: "translator",
+            message,
+            sourceLanguage,
+            targetLanguage,
+            attachments: [],
+            stream: true
+          },
+          text => {
+            if (!view) {
+              view = addTranslation(
+                message,
+                text,
+                sourceLanguage,
+                targetLanguage,
+                null
+              );
+              showStatus("");
+            } else {
+              view.setText(text);
+            }
+          }
+        );
       }
-
-      // Give the AI explicit multilingual OCR instructions.
-      // Do not assume that the image contains English text.
-      const imagePrompt = imageAttachment
-        ? [
-            "You are a multilingual OCR and translation expert.",
-            "Examine the attached image carefully.",
-            "Read and extract ALL visible text from the image.",
-            "Automatically identify the actual source language and writing system.",
-            "Do NOT assume that the source language is English.",
-            "Support any language, alphabet, script, and direction of writing.",
-            "This includes Kurdish Sorani, Kurdish Kurmanji, Arabic, Persian, Turkish, English, German, Korean, Japanese, Chinese, French, Spanish, and other languages.",
-            `Translate all detected text into ${targetLanguage}.`,
-            "Preserve the original meaning, names, numbers, dates, and formatting as accurately as possible.",
-            "Do not skip text just because it is written in a non-Latin script.",
-            "Return the translated text only, without unnecessary explanations.",
-            message
-              ? `Additional user instruction: ${message}`
-              : "Translate all readable text in the image."
-          ].join("\n")
-        : message;
-
-      const result = await postJSON(API_PATH, {
-        tool: "translator",
-        message: imagePrompt,
-        sourceLanguage,
-        targetLanguage,
-        attachments: imageAttachment ? [imageAttachment] : []
-      });
-
-      const translated = extractTranslation(result);
-
-      if (!translated) {
-        throw new Error("The AI server returned an empty translation.");
-      }
-
-      addTranslation(
-        message || "Read and translate image text",
-        translated,
-        sourceLanguage,
-        targetLanguage,
-        imageAttachment
-      );
 
       lastTranslation = translated;
 
@@ -807,7 +918,12 @@
     } catch (error) {
       console.error("TinVin Translator error:", error);
 
-      showStatus("Translation failed: " + (error?.message || "Please try again."));
+      if (error?.message === "limit_reached") {
+        showStatus("Daily limit reached. Upgrade to Premium for more.");
+        window.TinVinPremium?.open?.();
+      } else {
+        showStatus("Translation failed: " + (error?.message || "Please try again."));
+      }
 
     } finally {
       setBusy(false);
