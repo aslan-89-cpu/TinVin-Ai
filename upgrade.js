@@ -18,9 +18,9 @@
         "Your chats on all your devices"
       ],
       plans: [
-        { months: 1,  title: "1 Month",   price: "$13",  note: "" },
-        { months: 6,  title: "6 Months",  price: "$60",  note: "Lower price per month" },
-        { months: 12, title: "12 Months", price: "$100", note: "Best value" }
+        { months: 1,  title: "1 Month",   price: "$14.99",  note: "" },
+        { months: 6,  title: "6 Months",  price: "$74.99",  note: "Lower price per month" },
+        { months: 12, title: "12 Months", price: "$134.99", note: "Best value" }
       ]
     },
     {
