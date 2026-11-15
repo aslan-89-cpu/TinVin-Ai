@@ -1,4 +1,6 @@
-/* TinVin AI - Premium / Pro page (English) */
+/* TinVin AI - Premium / Pro page
+   The texts are written in English and translated into the user's
+   interface language (see i18n.js). */
 (() => {
   "use strict";
 
@@ -53,6 +55,14 @@
   let selectedTier = "premium";
   let selectedMonths = 6;
 
+  // English text -> text in the user's language
+  let dictionary = new Map();
+  let dictionaryLanguage = "English";
+
+  function tr(text) {
+    return dictionary.get(text) || text;
+  }
+
   function make(tag, className, text) {
     const node = document.createElement(tag);
     if (className) node.className = className;
@@ -99,6 +109,56 @@
     return TIERS.find(tier => tier.id === selectedTier) || TIERS[0];
   }
 
+  // Every English text on this page that should be translated
+  function allTexts() {
+    const list = [TEXT.pay, TEXT.status, TEXT.back];
+
+    TIERS.forEach(tier => {
+      list.push(tier.subtitle);
+      tier.features.forEach(text => list.push(text));
+
+      tier.plans.forEach(plan => {
+        list.push(plan.title);
+        if (plan.note) list.push(plan.note);
+      });
+    });
+
+    return [...new Set(list.filter(Boolean))];
+  }
+
+  async function translatePage() {
+    const i18n = window.TinVinI18n;
+
+    if (!i18n || typeof i18n.translateMany !== "function") return;
+
+    const language = i18n.language();
+
+    if (language === "English") {
+      dictionary = new Map();
+      dictionaryLanguage = "English";
+      render();
+      return;
+    }
+
+    // Already translated for this language
+    if (dictionaryLanguage === language && dictionary.size) {
+      render();
+      return;
+    }
+
+    const texts = allTexts();
+    const translated = await i18n.translateMany(texts);
+
+    dictionary = new Map();
+
+    texts.forEach((text, index) => {
+      dictionary.set(text, translated[index]);
+    });
+
+    dictionaryLanguage = language;
+    render();
+  }
+
   function build() {
     addStyle();
 
@@ -109,6 +169,7 @@
 
     const backBtn = make("button", "upgrade-close", TEXT.back);
     backBtn.type = "button";
+    backBtn.id = "upgradeBack";
     backBtn.addEventListener("click", close);
 
     const top = make("div", "upgrade-top");
@@ -130,9 +191,11 @@
 
     const pay = make("button", "upgrade-pay", TEXT.pay);
     pay.type = "button";
+    pay.id = "upgradePay";
     pay.disabled = true;
 
     const status = make("div", "upgrade-status", TEXT.status);
+    status.id = "upgradeStatus";
 
     card.append(top, tabs, sub, features, plans, pay, status);
     overlay.appendChild(card);
@@ -146,11 +209,25 @@
   function render() {
     const tier = getTier();
 
+    // Right-to-left languages (Arabic, Persian, Sorani...) flip the page
+    if (overlay) {
+      overlay.dir = document.documentElement.dir || "ltr";
+    }
+
     const title = document.getElementById("upgradeTitle");
     if (title) title.textContent = tier.title;
 
     const sub = document.getElementById("upgradeSub");
-    if (sub) sub.textContent = tier.subtitle;
+    if (sub) sub.textContent = tr(tier.subtitle);
+
+    const back = document.getElementById("upgradeBack");
+    if (back) back.textContent = tr(TEXT.back);
+
+    const pay = document.getElementById("upgradePay");
+    if (pay) pay.textContent = tr(TEXT.pay);
+
+    const status = document.getElementById("upgradeStatus");
+    if (status) status.textContent = tr(TEXT.status);
 
     // Tabs
     const tabs = document.getElementById("upgradeTabs");
@@ -177,7 +254,7 @@
     if (features) {
       features.replaceChildren();
       tier.features.forEach(text => {
-        features.appendChild(make("li", "", "✓ " + text));
+        features.appendChild(make("li", "", "✓ " + tr(text)));
       });
     }
 
@@ -193,9 +270,9 @@
       if (plan.months === selectedMonths) button.classList.add("selected");
 
       button.append(
-        make("strong", "", plan.title),
+        make("strong", "", tr(plan.title)),
         make("span", "plan-price", plan.price || TEXT.emptyPrice),
-        make("small", "", plan.note)
+        make("small", "", tr(plan.note))
       );
 
       button.addEventListener("click", () => {
@@ -214,9 +291,15 @@
     }
 
     if (!overlay) build();
+
+    // Show it at once (English or already translated), then translate
     render();
     overlay.hidden = false;
     document.body.classList.add("upgrade-open");
+
+    translatePage().catch(error => {
+      console.error("Premium page translation failed:", error);
+    });
   }
 
   function close() {
