@@ -28,6 +28,10 @@
   const LIMIT_MESSAGE =
     "You have reached today's limit. Upgrade to Premium for more messages.";
 
+  // Shown when a Free user uses an image feature
+  const IMAGE_PLAN_MESSAGE =
+    "Images are available in the Premium and Pro plans. Sign in or upgrade to use them.";
+
   function getElement(id) {
     return typeof $ === "function" ? $(id) : document.getElementById(id);
   }
@@ -694,8 +698,15 @@
       console.error("Translated image creation failed:", error);
 
       if (statusElement) {
-        statusElement.textContent =
-          "Image creation failed: " + (error.message || "Please try again.");
+        if (error.message === "images_for_paid_plans") {
+          statusElement.textContent = await (
+            window.TinVinI18n?.t?.(IMAGE_PLAN_MESSAGE) ?? IMAGE_PLAN_MESSAGE
+          );
+          window.TinVinPremium?.open?.();
+        } else {
+          statusElement.textContent =
+            "Image creation failed: " + (error.message || "Please try again.");
+        }
       }
 
       button.textContent = "Try again";
@@ -928,6 +939,13 @@
         );
 
         showStatus(limitText);
+        window.TinVinPremium?.open?.();
+      } else if (error?.message === "images_for_paid_plans") {
+        const imageText = await (
+          window.TinVinI18n?.t?.(IMAGE_PLAN_MESSAGE) ?? IMAGE_PLAN_MESSAGE
+        );
+
+        showStatus(imageText);
         window.TinVinPremium?.open?.();
       } else {
         showStatus("Translation failed: " + (error?.message || "Please try again."));
