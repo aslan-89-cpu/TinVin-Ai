@@ -24,6 +24,10 @@
   const LIMIT_MESSAGE =
     "You have reached today's limit. Upgrade to Premium for more messages.";
 
+  // Shown when a Free user asks for an image
+  const IMAGE_PLAN_MESSAGE =
+    "Images are available in the Premium and Pro plans. Sign in or upgrade to use them.";
+
   function setStatus(message) {
     const status = $("chatStatus");
     if (status) status.textContent = message || "";
@@ -601,6 +605,17 @@
         );
 
         turn.assistant = limitText;
+        turn.assistantImage = "";
+
+        renderHistory();
+        setStatus("");
+        window.TinVinPremium?.open?.();
+      } else if (error.message === "images_for_paid_plans") {
+        const imageText = await (
+          window.TinVinI18n?.t?.(IMAGE_PLAN_MESSAGE) ?? IMAGE_PLAN_MESSAGE
+        );
+
+        turn.assistant = imageText;
         turn.assistantImage = "";
 
         renderHistory();
